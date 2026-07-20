@@ -1,0 +1,67 @@
+appId: com.studycenter.sc_student
+---
+# ─── LAUNCH ─────────────────────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ─── LOGIN (default fields: test@email.com / 12345) ────────────────────────────
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- assertVisible: "Selamat datang kembali"
+
+- tapOn: "Masuk"
+
+# ─── BERANDA ───────────────────────────────────────────────────────────────────
+- extendedWaitUntil:
+    visible: "Elwi2"
+    timeout: 20000
+
+- assertVisible: "Artikel Terbaru"
+- assertVisible: "Galeri Kegiatan"
+
+# ─── NAVIGASI KE JURNAL ────────────────────────────────────────────────────────
+- tapOn:
+    point: "270,1433"
+
+- extendedWaitUntil:
+    visible: "Pembacaan Alkitab"
+    timeout: 20000
+
+- assertVisible: "Perjanjian Lama"
+- assertVisible: "Perjanjian Baru"
+- assertVisible: "Jadwal Kehidupan"
+
+# Toggle PL
+- tapOn: "Perjanjian Lama"
+- waitForAnimationToEnd
+
+# Toggle PB
+- tapOn: "Perjanjian Baru"
+- waitForAnimationToEnd
+
+# ─── NAVIGASI KE LAPORAN ───────────────────────────────────────────────────────
+- tapOn:
+    point: "450,1433"
+
+- extendedWaitUntil:
+    visible: "Matriks Harian"
+    timeout: 20000
+
+# ─── NAVIGASI KE PROFIL ────────────────────────────────────────────────────────
+- tapOn:
+    point: "630,1433"
+
+- extendedWaitUntil:
+    visible: "Elwi2"
+    timeout: 10000
+
+- assertVisible: "Elwi2"
+- assertVisible: "Keluar"
+
+# ─── LOGOUT ────────────────────────────────────────────────────────────────────
+- tapOn: "Keluar"
+
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 10000
