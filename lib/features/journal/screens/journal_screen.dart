@@ -1,25 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../home/providers/home_provider.dart';
 import '../models/journal_model.dart';
 import '../providers/journal_provider.dart';
 
-const _kitabList = [
-  'Kejadian','Keluaran','Imamat','Bilangan','Ulangan','Yosua','Hakim-hakim','Rut',
-  '1 Samuel','2 Samuel','1 Raja-raja','2 Raja-raja','1 Tawarikh','2 Tawarikh',
-  'Ezra','Nehemia','Ester','Ayub','Mazmur','Amsal','Pengkhotbah','Kidung Agung',
-  'Yesaya','Yeremia','Ratapan','Yehezkiel','Daniel','Hosea','Yoel','Amos',
-  'Obaja','Yunus','Mikha','Nahum','Habakuk','Zefanya','Hagai','Zakharia','Maleakhi',
-  'Matius','Markus','Lukas','Yohanes','Kisah Para Rasul','Roma',
-  '1 Korintus','2 Korintus','Galatia','Efesus','Filipi','Kolose',
-  '1 Tesalonika','2 Tesalonika','1 Timotius','2 Timotius','Titus','Filemon',
-  'Ibrani','Yakobus','1 Petrus','2 Petrus','1 Yohanes','2 Yohanes','3 Yohanes',
-  'Yudas','Wahyu',
-];
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
@@ -29,13 +17,10 @@ class JournalScreen extends ConsumerStatefulWidget {
 }
 
 class _JournalScreenState extends ConsumerState<JournalScreen> {
-  bool _frameReady = false;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _frameReady = true);
       final jState = ref.read(journalProvider);
       if (!jState.loading && jState.snapshot == null) {
         ref.read(journalProvider.notifier).load();
@@ -57,6 +42,11 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       appBar: AppBar(
         title: const Text('Jurnal'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Riwayat',
+            onPressed: () => context.push('/journal/history'),
+          ),
           if (state.loading)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -319,11 +309,10 @@ class _SectionCard extends StatelessWidget {
 
 class _CheckRow extends StatelessWidget {
   final String label;
-  final String? subtitle;
   final bool checked;
   final VoidCallback onTap;
 
-  const _CheckRow({required this.label, this.subtitle, required this.checked, required this.onTap});
+  const _CheckRow({required this.label, required this.checked, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -349,8 +338,6 @@ class _CheckRow extends StatelessWidget {
                   color: checked ? Colors.grey : null,
                 ),
               ),
-              if (subtitle != null && subtitle!.isNotEmpty)
-                Text(subtitle!, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[500])),
             ]),
           ),
         ]),

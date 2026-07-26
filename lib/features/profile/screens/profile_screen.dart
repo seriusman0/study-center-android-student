@@ -53,6 +53,12 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 32),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit Profil'),
+            onPressed: () => context.push('/profile/edit'),
+          ),
+          const SizedBox(height: 12),
           OutlinedButton.icon(
             icon: const Icon(Icons.logout),
             label: const Text('Keluar'),

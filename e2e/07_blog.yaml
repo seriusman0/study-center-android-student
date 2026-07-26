@@ -1,0 +1,102 @@
+appId: com.studycenter.sc_student
+---
+# Flow 07: Blog — view list, view detail, create blog post
+# Covers: GET /api/blogs, GET /api/blogs/{slug}, POST /api/blogs
+#
+# Blog list is shown on the Home (Beranda) screen under "Artikel Terbaru".
+# Detailed blog view and create may be in separate screens (if implemented).
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "Email"
+- clearText
+- inputText: "test@studycenter.test"
+- tapOn: "Password"
+- clearText
+- inputText: "password123"
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+- assertVisible: "Beranda"
+
+# ---- Navigate to Beranda tab ----
+- tapOn: "Beranda"
+
+- takeScreenshot: "07_beranda_home"
+
+# ---- Test: Blog list visible on home screen ----
+- scrollUntilVisible:
+    element: "Artikel Terbaru"
+
+- assertVisible: "Artikel Terbaru"
+- takeScreenshot: "07_blog_list_section"
+
+# ---- Test: At least one blog card is visible (or empty state) ----
+# Blog cards show title, date, and optional image
+# If no articles: "Belum ada artikel" is shown
+- takeScreenshot: "07_blog_list_content"
+
+# ---- Test: Tap a blog card to view detail ----
+# If blog cards are tappable and there's a detail screen:
+# - tapOn: "Refleksi Minggu Ini"
+# - assertVisible: "Refleksi Minggu Ini"
+# - takeScreenshot: "07_blog_detail"
+# - tapOn: "Kembali"   (back button)
+
+# ---- Test: Empty state ----
+# When no published blogs exist: "Belum ada artikel"
+# assertVisible: "Belum ada artikel"
+
+# ---- Test: Create a blog post ----
+# This requires a dedicated "Tulis Artikel" screen or FAB.
+# If a create button exists, use:
+#
+# - tapOn: "Tulis Artikel"
+# - assertVisible: "Judul"
+# - assertVisible: "Konten"
+#
+# - tapOn: "Judul"
+# - inputText: "Pengalaman Belajar Hari Ini"
+#
+# - tapOn: "Konten"
+# - inputText: "Hari ini saya belajar tentang disiplin dan ketekunan dalam menjalani kehidupan sehari-hari."
+#
+# - tapOn: "Simpan"
+# - assertVisible: "Pengalaman Belajar Hari Ini"
+# - takeScreenshot: "07_blog_create_success"
+
+# ---- Test: Pull to refresh home screen ----
+- swipe:
+    direction: Down
+    from:
+      x: 50%
+      y: 20%
+
+- scrollUntilVisible:
+    element: "Artikel Terbaru"
+
+- assertVisible: "Artikel Terbaru"
+- takeScreenshot: "07_blog_after_refresh"
+
+# ---- API contract notes ----
+# GET /api/blogs (public, no auth required)
+#   ?cabang=nias&page=1&sort=latest
+#   Returns paginated blog list (12 per page)
+#
+# GET /api/blogs/{slug} (public)
+#   Returns full blog with user, cabang, tags
+#
+# POST /api/blogs (auth required, role: student/mentor/fulltimer/admin)
+#   Body: { title, content, cabang_id, tags[], image? }
+#   Returns 201 with created blog
+#
+# PUT /api/blogs/{id} (auth required, must be author or admin)
+#   Body: partial update fields
+#   Returns 200 with updated blog
+#
+# DELETE /api/blogs/{id} (auth required, must be author or admin)
+#   Returns 200: { "message": "Blog dihapus." }

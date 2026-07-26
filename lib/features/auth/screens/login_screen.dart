@@ -116,6 +116,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : const Text('Masuk'),
                   ),
                 ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Belum punya akun? ',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.go('/register'),
+                      child: Text(
+                        'Daftar',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
               ],
             ),
           ),

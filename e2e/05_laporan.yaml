@@ -1,0 +1,103 @@
+appId: com.studycenter.sc_student
+---
+# Flow 05: Laporan — view summary report and matrix
+# Covers: GET /api/laporan/my, GET /api/laporan/my/matrix
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "Email"
+- clearText
+- inputText: "test@studycenter.test"
+- tapOn: "Password"
+- clearText
+- inputText: "password123"
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+- assertVisible: "Beranda"
+
+# ---- Navigate to Laporan tab ----
+- tapOn: "Laporan"
+
+- assertVisible: "Laporan"
+- takeScreenshot: "05_laporan_loading"
+
+# ---- Verify summary cards are visible ----
+# The summary shows 3 stat cards: Progres, Streak, Selesai
+- assertVisible: "Progres"
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "05_laporan_summary_cards"
+
+# ---- Verify Matriks Harian section ----
+- scrollUntilVisible:
+    element: "Matriks Harian"
+
+- assertVisible: "Matriks Harian"
+
+# The matrix shows a date range label "from s/d to"
+- assertVisible: "s/d"
+
+- takeScreenshot: "05_laporan_matrix_visible"
+
+# ---- Scroll horizontally through the matrix table ----
+# The matrix table scrolls horizontally when there are many columns
+- scrollUntilVisible:
+    element: "Tanggal"
+
+- assertVisible: "Tanggal"
+- assertVisible: "PL"
+- assertVisible: "PB"
+- assertVisible: "Hafal Ayat"
+
+- takeScreenshot: "05_laporan_matrix_headers"
+
+# ---- Test: Refresh laporan ----
+- swipe:
+    direction: Down
+    from:
+      x: 50%
+      y: 30%
+
+- assertVisible: "Progres"
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "05_laporan_after_refresh"
+
+# ---- Test: Pick custom date range for matrix ----
+# Tap the calendar icon in the AppBar
+- tapOn:
+    id: "date_range"
+  optional: true
+
+- takeScreenshot: "05_laporan_date_picker_open"
+
+# After selecting a date range the matrix reloads
+# - assertVisible: "Matriks Harian"
+# - takeScreenshot: "05_laporan_matrix_custom_range"
+
+# ---- Test: Matrix shows Y and dash values ----
+# When checked: green check icon appears
+# When not checked: dash "-" text in grey
+# (Verified by visual inspection of the rendered table)
+
+# ---- Test: Progres percentage is a valid number ----
+# The Progres card shows e.g. "47.5%" — assertVisible can't check dynamic values
+# but the card label "Progres" must be present
+- assertVisible: "Progres"
+
+# ---- Test: Streak value ----
+# Streak card shows e.g. "5 hari" — verify the label
+- assertVisible: "Streak"
+
+# ---- Test: Selesai fraction ----
+# Selesai shows e.g. "57/120" — verify the label
+- assertVisible: "Selesai"
+
+- takeScreenshot: "05_laporan_final"

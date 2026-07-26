@@ -16,12 +16,12 @@ class LaporanSummary {
   });
 
   factory LaporanSummary.fromJson(Map<String, dynamic> j) => LaporanSummary(
-        from:    j['from'] ?? '',
-        to:      j['to'] ?? '',
-        pct:     (j['pct'] as num).toDouble(),
-        checked: j['checked'] as int,
-        total:   j['total'] as int,
-        streak:  j['streak'] as int,
+        from:    j['from'] as String? ?? '',
+        to:      j['to'] as String? ?? '',
+        pct:     (j['pct'] as num?)?.toDouble() ?? 0.0,
+        checked: (j['checked'] as num?)?.toInt() ?? 0,
+        total:   (j['total'] as num?)?.toInt() ?? 0,
+        streak:  (j['streak'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -45,12 +45,14 @@ class LaporanMatrix {
   });
 
   factory LaporanMatrix.fromJson(Map<String, dynamic> j) => LaporanMatrix(
-        from:    j['from'] ?? '',
-        to:      j['to'] ?? '',
-        headers: List<String>.from(j['headers'] as List),
-        rows:    (j['rows'] as List).map((r) => List<String>.from(r as List)).toList(),
-        pct:     (j['pct'] as num).toDouble(),
-        checked: j['checked'] as int,
-        total:   j['total'] as int,
+        from:    j['from'] as String? ?? '',
+        to:      j['to'] as String? ?? '',
+        headers: List<String>.from((j['headers'] as List? ?? [])),
+        rows:    ((j['rows'] as List?) ?? [])
+            .map((r) => List<String>.from(r as List))
+            .toList(),
+        pct:     (j['pct'] as num?)?.toDouble() ?? 0.0,
+        checked: (j['checked'] as num?)?.toInt() ?? 0,
+        total:   (j['total'] as num?)?.toInt() ?? 0,
       );
 }

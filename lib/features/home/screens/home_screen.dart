@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../journal/providers/journal_provider.dart';
+import '../models/home_model.dart';
 import '../providers/home_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -66,12 +68,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             Text(
               user?.name ?? '',
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
             Text(
               DateFormat('EEEE, d MMMM yyyy', 'id').format(now),
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+              style:
+                  theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
             ),
 
             const SizedBox(height: 24),
@@ -85,9 +89,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.qr_code, color: theme.colorScheme.primary, size: 20),
+                          Icon(Icons.qr_code,
+                              color: theme.colorScheme.primary, size: 20),
                           const SizedBox(width: 8),
-                          Text('QR Absensi', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                          Text(
+                            'QR Absensi',
+                            style: theme.textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -98,9 +107,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         backgroundColor: Colors.white,
                       ),
                       const SizedBox(height: 8),
-                      Text(user.name, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                      Text(
+                        user.name,
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
                       if (user.cabang != null)
-                        Text(user.cabang!, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500])),
+                        Text(
+                          user.cabang!,
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[500]),
+                        ),
                     ],
                   ),
                 ),
@@ -117,33 +134,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.book, color: theme.colorScheme.primary, size: 20),
+                        Icon(Icons.book,
+                            color: theme.colorScheme.primary, size: 20),
                         const SizedBox(width: 8),
-                        Text('Jurnal Hari Ini', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                        Text(
+                          'Jurnal Hari Ini',
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
                         const Spacer(),
-                        if (jState.loading) const SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+                        if (jState.loading)
+                          const SizedBox(
+                              height: 14,
+                              width: 14,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2)),
                       ],
                     ),
                     const SizedBox(height: 16),
                     if (snap != null) ...[
                       LinearProgressIndicator(
-                        value: snap.totalCount > 0 ? snap.checkedCount / snap.totalCount : 0,
+                        value: snap.totalCount > 0
+                            ? snap.checkedCount / snap.totalCount
+                            : 0,
                         borderRadius: BorderRadius.circular(4),
                         minHeight: 8,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '${snap.checkedCount} dari ${snap.totalCount} item selesai',
-                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 14),
-                      _BibleRow('PL', snap.bible.plPorsi, snap.bible.plChecked),
+                      _BibleRow(
+                          'PL', snap.bible.plPorsi, snap.bible.plChecked),
                       const SizedBox(height: 6),
-                      _BibleRow('PB', snap.bible.pbPorsi, snap.bible.pbChecked),
+                      _BibleRow(
+                          'PB', snap.bible.pbPorsi, snap.bible.pbChecked),
                     ] else if (jState.error != null)
-                      Text('Gagal memuat jurnal', style: TextStyle(color: Colors.red[400], fontSize: 13))
+                      Text('Gagal memuat jurnal',
+                          style: TextStyle(color: Colors.red[400], fontSize: 13))
                     else
-                      const Text('Memuat...', style: TextStyle(color: Colors.grey)),
+                      const Text('Memuat...',
+                          style: TextStyle(color: Colors.grey)),
                   ],
                 ),
               ),
@@ -153,7 +187,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (hState.laporan != null && hState.laporan!.streak > 0) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(12),
@@ -177,17 +212,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
 
             // Verse reference
-            if (snap != null && snap.verseRef != null && snap.verseRef!.isNotEmpty) ...[
+            if (snap != null &&
+                snap.verseRef != null &&
+                snap.verseRef!.isNotEmpty) ...[
               const SizedBox(height: 16),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(18),
                   child: Row(
                     children: [
-                      Icon(Icons.format_quote, color: theme.colorScheme.secondary, size: 20),
+                      Icon(Icons.format_quote,
+                          color: theme.colorScheme.secondary, size: 20),
                       const SizedBox(width: 8),
-                      Text('Hafal Ayat: ', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-                      Text(snap.verseRef!, style: theme.textTheme.bodyMedium),
+                      Text(
+                        'Hafal Ayat: ',
+                        style: theme.textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Expanded(
+                        child: Text(snap.verseRef!,
+                            style: theme.textTheme.bodyMedium),
+                      ),
                     ],
                   ),
                 ),
@@ -199,40 +244,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Artikel Terbaru
             Row(
               children: [
-                Icon(Icons.article, color: theme.colorScheme.primary, size: 20),
+                Icon(Icons.article,
+                    color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 8),
-                Text('Artikel Terbaru', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  'Artikel Terbaru',
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => context.push('/blog/create'),
+                  child: const Text('Tulis'),
+                ),
               ],
             ),
             const SizedBox(height: 12),
             if (hState.loading && hState.blogs.isEmpty)
-              const Center(child: Padding(
+              const Center(
+                  child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: CircularProgressIndicator(strokeWidth: 2),
               ))
             else if (hState.blogs.isEmpty)
-              Text('Belum ada artikel', style: TextStyle(color: Colors.grey[500]))
+              Text('Belum ada artikel',
+                  style: TextStyle(color: Colors.grey[500]))
             else
-              ...hState.blogs.map((blog) => _BlogCard(blog: blog, theme: theme)),
+              ...hState.blogs
+                  .map((blog) => _BlogCard(blog: blog, theme: theme)),
 
             const SizedBox(height: 24),
 
             // Galeri Kegiatan
             Row(
               children: [
-                Icon(Icons.photo_library, color: theme.colorScheme.primary, size: 20),
+                Icon(Icons.photo_library,
+                    color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 8),
-                Text('Galeri Kegiatan', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  'Galeri Kegiatan',
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => context.push('/galeri'),
+                  child: const Text('Lihat semua'),
+                ),
               ],
             ),
             const SizedBox(height: 12),
             if (hState.loading && hState.galeri.isEmpty)
-              const Center(child: Padding(
+              const Center(
+                  child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: CircularProgressIndicator(strokeWidth: 2),
               ))
             else if (hState.galeri.isEmpty)
-              Text('Belum ada foto kegiatan', style: TextStyle(color: Colors.grey[500]))
+              Text('Belum ada foto kegiatan',
+                  style: TextStyle(color: Colors.grey[500]))
             else
               SizedBox(
                 height: 160,
@@ -240,7 +310,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   scrollDirection: Axis.horizontal,
                   itemCount: hState.galeri.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (ctx, i) => _GaleriCard(item: hState.galeri[i]),
+                  itemBuilder: (ctx, i) =>
+                      _GaleriCard(item: hState.galeri[i]),
                 ),
               ),
 
@@ -269,14 +340,15 @@ class _BibleRow extends StatelessWidget {
           color: checked ? Colors.green : Colors.grey[400],
         ),
         const SizedBox(width: 8),
-        Text('$type — $porsi', style: Theme.of(context).textTheme.bodySmall),
+        Text('$type — $porsi',
+            style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
 }
 
 class _BlogCard extends StatelessWidget {
-  final dynamic blog;
+  final BlogPost blog;
   final ThemeData theme;
 
   const _BlogCard({required this.blog, required this.theme});
@@ -285,63 +357,71 @@ class _BlogCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            if (blog.image != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: blog.image!,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push('/blog/${blog.slug}'),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              if (blog.image != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: blog.image!,
                     width: 60,
                     height: 60,
-                    color: Colors.grey[200],
-                    child: Icon(Icons.article, color: Colors.grey[400]),
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.article, color: theme.colorScheme.primary),
-              ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    blog.title,
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (blog.publishedAt != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDate(blog.publishedAt!),
-                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey[200],
+                      child: Icon(Icons.article, color: Colors.grey[400]),
                     ),
+                  ),
+                )
+              else
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.article,
+                      color: theme.colorScheme.primary),
+                ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      blog.title,
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (blog.publishedAt != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDate(blog.publishedAt!),
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: Colors.grey[500]),
+                      ),
+                    ],
+                    if (blog.cabangNama != null)
+                      Text(
+                        blog.cabangNama!,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: Colors.grey[400]),
+                      ),
                   ],
-                  if (blog.cabangNama != null)
-                    Text(
-                      blog.cabangNama!,
-                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[400]),
-                    ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -358,7 +438,7 @@ class _BlogCard extends StatelessWidget {
 }
 
 class _GaleriCard extends StatelessWidget {
-  final dynamic item;
+  final GaleriItem item;
 
   const _GaleriCard({required this.item});
 
@@ -374,7 +454,8 @@ class _GaleriCard extends StatelessWidget {
         placeholder: (_, __) => Container(
           width: 140,
           color: Colors.grey[200],
-          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          child: const Center(
+              child: CircularProgressIndicator(strokeWidth: 2)),
         ),
         errorWidget: (_, __, ___) => Container(
           width: 140,

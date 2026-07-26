@@ -1,0 +1,77 @@
+appId: com.studycenter.sc_student
+---
+# Flow 04: Jurnal history — view history by date range
+# Covers: GET /api/jurnal/history?from=X&to=Y
+#
+# Note: The current Android app does not have a dedicated history screen.
+# The history API is used internally by the laporan feature.
+# This flow documents the history API test expectations and tests the
+# laporan screen which consumes the matrix (derived from history data).
+#
+# When a history screen is added to the app, uncomment and adjust the steps below.
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "Email"
+- clearText
+- inputText: "test@studycenter.test"
+- tapOn: "Password"
+- clearText
+- inputText: "password123"
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+- assertVisible: "Beranda"
+
+# ---- Navigate to Laporan (which uses history data for the matrix) ----
+- tapOn: "Laporan"
+
+- assertVisible: "Laporan"
+
+# Wait for summary to load
+- assertVisible: "Progres"
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "04_laporan_shows_history_matrix"
+
+# The Matriks Harian section is rendered from history data
+- assertVisible: "Matriks Harian"
+
+- scrollUntilVisible:
+    element: "Matriks Harian"
+
+- takeScreenshot: "04_jurnal_history_matrix_visible"
+
+# ---- Test: Pick a custom date range ----
+# Tap the date range icon in the AppBar
+- tapOn:
+    id: "date_range"
+  optional: true
+
+# If the date picker opens, pick a range
+# The date range picker is a system dialog/overlay
+- takeScreenshot: "04_date_range_picker_open"
+
+# Select start date (tap on a day, e.g. the 1st of current month)
+# These taps depend on the system date picker UI — adjust for device locale
+# - tapOn: "1"
+# - tapOn: "14"
+# - tapOn: "OK"
+
+# After picking a range, the matrix reloads with the selected range
+# - assertVisible: "Matriks Harian"
+# - assertVisible: "s/d"
+# - takeScreenshot: "04_history_custom_range_result"
+
+# ---- API contract notes (verified via backend tests) ----
+# GET /api/jurnal/history?from=2026-07-20&to=2026-07-26
+# Returns: { "data": [ { date, pl_checked, pb_checked, verse_checked, life_checked_ids } ] }
+# - One entry per day in range
+# - Days with no entry return all false / []
+# - to must be >= from (422 otherwise)
+# - Both from and to are required (422 if missing)

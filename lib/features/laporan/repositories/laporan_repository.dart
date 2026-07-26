@@ -15,12 +15,17 @@ class LaporanRepository {
   }
 
   Future<LaporanMatrix> matrix({String? from, String? to}) async {
-    final res = await _dio.get(ApiConstants.laporanMatrix, queryParameters: {
-      'from': from,
-      'to': to,
-    });
+    final queryParams = <String, dynamic>{};
+    if (from != null) queryParams['from'] = from;
+    if (to != null) queryParams['to'] = to;
+
+    final res = await _dio.get(
+      ApiConstants.laporanMatrix,
+      queryParameters: queryParams.isEmpty ? null : queryParams,
+    );
     return LaporanMatrix.fromJson(res.data as Map<String, dynamic>);
   }
 }
 
-final laporanRepositoryProvider = Provider((ref) => LaporanRepository(ref.read(dioProvider)));
+final laporanRepositoryProvider =
+    Provider((ref) => LaporanRepository(ref.read(dioProvider)));

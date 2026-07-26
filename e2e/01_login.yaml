@@ -1,0 +1,66 @@
+appId: com.studycenter.sc_student
+---
+# Flow 01: Login, wrong password error, successful login, and logout
+# Covers: POST /api/auth/login, POST /api/auth/logout
+
+- launchApp:
+    clearState: true
+
+# ---- App should redirect to login screen ----
+- assertVisible: "Masuk"
+- assertVisible: "Selamat datang kembali"
+- assertVisible: "Email"
+- assertVisible: "Password"
+
+- takeScreenshot: "01_login_initial_screen"
+
+# ---- Test: wrong password shows error ----
+- tapOn: "Email"
+- clearText
+- inputText: "test@studycenter.test"
+
+- tapOn: "Password"
+- clearText
+- inputText: "wrongpassword"
+
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+- assertVisible: "Username/email atau password salah."
+- takeScreenshot: "01_login_wrong_password_error"
+
+# ---- Test: successful login with correct credentials ----
+- tapOn: "Email"
+- clearText
+- inputText: "test@studycenter.test"
+
+- tapOn: "Password"
+- clearText
+- inputText: "password123"
+
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+# After login, should see home screen (bottom nav visible)
+- assertVisible: "Beranda"
+- assertVisible: "Jurnal"
+- assertVisible: "Laporan"
+- assertVisible: "Profil"
+
+- takeScreenshot: "01_login_success_home"
+
+# ---- Test: logout from profile screen ----
+- tapOn: "Profil"
+
+- assertVisible: "Profil"
+- assertVisible: "Keluar"
+
+- tapOn: "Keluar"
+
+# After logout, should return to login screen
+- assertVisible: "Masuk"
+- assertVisible: "Selamat datang kembali"
+
+- takeScreenshot: "01_logout_success"

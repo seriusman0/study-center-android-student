@@ -24,14 +24,17 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final rolesRaw = json['roles'] as List? ?? [];
     return UserModel(
-      id:       json['id'] as int,
-      name:     json['name'] as String,
-      username: json['username'] as String,
-      email:    json['email'] as String,
-      avatar:   json['avatar'] as String?,
+      id:         (json['id'] as num).toInt(),
+      name:       json['name'] as String? ?? '',
+      username:   json['username'] as String? ?? '',
+      email:      json['email'] as String? ?? '',
+      avatar:     json['avatar'] as String?,
       cabang:     (json['cabang'] as Map?)?['nama'] as String?,
       cabangSlug: (json['cabang'] as Map?)?['slug'] as String?,
-      roles:    rolesRaw.map((r) => r['name'] as String).toList(),
+      roles: rolesRaw
+          .map((r) => (r is Map ? r['name'] : r) as String? ?? '')
+          .where((s) => s.isNotEmpty)
+          .toList(),
     );
   }
 }

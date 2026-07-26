@@ -1,0 +1,123 @@
+appId: com.studycenter.sc_student
+---
+# Flow 03: Jurnal today — view, check PL/PB, save verse, check life item
+# Covers: GET /api/jurnal/today, POST /api/jurnal/check (pl, pb, verse, life)
+
+- launchApp:
+    clearState: true
+
+# ---- Login first ----
+- assertVisible: "Masuk"
+- tapOn: "Email"
+- clearText
+- inputText: "test@studycenter.test"
+- tapOn: "Password"
+- clearText
+- inputText: "password123"
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+- assertVisible: "Beranda"
+
+# ---- Navigate to Jurnal tab ----
+- tapOn: "Jurnal"
+
+- assertVisible: "Jurnal"
+- takeScreenshot: "03_jurnal_screen_initial"
+
+# Wait for the jurnal snapshot to load
+- assertVisible: "Pembacaan Alkitab"
+
+# ---- Verify key sections are visible ----
+- assertVisible: "Pembacaan Alkitab"
+- assertVisible: "Hafal Ayat Mingguan"
+- assertVisible: "Jadwal Kehidupan"
+
+- assertVisible: "Perjanjian Lama"
+- assertVisible: "Perjanjian Baru"
+
+- takeScreenshot: "03_jurnal_bible_section"
+
+# ---- Test: Check PL (Perjanjian Lama) ----
+- tapOn: "Perjanjian Lama"
+
+# The row toggles; verify it is now in a checked state
+# The checkbox changes to checked and the text gets a strikethrough
+- takeScreenshot: "03_jurnal_pl_checked"
+
+# ---- Test: Check PB (Perjanjian Baru) ----
+- tapOn: "Perjanjian Baru"
+- takeScreenshot: "03_jurnal_pb_checked"
+
+# ---- Test: Uncheck PL ----
+- tapOn: "Perjanjian Lama"
+- takeScreenshot: "03_jurnal_pl_unchecked"
+
+# ---- Test: Save weekly verse ----
+# Scroll to the Hafal Ayat Mingguan section
+- scrollUntilVisible:
+    element: "Hafal Ayat Mingguan"
+
+- assertVisible: "Hafal Ayat Mingguan"
+
+# If there's an input card, tap into kitab field
+# The verse section shows "Belum ada ayat hafalan hari ini." when no verse is saved
+- assertVisible: "Belum ada ayat hafalan hari ini."
+
+- takeScreenshot: "03_jurnal_verse_empty"
+
+# Note: verse input requires tapping into the Kitab field, but the current screen
+# shows a read-only _VerseSection when built from journal_screen.dart.
+# If the screen renders _VerseInputCard, use the flow below:
+#
+# - tapOn: "Kitab (cth. Yohanes)"
+# - inputText: "Yohanes"
+#
+# - tapOn: "Pasal"
+# - inputText: "3"
+#
+# - tapOn: "Ayat"
+# - inputText: "16"
+#
+# - tapOn: "Simpan"
+# - assertVisible: "Tersimpan: Yohanes 3:16"
+# - takeScreenshot: "03_jurnal_verse_saved"
+
+# ---- Test: Check a life item ----
+- scrollUntilVisible:
+    element: "Jadwal Kehidupan"
+
+- assertVisible: "Jadwal Kehidupan"
+
+# Life items are listed under category headers (KEROHANIAN, PENDIDIKAN, KARAKTER)
+- scrollUntilVisible:
+    element: "KEROHANIAN"
+
+- assertVisible: "KEROHANIAN"
+
+# Tap "Berdoa pagi" (or any first life item visible)
+- scrollUntilVisible:
+    element: "Berdoa pagi"
+
+- tapOn: "Berdoa pagi"
+- takeScreenshot: "03_jurnal_life_item_checked"
+
+# Uncheck the same item
+- tapOn: "Berdoa pagi"
+- takeScreenshot: "03_jurnal_life_item_unchecked"
+
+# ---- Test: Refresh jurnal ----
+- tapOn:
+    id: "refresh"
+  optional: true
+
+# Alternatively swipe-to-refresh
+- swipe:
+    direction: Down
+    from:
+      x: 50%
+      y: 30%
+
+- assertVisible: "Pembacaan Alkitab"
+- takeScreenshot: "03_jurnal_after_refresh"

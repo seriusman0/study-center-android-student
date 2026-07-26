@@ -1,0 +1,28 @@
+appId: com.studycenter.sc_student
+---
+# Study Center Student App — Maestro E2E Configuration
+#
+# This file defines common test credentials and shared setup.
+# All other flows include this config via `runFlow` where needed.
+#
+# Test Account (must exist in the backend with role=student):
+#   email:    test@studycenter.test
+#   username: teststudent
+#   password: password123
+#   cabang:   Nias
+#
+# Base URL (configured inside the app at lib/core/constants/api_constants.dart):
+#   https://studycenter.seriusman.shop/api
+#
+# App package: com.studycenter.sc_student
+# Flutter project name: sc_student
+#
+# Run all tests:
+#   maestro test e2e/
+#
+# Run a single flow:
+#   maestro test e2e/01_login.yaml
+#
+# Environment variables you can override:
+#   STUDENT_EMAIL     (default: test@studycenter.test)
+#   STUDENT_PASSWORD  (default: password123)

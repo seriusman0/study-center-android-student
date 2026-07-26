@@ -30,6 +30,24 @@ class AuthRepository {
     return user;
   }
 
+  Future<UserModel> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final response = await _dio.post(ApiConstants.register, data: {
+      'name': name,
+      'email': email,
+      'password': password,
+    });
+
+    final data = response.data as Map<String, dynamic>;
+    final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
+
+    await _storage.saveToken(data['token'] as String);
+    return user;
+  }
+
   Future<void> logout() async {
     try {
       await _dio.post(ApiConstants.logout);

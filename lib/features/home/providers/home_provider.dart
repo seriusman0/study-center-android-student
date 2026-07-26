@@ -44,14 +44,22 @@ class HomeNotifier extends Notifier<HomeState> {
     state = state.copyWith(loading: true, error: null);
     final repo = ref.read(homeRepositoryProvider);
 
-    final blogs = await repo.fetchBlogs(cabangSlug).catchError((e) {
+    List<BlogPost> blogs;
+    try {
+      blogs = await repo.fetchBlogs(cabangSlug);
+    } catch (e) {
       debugPrint('fetchBlogs error: $e');
-      return <BlogPost>[];
-    });
-    final galeri = await repo.fetchGaleri().catchError((e) {
+      blogs = [];
+    }
+
+    List<GaleriItem> galeri;
+    try {
+      galeri = await repo.fetchGaleri();
+    } catch (e) {
       debugPrint('fetchGaleri error: $e');
-      return <GaleriItem>[];
-    });
+      galeri = [];
+    }
+
     LaporanSummary? laporan;
     try {
       laporan = await repo.fetchLaporan();
