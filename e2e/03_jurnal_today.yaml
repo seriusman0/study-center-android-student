@@ -9,115 +9,83 @@ appId: com.studycenter.sc_student
 # ---- Login first ----
 - assertVisible: "Masuk"
 - tapOn: "Email"
-- clearText
 - inputText: "test@studycenter.test"
 - tapOn: "Password"
-- clearText
 - inputText: "password123"
 - tapOn:
     text: "Masuk"
     index: 0
 
-- assertVisible: "Beranda"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 8000
 
 # ---- Navigate to Jurnal tab ----
 - tapOn: "Jurnal"
+- waitForAnimationToEnd
 
-- assertVisible: "Jurnal"
+- assertVisible: "Jurnal Harian"
 - takeScreenshot: "03_jurnal_screen_initial"
 
-# Wait for the jurnal snapshot to load
-- assertVisible: "Pembacaan Alkitab"
-
 # ---- Verify key sections are visible ----
-- assertVisible: "Pembacaan Alkitab"
-- assertVisible: "Hafal Ayat Mingguan"
-- assertVisible: "Jadwal Kehidupan"
-
 - assertVisible: "Perjanjian Lama"
 - assertVisible: "Perjanjian Baru"
+- assertVisible: "Ayat Hafalan"
 
 - takeScreenshot: "03_jurnal_bible_section"
 
 # ---- Test: Check PL (Perjanjian Lama) ----
 - tapOn: "Perjanjian Lama"
-
-# The row toggles; verify it is now in a checked state
-# The checkbox changes to checked and the text gets a strikethrough
+- waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_pl_checked"
 
 # ---- Test: Check PB (Perjanjian Baru) ----
 - tapOn: "Perjanjian Baru"
+- waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_pb_checked"
 
 # ---- Test: Uncheck PL ----
 - tapOn: "Perjanjian Lama"
+- waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_pl_unchecked"
 
-# ---- Test: Save weekly verse ----
-# Scroll to the Hafal Ayat Mingguan section
+# ---- Test: Ayat Hafalan section ----
 - scrollUntilVisible:
-    element: "Hafal Ayat Mingguan"
+    element: "Ayat Hafalan"
+    direction: DOWN
 
-- assertVisible: "Hafal Ayat Mingguan"
-
-# If there's an input card, tap into kitab field
-# The verse section shows "Belum ada ayat hafalan hari ini." when no verse is saved
-- assertVisible: "Belum ada ayat hafalan hari ini."
-
-- takeScreenshot: "03_jurnal_verse_empty"
-
-# Note: verse input requires tapping into the Kitab field, but the current screen
-# shows a read-only _VerseSection when built from journal_screen.dart.
-# If the screen renders _VerseInputCard, use the flow below:
-#
-# - tapOn: "Kitab (cth. Yohanes)"
-# - inputText: "Yohanes"
-#
-# - tapOn: "Pasal"
-# - inputText: "3"
-#
-# - tapOn: "Ayat"
-# - inputText: "16"
-#
-# - tapOn: "Simpan"
-# - assertVisible: "Tersimpan: Yohanes 3:16"
-# - takeScreenshot: "03_jurnal_verse_saved"
+- assertVisible: "Ayat Hafalan"
+- takeScreenshot: "03_jurnal_verse_section"
 
 # ---- Test: Check a life item ----
 - scrollUntilVisible:
     element: "Jadwal Kehidupan"
+    direction: DOWN
 
 - assertVisible: "Jadwal Kehidupan"
+- takeScreenshot: "03_jurnal_life_section"
 
-# Life items are listed under category headers (KEROHANIAN, PENDIDIKAN, KARAKTER)
-- scrollUntilVisible:
-    element: "KEROHANIAN"
-
-- assertVisible: "KEROHANIAN"
-
-# Tap "Berdoa pagi" (or any first life item visible)
+# Tap the first visible life item
 - scrollUntilVisible:
     element: "Berdoa pagi"
+    direction: DOWN
 
 - tapOn: "Berdoa pagi"
+- waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_life_item_checked"
 
 # Uncheck the same item
 - tapOn: "Berdoa pagi"
+- waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_life_item_unchecked"
 
-# ---- Test: Refresh jurnal ----
-- tapOn:
-    id: "refresh"
-  optional: true
-
-# Alternatively swipe-to-refresh
+# ---- Test: Pull-to-refresh ----
 - swipe:
-    direction: Down
-    from:
-      x: 50%
-      y: 30%
+    direction: DOWN
+    duration: 300
 
-- assertVisible: "Pembacaan Alkitab"
+- extendedWaitUntil:
+    visible: "Jurnal Harian"
+    timeout: 5000
+
 - takeScreenshot: "03_jurnal_after_refresh"

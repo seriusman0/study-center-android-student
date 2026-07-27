@@ -8,7 +8,6 @@ appId: com.studycenter.sc_student
 
 # ---- App should redirect to login screen ----
 - assertVisible: "Masuk"
-- assertVisible: "Selamat datang kembali"
 - assertVisible: "Email"
 - assertVisible: "Password"
 
@@ -16,27 +15,30 @@ appId: com.studycenter.sc_student
 
 # ---- Test: wrong password shows error ----
 - tapOn: "Email"
-- clearText
 - inputText: "test@studycenter.test"
 
 - tapOn: "Password"
-- clearText
 - inputText: "wrongpassword"
 
 - tapOn:
     text: "Masuk"
     index: 0
 
-- assertVisible: "Username/email atau password salah."
+- extendedWaitUntil:
+    visible: "Username/email atau password salah."
+    timeout: 5000
+
 - takeScreenshot: "01_login_wrong_password_error"
 
 # ---- Test: successful login with correct credentials ----
+# clearState on launchApp already wiped state; re-launch to get a clean form
+- launchApp:
+    clearState: true
+
 - tapOn: "Email"
-- clearText
 - inputText: "test@studycenter.test"
 
 - tapOn: "Password"
-- clearText
 - inputText: "password123"
 
 - tapOn:
@@ -44,7 +46,10 @@ appId: com.studycenter.sc_student
     index: 0
 
 # After login, should see home screen (bottom nav visible)
-- assertVisible: "Beranda"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 8000
+
 - assertVisible: "Jurnal"
 - assertVisible: "Laporan"
 - assertVisible: "Profil"
@@ -53,11 +58,12 @@ appId: com.studycenter.sc_student
 
 # ---- Test: logout from profile screen ----
 - tapOn: "Profil"
+- waitForAnimationToEnd
 
-- assertVisible: "Profil"
 - assertVisible: "Keluar"
 
 - tapOn: "Keluar"
+- waitForAnimationToEnd
 
 # After logout, should return to login screen
 - assertVisible: "Masuk"

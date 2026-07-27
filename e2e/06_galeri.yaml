@@ -12,70 +12,50 @@ appId: com.studycenter.sc_student
 # ---- Login ----
 - assertVisible: "Masuk"
 - tapOn: "Email"
-- clearText
 - inputText: "test@studycenter.test"
 - tapOn: "Password"
-- clearText
 - inputText: "password123"
 - tapOn:
     text: "Masuk"
     index: 0
 
-# Wait for home screen
-- assertVisible: "Beranda"
-- assertVisible: "Jurnal"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 8000
 
-# ---- Home screen should be on Beranda tab ----
+# ---- Ensure we are on Beranda tab ----
 - tapOn: "Beranda"
+- waitForAnimationToEnd
 
-# Scroll down to find the gallery section
+# ---- Scroll to gallery section ----
 - scrollUntilVisible:
     element: "Galeri Kegiatan"
+    direction: DOWN
 
 - assertVisible: "Galeri Kegiatan"
 - takeScreenshot: "06_galeri_section_visible"
 
-# ---- Test: Gallery is visible (either photos or empty state) ----
-# If photos exist: horizontal list of images is shown
-# If no photos: "Belum ada foto kegiatan" text is shown
-
-# Check that either photos OR the empty state message is present
-# (We can't assert on image widgets directly, so check the section header)
-- assertVisible: "Galeri Kegiatan"
-
 - takeScreenshot: "06_galeri_content"
 
 # ---- Test: Scroll horizontally through gallery photos ----
-# If photos are loaded, the horizontal list can be scrolled
-- scroll:
-    direction: Right
+- swipe:
+    direction: LEFT
+    duration: 300
 
 - takeScreenshot: "06_galeri_scrolled_right"
 
-# ---- Test: Empty state ----
-# When cabang has no presensi photos, the app shows:
-# "Belum ada foto kegiatan"
-# This is tested by asserting either the text OR photo images are visible.
-# (Dynamic — depends on test data in the backend.)
-
 # ---- Test: Pull to refresh home screen ----
 - swipe:
-    direction: Down
-    from:
-      x: 50%
-      y: 20%
+    direction: DOWN
+    duration: 300
 
-# After refresh, gallery section should still be visible
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 5000
+
 - scrollUntilVisible:
     element: "Galeri Kegiatan"
+    direction: DOWN
 
 - assertVisible: "Galeri Kegiatan"
 - takeScreenshot: "06_galeri_after_refresh"
-
-# ---- API contract notes ----
-# GET /api/galeri (student role required)
-# Returns: { "data": [ { id, foto_url, tanggal } ] }
-# - Up to 20 items, newest first
-# - Scoped to student's cabang_id
-# - Items without foto are excluded
-# - 403 if user is not a student

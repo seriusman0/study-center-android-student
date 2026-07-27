@@ -3,49 +3,49 @@ appId: com.studycenter.sc_student
 # Flow 02: Registration flow
 # Covers: POST /api/auth/register
 #
-# Note: The current app only has a login screen visible in the student app.
-# Registration may be done via the web portal or a register screen if added.
-# This flow tests the login screen navigation and documents the expected
-# registration API behaviour for future screen implementation.
-#
-# If a register button/link exists on the login screen, this flow exercises it.
-# Otherwise it validates the login screen as the entry point.
+# The student app uses a login-first entry point.
+# If a registration screen is added, tap "Daftar" from the login screen.
+# This flow validates the login screen as the app entry point and tests
+# the registration screen if the "Daftar" link is present.
 
 - launchApp:
     clearState: true
 
 - assertVisible: "Masuk"
+- assertVisible: "Selamat datang kembali"
 - assertVisible: "Email"
 - assertVisible: "Password"
 
 - takeScreenshot: "02_register_login_screen"
 
-# ---- If a "Daftar" / "Register" link exists, tap it ----
-# Uncomment and adjust the element text when a registration screen is added:
-#
-# - tapOn: "Daftar"
-# - assertVisible: "Buat Akun"
-# - assertVisible: "Nama"
-# - assertVisible: "Email"
-# - assertVisible: "Password"
-#
-# - tapOn: "Nama"
-# - inputText: "Test User Baru"
-#
-# - tapOn: "Email"
-# - inputText: "testbaru@studycenter.test"
-#
-# - tapOn: "Password"
-# - inputText: "password123"
-#
-# - tapOn: "Daftar"
-# - assertVisible: "Beranda"
-# - takeScreenshot: "02_register_success"
+# ---- Test: Registration screen (if "Daftar" link exists on login screen) ----
+- tapOn: "Daftar"
+- waitForAnimationToEnd
 
-# ---- Validate that a new guest user cannot access student features ----
-# After registration via API, user has role=guest (not student).
-# Login with guest credentials should succeed but student-only tabs
-# should show Forbidden if the app enforces role checking.
-#
-# For now, confirm login screen is intact.
-- assertVisible: "Masuk"
+- assertVisible: "Daftar Akun"
+- assertVisible: "Email"
+- assertVisible: "Password"
+
+- takeScreenshot: "02_register_screen"
+
+- tapOn: "Nama"
+- inputText: "Test User Baru"
+
+- tapOn: "Email"
+- inputText: "testbaru@studycenter.test"
+
+- tapOn: "Password"
+- inputText: "password123"
+
+- tapOn: "Konfirmasi Password"
+- inputText: "password123"
+
+- hideKeyboard
+
+- tapOn: "Daftar"
+
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 8000
+
+- takeScreenshot: "02_register_success"

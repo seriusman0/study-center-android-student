@@ -1,13 +1,10 @@
 appId: com.studycenter.sc_student
 ---
-# Flow 09: Komentar — read comments, post a comment, delete own comment
+# Flow 09: Komentar — read comments on a blog post, post a comment
 # Covers: GET /api/blogs/{blog}/comments, POST /api/blogs/{blog}/comments,
 #         DELETE /api/comments/{comment}
 #
-# Comments are attached to blog posts. This flow assumes:
-# - Blog detail screen exists and is accessible by tapping a blog card
-# - Comment section is visible on the blog detail screen
-# - A text field allows posting a comment
+# Assumes a blog detail screen is accessible by tapping a blog card on Beranda.
 
 - launchApp:
     clearState: true
@@ -15,77 +12,66 @@ appId: com.studycenter.sc_student
 # ---- Login ----
 - assertVisible: "Masuk"
 - tapOn: "Email"
-- clearText
 - inputText: "test@studycenter.test"
 - tapOn: "Password"
-- clearText
 - inputText: "password123"
 - tapOn:
     text: "Masuk"
     index: 0
 
-- assertVisible: "Beranda"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 8000
 
 # ---- Navigate to Beranda and open a blog post ----
 - tapOn: "Beranda"
+- waitForAnimationToEnd
 
 - scrollUntilVisible:
     element: "Artikel Terbaru"
+    direction: DOWN
 
 - assertVisible: "Artikel Terbaru"
 - takeScreenshot: "09_blog_list_before_comment"
 
-# Tap the first available blog card to open detail
-# Adjust element text to match a known blog title in test data:
-# - tapOn: "Refleksi Minggu Ini"
-# - assertVisible: "Refleksi Minggu Ini"
-# - takeScreenshot: "09_blog_detail_open"
+# ---- Tap the first blog card to open detail ----
+# Adjust element text to match a known blog title in test data
+- tapOn:
+    text: "Artikel Terbaru"
+    index: 0
+
+- waitForAnimationToEnd
+- takeScreenshot: "09_blog_detail_open"
 
 # ---- Test: Comment list is visible ----
-# - scrollUntilVisible:
-#     element: "Komentar"
-# - assertVisible: "Komentar"
-# - takeScreenshot: "09_comment_list"
+- scrollUntilVisible:
+    element: "Komentar"
+    direction: DOWN
 
-# ---- Test: Read existing comments ----
-# If comments exist, each shows user name and comment body
-# - assertVisible: "Artikel yang sangat inspiratif!"
-# - assertVisible: "Siti Rahma"
-# - takeScreenshot: "09_comment_existing"
+- assertVisible: "Komentar"
+- takeScreenshot: "09_comment_list"
 
 # ---- Test: Post a new comment ----
-# - scrollUntilVisible:
-#     element: "Tulis komentar..."
-# - tapOn: "Tulis komentar..."
-# - inputText: "Terima kasih atas sharingnya, sangat bermanfaat!"
-# - tapOn: "Kirim"
-# - assertVisible: "Terima kasih atas sharingnya, sangat bermanfaat!"
-# - takeScreenshot: "09_comment_posted"
+- scrollUntilVisible:
+    element: "Tulis komentar..."
+    direction: DOWN
+
+- tapOn: "Tulis komentar..."
+- inputText: "Terima kasih atas sharingnya, sangat bermanfaat!"
+- hideKeyboard
+
+- tapOn: "Kirim"
+
+- extendedWaitUntil:
+    visible: "Terima kasih atas sharingnya, sangat bermanfaat!"
+    timeout: 5000
+
+- takeScreenshot: "09_comment_posted"
 
 # ---- Test: Delete own comment ----
-# Long-press or tap a delete button on the posted comment
-# - tapOn:
-#     text: "Hapus"
-#     belowText: "Terima kasih atas sharingnya, sangat bermanfaat!"
-# - assertNotVisible: "Terima kasih atas sharingnya, sangat bermanfaat!"
-# - takeScreenshot: "09_comment_deleted"
+- tapOn: "Hapus"
 
-# ---- Note ----
-# If the blog detail and comment screens are not yet implemented in the Flutter app,
-# the steps above are commented out as specifications for when they are built.
-# The API contract below is what the backend currently supports.
+- assertNotVisible: "Terima kasih atas sharingnya, sangat bermanfaat!"
+- takeScreenshot: "09_comment_deleted"
 
 - takeScreenshot: "09_komentar_flow_end"
-
-# ---- API contract notes ----
-# GET /api/blogs/{blog}/comments (public, no auth)
-#   Returns: array of comment objects with user info
-#   { id, blog_id, user_id, body, created_at, user: { id, name, username, avatar } }
-#
-# POST /api/blogs/{blog}/comments (auth required, any role)
-#   Rate limit: 20 requests/minute
-#   Body: { body: "comment text" }
-#   Returns 201 with created comment
-#
-# DELETE /api/comments/{comment} (auth required, must be comment author or admin)
-#   Returns 200: { "message": "Comment deleted." }

@@ -11,8 +11,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailCtrl = TextEditingController(text: 'test@email.com');
-  final _passCtrl  = TextEditingController(text: '12345');
+  final _emailCtrl = TextEditingController();
+  final _passCtrl  = TextEditingController();
   bool _obscure = true;
 
   @override

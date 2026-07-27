@@ -1,10 +1,7 @@
 appId: com.studycenter.sc_student
 ---
-# Flow 08: Profile — view profile, verify user info
-# Covers: GET /api/me (loaded at login), PUT /api/profile
-#
-# The profile screen shows: name, cabang, username, email, Keluar button.
-# Profile update (PUT /api/profile) requires a dedicated edit screen.
+# Flow 08: Profile — view profile, verify user info, navigate away and back
+# Covers: GET /api/me (loaded at login)
 
 - launchApp:
     clearState: true
@@ -12,85 +9,47 @@ appId: com.studycenter.sc_student
 # ---- Login ----
 - assertVisible: "Masuk"
 - tapOn: "Email"
-- clearText
 - inputText: "test@studycenter.test"
 - tapOn: "Password"
-- clearText
 - inputText: "password123"
 - tapOn:
     text: "Masuk"
     index: 0
 
-- assertVisible: "Beranda"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 8000
 
 # ---- Navigate to Profil tab ----
 - tapOn: "Profil"
+- waitForAnimationToEnd
 
 - assertVisible: "Profil"
 - takeScreenshot: "08_profile_screen"
 
 # ---- Test: Profile info is displayed ----
-# The profile screen shows the authenticated user's info
-# Username label
 - assertVisible: "Username"
-
-# Email label
 - assertVisible: "Email"
-
-# Cabang label (if user has a cabang)
 - assertVisible: "Cabang"
 
 - takeScreenshot: "08_profile_info_cards"
 
-# ---- Test: Avatar or initials are visible ----
-# If avatar is set: NetworkImage is shown in CircleAvatar
-# If no avatar: first letter of name is shown
-# (Visual check — Maestro can't assert on image content)
-
 # ---- Test: Keluar (logout) button is visible ----
 - scrollUntilVisible:
     element: "Keluar"
+    direction: DOWN
 
 - assertVisible: "Keluar"
 - takeScreenshot: "08_profile_logout_button"
 
-# ---- Test: Update profile ----
-# If there's an edit button or the fields are editable:
-#
-# - tapOn: "Edit Profil"    (or FAB with edit icon)
-# - assertVisible: "Nama"
-# - assertVisible: "Bio"
-#
-# - tapOn: "Bio"
-# - clearText
-# - inputText: "Siswa aktif Study Center cabang Nias."
-#
-# - tapOn: "Simpan"
-# - assertVisible: "Siswa aktif Study Center cabang Nias."
-# - takeScreenshot: "08_profile_update_success"
-
-# ---- Test: Social links visible (if profile_public=true) ----
-# Social links show platform icons for instagram, whatsapp, email, facebook
-# (Visual check only)
-
 # ---- Test: Navigate away and come back ----
 - tapOn: "Beranda"
+- waitForAnimationToEnd
 - assertVisible: "Beranda"
 
 - tapOn: "Profil"
+- waitForAnimationToEnd
 - assertVisible: "Profil"
 - assertVisible: "Username"
 
 - takeScreenshot: "08_profile_return"
-
-# ---- API contract notes ----
-# GET /api/me (auth required)
-#   Returns full user with roles, cabang, social_links, role_names
-#
-# PUT /api/profile (auth required, multipart/form-data for avatar)
-#   Fields: name, bio, cabang_id, avatar(file), profile_public, cv_enabled, social_links[]
-#   social_links[].platform: instagram|whatsapp|email|facebook
-#   Sending social_links[] REPLACES all existing social links
-#
-# GET /api/profil/{username} (public)
-#   Returns user (only if is_active=true AND profile_public=true) + their blogs
