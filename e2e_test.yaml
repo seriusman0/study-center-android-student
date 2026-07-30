@@ -4,64 +4,89 @@ appId: com.studycenter.sc_student
 - launchApp:
     clearState: true
 
-# ─── LOGIN (default fields: test@email.com / 12345) ────────────────────────────
+# ─── LOGIN ────────────────────────────
 - extendedWaitUntil:
     visible: "Masuk"
     timeout: 15000
-- assertVisible: "Selamat datang kembali"
+- assertVisible: "Masuk ke akun Study Center Nias"
 
-- tapOn: "Masuk"
+# Input fields
+- tapOn: "email@contoh.com / username"
+- inputText: "teststudent"
+- pressKey: Enter
+- inputText: "12345"
+- tapOn: "Password"
+- tapOn:
+    id: "loginBtn"
 
 # ─── BERANDA ───────────────────────────────────────────────────────────────────
 - extendedWaitUntil:
-    visible: "Elwi2"
+    visible: ".*Jurnal Hari Ini.*"
     timeout: 20000
-
-- assertVisible: "Artikel Terbaru"
-- assertVisible: "Galeri Kegiatan"
 
 # ─── NAVIGASI KE JURNAL ────────────────────────────────────────────────────────
-- tapOn:
-    point: "270,1433"
+- tapOn: "Jurnal.*"
 
 - extendedWaitUntil:
-    visible: "Pembacaan Alkitab"
+    visible: ".*Baca Alkitab.*"
     timeout: 20000
 
-- assertVisible: "Perjanjian Lama"
-- assertVisible: "Perjanjian Baru"
-- assertVisible: "Jadwal Kehidupan"
-
-# Toggle PL
+# ─── PENGISIAN JURNAL HARI INI ────────────────────────────────────────────────────────
 - tapOn: "Perjanjian Lama"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 2000
 
-# Toggle PB
 - tapOn: "Perjanjian Baru"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 2000
 
-# ─── NAVIGASI KE LAPORAN ───────────────────────────────────────────────────────
+# ─── AYAT HAFALAN ────────────────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "Hafal Ayat"
+    direction: DOWN
+
+- tapOn: "Pilih Kitab"
+- tapOn: "Yohanes"
+- tapOn: "Pasal"
+- inputText: "3"
+- tapOn: ".*Hafal Ayat.*"
 - tapOn:
-    point: "450,1433"
+    id: "ayatInput"
+- inputText: "16"
+- tapOn: ".*Hafal Ayat.*"
+- tapOn: ".*Simpan.*"
+- waitForAnimationToEnd:
+    timeout: 2000
 
+# ─── FOTO BELAJAR ────────────────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: ".*Upload Foto.*"
+    direction: DOWN
+- tapOn: ".*Upload Foto.*"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: ".*Allow.*"
+    optional: true
+- tapOn:
+    text: ".*Izinkan.*"
+    optional: true
+- tapOn:
+    text: ".*While using the app.*"
+    optional: true
+- tapOn:
+    text: ".*Saat aplikasi digunakan.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "before_photo_picker"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    point: "20%, 30%" # Usually the first item in the grid
+- takeScreenshot: "after_photo_picker"
 - extendedWaitUntil:
-    visible: "Matriks Harian"
+    visible: ".*Ganti Foto.*"
     timeout: 20000
-
-# ─── NAVIGASI KE PROFIL ────────────────────────────────────────────────────────
-- tapOn:
-    point: "630,1433"
-
-- extendedWaitUntil:
-    visible: "Elwi2"
-    timeout: 10000
-
-- assertVisible: "Elwi2"
-- assertVisible: "Keluar"
-
-# ─── LOGOUT ────────────────────────────────────────────────────────────────────
-- tapOn: "Keluar"
-
-- extendedWaitUntil:
-    visible: "Masuk"
-    timeout: 10000

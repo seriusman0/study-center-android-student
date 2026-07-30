@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://10.190.121.161:8000/api';
+  static const String baseUrl = 'https://studycenter.nanoprojectdevindonesia.com/api';
 
   // Auth
   static const String login       = '/auth/login';
@@ -20,6 +20,7 @@ class ApiConstants {
   static const String jurnalToday   = '/jurnal/today';
   static const String jurnalCheck   = '/jurnal/check';
   static const String jurnalHistory = '/jurnal/history';
+  static const String jurnalFoto    = '/jurnal/foto';
 
   // Laporan
   static const String laporanSummary = '/laporan/my';

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/journal_model.dart';
 import '../repositories/journal_repository.dart';
@@ -100,6 +101,33 @@ class JournalNotifier extends Notifier<JournalState> {
       state = state.copyWith(snapshot: result);
     } catch (_) {
       state = state.copyWith(snapshot: snap);
+    }
+  }
+
+  Future<void> uploadPhoto(XFile file) async {
+    final snap = state.snapshot;
+    if (snap == null) return;
+
+    try {
+      final bytes = await file.readAsBytes();
+      final result = await ref.read(journalRepositoryProvider).uploadPhoto(bytes, file.name, snap.date);
+      state = state.copyWith(snapshot: result);
+    } catch (e) {
+      debugPrint('[Journal] uploadPhoto error: $e');
+      throw e;
+    }
+  }
+
+  Future<void> deletePhoto() async {
+    final snap = state.snapshot;
+    if (snap == null) return;
+
+    try {
+      final result = await ref.read(journalRepositoryProvider).deletePhoto(snap.date);
+      state = state.copyWith(snapshot: result);
+    } catch (e) {
+      debugPrint('[Journal] deletePhoto error: $e');
+      throw e;
     }
   }
 }

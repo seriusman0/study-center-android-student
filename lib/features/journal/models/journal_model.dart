@@ -3,12 +3,14 @@ class BibleReading {
   final String pbPorsi;
   final bool plChecked;
   final bool pbChecked;
+  final int? dayNo;
 
   const BibleReading({
     required this.plPorsi,
     required this.pbPorsi,
     required this.plChecked,
     required this.pbChecked,
+    this.dayNo,
   });
 
   factory BibleReading.fromJson(Map<String, dynamic> j) => BibleReading(
@@ -16,13 +18,15 @@ class BibleReading {
         pbPorsi:   j['pb_porsi'] ?? '',
         plChecked: j['pl_checked'] == true,
         pbChecked: j['pb_checked'] == true,
+        dayNo:     j['day_no'] as int?,
       );
 
-  BibleReading copyWith({bool? plChecked, bool? pbChecked}) => BibleReading(
+  BibleReading copyWith({bool? plChecked, bool? pbChecked, int? dayNo}) => BibleReading(
         plPorsi: plPorsi,
         pbPorsi: pbPorsi,
         plChecked: plChecked ?? this.plChecked,
         pbChecked: pbChecked ?? this.pbChecked,
+        dayNo: dayNo ?? this.dayNo,
       );
 }
 
@@ -66,12 +70,14 @@ class JournalSnapshot {
   final String date;
   final BibleReading bible;
   final String? verseRef;
+  final String? photoUrl;
   final List<LifeItem> lifeItems;
 
   const JournalSnapshot({
     required this.date,
     required this.bible,
     this.verseRef,
+    this.photoUrl,
     required this.lifeItems,
   });
 
@@ -79,19 +85,28 @@ class JournalSnapshot {
         date:      j['date'] ?? '',
         bible:     BibleReading.fromJson(j['bible'] as Map<String, dynamic>),
         verseRef:  j['verse_ref'] as String?,
+        photoUrl:  _parsePhotoUrl(j),
         lifeItems: (j['life_items'] as List? ?? []).map((e) => LifeItem.fromJson(e)).toList(),
       );
+
+  static String? _parsePhotoUrl(Map<String, dynamic> j) {
+    final path = j['foto_belajar_url'] ?? j['foto_belajar'] ?? j['photo_url'] ?? j['foto_url'] ?? j['foto'] as String?;
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    return 'https://studycenter.nanoprojectdevindonesia.com/storage/$path';
+  }
 
   int get checkedCount {
     int c = 0;
     if (bible.plChecked) c++;
     if (bible.pbChecked) c++;
     if (verseRef != null && verseRef!.isNotEmpty) c++;
-    c += lifeItems.where((i) => i.checked).length;
+    if (photoUrl != null && photoUrl!.isNotEmpty) c++;
+    c += lifeItems.where((i) => i.checked && i.label != 'Baca Alkitab' && i.label != 'Hafal Ayat').length;
     return c;
   }
 
-  int get totalCount => 3 + lifeItems.length;
+  int get totalCount => 4 + lifeItems.where((i) => i.label != 'Baca Alkitab' && i.label != 'Hafal Ayat').length;
 
   Map<String, List<LifeItem>> get lifeItemsByKategori {
     final map = <String, List<LifeItem>>{};

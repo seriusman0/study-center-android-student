@@ -12,7 +12,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailCtrl = TextEditingController();
-  final _passCtrl  = TextEditingController();
+  final _passCtrl = TextEditingController();
   bool _obscure = true;
 
   @override
@@ -42,106 +42,311 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  void _toggleObscure() {
+    setState(() => _obscure = !_obscure);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(authProvider);
-
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 40),
-                Center(
-                  child: Image.asset('assets/images/logo.png', height: 80),
-                ),
-                const SizedBox(height: 40),
-                Semantics(
-                  label: 'Masuk',
-                  child: Text(
-                    'Masuk',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Semantics(
-                  label: 'Selamat datang kembali',
-                  child: Text(
-                    'Selamat datang kembali',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                if (state.error != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Text(state.error!, style: const TextStyle(color: Colors.red)),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                TextField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passCtrl,
-                  obscureText: _obscure,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscure = !_obscure),
-                    ),
-                  ),
-                  onSubmitted: (_) => _submit(),
-                ),
-                const SizedBox(height: 28),
-                Semantics(
-                  label: 'Masuk',
-                  button: true,
-                  child: ElevatedButton(
-                    onPressed: state.loading ? null : _submit,
-                    child: state.loading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Masuk'),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Belum punya akun? ',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.go('/register'),
-                      child: Text(
-                        'Daftar',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-              ],
+      appBar: const _LoginAppBar(),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0F766E), Color(0xFF0D9488)], // teal-700 to teal-600
+            ),
+          ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+              child: _LoginFormCard(
+                emailCtrl: _emailCtrl,
+                passCtrl: _passCtrl,
+                obscure: _obscure,
+                onToggleObscure: _toggleObscure,
+                onSubmit: _submit,
+              ),
             ),
           ),
         ),
+        ),
       ),
+    );
+  }
+}
+
+class _LoginAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _LoginAppBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Study Center ',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE0C020), fontSize: 18),
+          ),
+          Text(
+            'Nias',
+            style: TextStyle(fontWeight: FontWeight.normal, color: Colors.white.withOpacity(0.8), fontSize: 14),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {},
+          child: const Text('Masuk', style: TextStyle(color: Colors.white)),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0, top: 8, bottom: 8),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF97316),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              minimumSize: const Size(0, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            onPressed: () => context.go('/register'),
+            child: const Text('Daftar'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoginFormCard extends ConsumerWidget {
+  const _LoginFormCard({
+    required this.emailCtrl,
+    required this.passCtrl,
+    required this.obscure,
+    required this.onToggleObscure,
+    required this.onSubmit,
+  });
+
+  final TextEditingController emailCtrl;
+  final TextEditingController passCtrl;
+  final bool obscure;
+  final VoidCallback onToggleObscure;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(authProvider);
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 400),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Masuk',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Masuk ke akun Study Center Nias',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
+          ),
+          const SizedBox(height: 24),
+          const _GoogleLoginButton(),
+          const SizedBox(height: 24),
+          const _DividerAtau(),
+          const SizedBox(height: 24),
+          if (state.error != null) _ErrorBox(error: state.error!),
+          const Text('Email atau Username', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          TextField(
+            controller: emailCtrl,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(hintText: 'email@contoh.com / username'),
+          ),
+          const SizedBox(height: 16),
+          const Text('Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          Semantics(
+            identifier: 'passwordField',
+            textField: true,
+            child: TextField(
+              key: const Key('passwordField'),
+              controller: passCtrl,
+              obscureText: obscure,
+              textInputAction: TextInputAction.done,
+              decoration: InputDecoration(
+                hintText: 'Masukkan password',
+                suffixIcon: IconButton(
+                  icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                  onPressed: onToggleObscure,
+                ),
+              ),
+              onSubmitted: (_) => onSubmit(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _RememberMeCheckbox(),
+          const SizedBox(height: 24),
+          Semantics(
+            identifier: 'loginBtn',
+            button: true,
+            child: ElevatedButton(
+              onPressed: state.loading ? null : onSubmit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF97316),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: state.loading
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Login Sekarang', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const _DaftarLink(),
+        ],
+      ),
+    );
+  }
+}
+
+class _GoogleLoginButton extends StatelessWidget {
+  const _GoogleLoginButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      onPressed: () {},
+      icon: Image.network(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/512px-Google_%22G%22_logo.svg.png',
+        height: 20,
+      ),
+      label: const Text('Masuk dengan Google', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
+    );
+  }
+}
+
+class _DividerAtau extends StatelessWidget {
+  const _DividerAtau();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text('atau', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+        ),
+        const Expanded(child: Divider()),
+      ],
+    );
+  }
+}
+
+class _ErrorBox extends StatelessWidget {
+  const _ErrorBox({required this.error});
+  final String error;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.red.shade50,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.red.shade200),
+        ),
+        child: Text(
+          error,
+          style: const TextStyle(color: Colors.red),
+          maxLines: 5,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+}
+
+class _RememberMeCheckbox extends StatelessWidget {
+  const _RememberMeCheckbox();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          height: 24,
+          width: 24,
+          child: Checkbox(
+            value: false,
+            onChanged: (val) {},
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text('Ingat saya', style: TextStyle(color: Colors.grey[700], fontSize: 14)),
+      ],
+    );
+  }
+}
+
+class _DaftarLink extends StatelessWidget {
+  const _DaftarLink();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Belum punya akun? ',
+          style: TextStyle(color: Colors.grey[500], fontSize: 14),
+        ),
+        GestureDetector(
+          onTap: () => context.go('/register'),
+          child: Text(
+            'Daftar',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

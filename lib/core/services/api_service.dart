@@ -10,8 +10,8 @@ final dioProvider = Provider((ref) {
   final storage = ref.read(storageServiceProvider);
   final dio = Dio(BaseOptions(
     baseUrl: ApiConstants.baseUrl,
-    connectTimeout: const Duration(seconds: 15),
-    receiveTimeout: const Duration(seconds: 20),
+    connectTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
     headers: {'Accept': 'application/json'},
   ));
 
@@ -74,7 +74,16 @@ String extractErrorMessage(Object e) {
       final msg = data['message'] ?? data['error'];
       if (msg != null) return msg.toString();
     }
-    if (e.message != null && e.message!.isNotEmpty) return e.message!;
+    if (e.response != null) {
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 400) return 'Data yang dikirim tidak valid (400).';
+      if (statusCode == 401) return 'Email atau password salah.';
+      if (statusCode == 403) return 'Akses ditolak (403).';
+      if (statusCode == 404) return 'Layanan tidak ditemukan (404).';
+      if (statusCode == 500) return 'Terjadi kesalahan pada server (500).';
+      return 'Terjadi kesalahan HTTP ($statusCode).';
+    }
+    
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
@@ -83,7 +92,7 @@ String extractErrorMessage(Object e) {
       case DioExceptionType.connectionError:
         return 'Tidak dapat terhubung ke server.';
       default:
-        return 'Terjadi kesalahan jaringan.';
+        return 'Terjadi kesalahan jaringan atau koneksi.';
     }
   }
   return e.toString();

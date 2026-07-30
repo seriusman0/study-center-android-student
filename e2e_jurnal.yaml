@@ -1,0 +1,76 @@
+appId: com.studycenter.sc_student
+---
+# ─── LAUNCH ─────────────────────────────────────────────────────────────────────
+- stopApp
+- launchApp:
+    clearState: false
+
+# ─── BERANDA ───────────────────────────────────────────────────────────────────
+- extendedWaitUntil:
+    visible: ".*Jurnal Hari Ini.*"
+    timeout: 20000
+
+# ─── NAVIGASI KE JURNAL ────────────────────────────────────────────────────────
+- tapOn: "Jurnal.*"
+
+- extendedWaitUntil:
+    visible: ".*Baca Alkitab.*"
+    timeout: 20000
+
+# ─── PENGISIAN JURNAL HARI INI ────────────────────────────────────────────────────────
+- tapOn: "Perjanjian Lama"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn: "Perjanjian Baru"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ─── AYAT HAFALAN ────────────────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: ".*Ayat Hafalan.*"
+    direction: DOWN
+
+- tapOn: ".*Kitab.*"
+- inputText: "Yohanes"
+- tapOn: ".*Ayat Hafalan.*"
+- tapOn:
+    id: "pasalInput"
+- inputText: "3"
+- tapOn: ".*Ayat Hafalan.*"
+- tapOn:
+    id: "ayatInput"
+- inputText: "16"
+- tapOn: ".*Ayat Hafalan.*"
+- tapOn: ".*Simpan.*"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ─── FOTO BELAJAR ────────────────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: ".*Upload Foto.*"
+    direction: DOWN
+- tapOn: ".*Upload Foto.*"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: ".*Allow.*"
+    optional: true
+- tapOn:
+    text: ".*Izinkan.*"
+    optional: true
+- tapOn:
+    text: ".*While using the app.*"
+    optional: true
+- tapOn:
+    text: ".*Saat aplikasi digunakan.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    point: "30%, 30%"
+- extendedWaitUntil:
+    visible: ".*Ganti Foto.*"
+    timeout: 20000

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// Primary extracted from logo (navy/dark blue dominant)
-const Color kPrimary   = Color(0xFF1B3A6B);
-const Color kAccent    = Color(0xFF2E7D32);
+// Primary extracted from user request (Teal dominant matching web version)
+const Color kPrimary   = Color(0xFF0F766E); // Teal 700
+const Color kAccent    = Color(0xFFF97316); // Orange 500 accent like the web
 const Color kSurface   = Color(0xFFF8F9FA);
-const Color kBackground = Colors.white;
+const Color kBackground = Color(0xFFF3F4F6); // Gray background like the web
+
 
 ThemeData buildAppTheme() {
   final base = ThemeData(
@@ -23,18 +24,20 @@ ThemeData buildAppTheme() {
   return base.copyWith(
     textTheme: GoogleFonts.interTextTheme(base.textTheme),
     appBarTheme: const AppBarTheme(
-      backgroundColor: kBackground,
-      foregroundColor: kPrimary,
-      elevation: 0,
-      scrolledUnderElevation: 1,
+      backgroundColor: kPrimary,
+      foregroundColor: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black38,
+      scrolledUnderElevation: 4,
     ),
-    cardTheme: CardTheme(
-      elevation: 0,
+    cardTheme: CardThemeData(
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.4),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade100),
       ),
-      color: kSurface,
+      color: Colors.white,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -55,7 +58,7 @@ ThemeData buildAppTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: kPrimary,
+        backgroundColor: kAccent, // Orange
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(50),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

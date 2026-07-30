@@ -38,6 +38,24 @@ class JournalRepository {
     final statePayload = data['state'] ?? data;
     return JournalSnapshot.fromJson(statePayload as Map<String, dynamic>);
   }
+
+  Future<JournalSnapshot> uploadPhoto(List<int> bytes, String filename, String date) async {
+    final formData = FormData.fromMap({
+      'date': date,
+      'foto': MultipartFile.fromBytes(bytes, filename: filename),
+    });
+    final res = await _dio.post(ApiConstants.jurnalFoto, data: formData);
+    final data = res.data as Map<String, dynamic>;
+    final statePayload = data['state'] ?? data;
+    return JournalSnapshot.fromJson(statePayload as Map<String, dynamic>);
+  }
+
+  Future<JournalSnapshot> deletePhoto(String date) async {
+    final res = await _dio.delete(ApiConstants.jurnalFoto, data: {'date': date});
+    final data = res.data as Map<String, dynamic>;
+    final statePayload = data['state'] ?? data;
+    return JournalSnapshot.fromJson(statePayload as Map<String, dynamic>);
+  }
 }
 
 final journalRepositoryProvider =

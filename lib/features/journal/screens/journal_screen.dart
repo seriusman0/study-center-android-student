@@ -1,8 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../home/providers/home_provider.dart';
 import '../models/journal_model.dart';
@@ -40,7 +42,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jurnal'),
+        title: const Text('Jurnal Harian'),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
@@ -99,27 +101,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           _ProgressHeader(checked: snap.checkedCount, total: snap.totalCount, date: snap.date, streak: streak),
-          const SizedBox(height: 16),
-          _SectionCard(
-            number: '1',
-            title: 'Pembacaan Alkitab',
-            children: [
-              _CheckRow(
-                label: 'Perjanjian Lama',
-                checked: snap.bible.plChecked,
-                onTap: () => notifier.checkBible('pl', !snap.bible.plChecked),
-              ),
-              _CheckRow(
-                label: 'Perjanjian Baru',
-                checked: snap.bible.pbChecked,
-                onTap: () => notifier.checkBible('pb', !snap.bible.pbChecked),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _VerseSection(verseRef: snap.verseRef),
-          const SizedBox(height: 12),
           _LifeScheduleCard(snap: snap, notifier: notifier),
+          const SizedBox(height: 12),
+          _PhotoCard(snap: snap, notifier: notifier),
         ],
       ),
     );
@@ -140,55 +124,70 @@ class _ProgressHeader extends StatelessWidget {
     final progress = total > 0 ? checked / total : 0.0;
     final formatted = _formatDate(date);
 
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.primary.withOpacity(0.07),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(
-              child: Text(
-                'Jurnal $formatted',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F766E), Color(0xFF0D9488)], // Teal gradient
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4)),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(
+            child: Text(
+              'Jurnal $formatted',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            Text(
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
               '$checked/$total',
               style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-          ]),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: Colors.grey.shade200,
-            ),
           ),
-          if (streak != null && streak! > 0) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Text('🔥', style: TextStyle(fontSize: 14)),
-                const SizedBox(width: 4),
-                Text(
-                  'Streak $streak hari berturut-turut',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.orange.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
         ]),
-      ),
+        const SizedBox(height: 16),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            backgroundColor: Colors.white.withOpacity(0.2),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFDE047)), // Yellow accent
+          ),
+        ),
+        if (streak != null && streak! > 0) ...[
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              const Text('🔥', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 6),
+              Text(
+                'Streak $streak hari berturut-turut',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFFFDE047), // Yellow text
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ]),
     );
   }
 
@@ -227,7 +226,7 @@ class _LifeScheduleCard extends StatelessWidget {
             Container(
               width: 28, height: 28,
               decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(8)),
-              child: const Center(child: Text('3', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
+              child: const Center(child: Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
             ),
             const SizedBox(width: 8),
             Text('Jadwal Kehidupan', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
@@ -245,11 +244,16 @@ class _LifeScheduleCard extends StatelessWidget {
               ),
             ),
             for (final item in entry.value)
-              _CheckRow(
-                label: item.label,
-                checked: item.checked,
-                onTap: () => notifier.checkLife(item.id, !item.checked),
-              ),
+              if (item.label == 'Baca Alkitab')
+                _BibleReadingInline(snap: snap, notifier: notifier)
+              else if (item.label == 'Hafal Ayat')
+                _VerseInputInline(snap: snap, notifier: notifier)
+              else
+                _CheckRow(
+                  label: item.label,
+                  checked: item.checked,
+                  onTap: () => notifier.checkLife(item.id, !item.checked),
+                ),
           ],
         ]),
       ),
@@ -266,98 +270,75 @@ class _LifeScheduleCard extends StatelessWidget {
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  final String number;
-  final String title;
-  final List<Widget> children;
-
-  const _SectionCard({required this.number, required this.title, required this.children});
+class _BibleReadingInline extends StatelessWidget {
+  final JournalSnapshot snap;
+  final JournalNotifier notifier;
+  const _BibleReadingInline({required this.snap, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Container(
-                width: 28, height: 28,
-                decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(8)),
-                child: Center(child: Text(number, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
-              ),
-              const SizedBox(width: 8),
-              Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            ]),
-            const SizedBox(height: 10),
-            const Divider(height: 1),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CheckRow extends StatelessWidget {
-  final String label;
-  final bool checked;
-  final VoidCallback onTap;
-
-  const _CheckRow({required this.label, required this.checked, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(children: [
-          Checkbox(
-            value: checked,
-            onChanged: (_) => onTap(),
-            visualDensity: VisualDensity.compact,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                label,
-                style: TextStyle(
-                  decoration: checked ? TextDecoration.lineThrough : null,
-                  color: checked ? Colors.grey : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('Baca Alkitab', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              if (snap.bible.dayNo != null)
+                Text(
+                  ' — Hari ke-${snap.bible.dayNo}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
-              ),
-            ]),
+            ],
           ),
-        ]),
+          const SizedBox(height: 8),
+          _CheckRow(
+            label: 'Perjanjian Lama',
+            subtitle: snap.bible.plPorsi.isNotEmpty ? snap.bible.plPorsi : '—',
+            checked: snap.bible.plChecked,
+            onTap: () => notifier.checkBible('pl', !snap.bible.plChecked),
+          ),
+          _CheckRow(
+            label: 'Perjanjian Baru',
+            subtitle: snap.bible.pbPorsi.isNotEmpty ? snap.bible.pbPorsi : '—',
+            checked: snap.bible.pbChecked,
+            onTap: () => notifier.checkBible('pb', !snap.bible.pbChecked),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _VerseInputCard extends StatefulWidget {
-  final String? initialRef;
-  final Future<void> Function(String?) onSave;
-
-  const _VerseInputCard({this.initialRef, required this.onSave});
+class _VerseInputInline extends StatefulWidget {
+  final JournalSnapshot snap;
+  final JournalNotifier notifier;
+  const _VerseInputInline({required this.snap, required this.notifier});
 
   @override
-  State<_VerseInputCard> createState() => _VerseInputCardState();
+  State<_VerseInputInline> createState() => _VerseInputInlineState();
 }
 
-class _VerseInputCardState extends State<_VerseInputCard> {
-  late final TextEditingController _kitab;
+const _bibleBooks = [
+  'Kejadian', 'Keluaran', 'Imamat', 'Bilangan', 'Ulangan', 'Yosua', 'Hakim-hakim', 'Rut',
+  '1 Samuel', '2 Samuel', '1 Raja-raja', '2 Raja-raja', '1 Tawarikh', '2 Tawarikh', 'Ezra',
+  'Nehemia', 'Ester', 'Ayub', 'Mazmur', 'Amsal', 'Pengkhotbah', 'Kidung Agung', 'Yesaya',
+  'Yeremia', 'Ratapan', 'Yehezkiel', 'Daniel', 'Hosea', 'Yoel', 'Amos', 'Obaja', 'Yunus',
+  'Mikha', 'Nahum', 'Habakuk', 'Zefanya', 'Hagai', 'Zakharia', 'Maleakhi',
+  'Matius', 'Markus', 'Lukas', 'Yohanes', 'Kisah Para Rasul', 'Roma', '1 Korintus', '2 Korintus',
+  'Galatia', 'Efesus', 'Filipi', 'Kolose', '1 Tesalonika', '2 Tesalonika', '1 Timotius', '2 Timotius',
+  'Titus', 'Filemon', 'Ibrani', 'Yakobus', '1 Petrus', '2 Petrus', '1 Yohanes', '2 Yohanes',
+  '3 Yohanes', 'Yudas', 'Wahyu'
+];
+
+class _VerseInputInlineState extends State<_VerseInputInline> {
+  String? _selectedKitab;
   late final TextEditingController _pasal;
   late final TextEditingController _ayat;
   String _savedLabel = '';
@@ -365,22 +346,22 @@ class _VerseInputCardState extends State<_VerseInputCard> {
   @override
   void initState() {
     super.initState();
-    final ref = widget.initialRef ?? '';
+    final ref = widget.snap.verseRef ?? '';
     final parsed = _parseRef(ref);
-    _kitab = TextEditingController(text: parsed.$1);
+    _selectedKitab = parsed.$1.isNotEmpty && _bibleBooks.contains(parsed.$1) ? parsed.$1 : null;
     _pasal = TextEditingController(text: parsed.$2);
     _ayat  = TextEditingController(text: parsed.$3);
     _savedLabel = ref;
   }
 
   @override
-  void didUpdateWidget(_VerseInputCard old) {
+  void didUpdateWidget(_VerseInputInline old) {
     super.didUpdateWidget(old);
-    final newRef = widget.initialRef ?? '';
+    final newRef = widget.snap.verseRef ?? '';
     if (newRef != _savedLabel && newRef.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _kitab.clear(); _pasal.clear(); _ayat.clear();
+          _selectedKitab = null; _pasal.clear(); _ayat.clear();
           setState(() => _savedLabel = '');
         }
       });
@@ -394,87 +375,89 @@ class _VerseInputCardState extends State<_VerseInputCard> {
   }
 
   Future<void> _save() async {
-    final k = _kitab.text.trim();
+    final k = _selectedKitab ?? '';
     final p = _pasal.text.trim();
     final a = _ayat.text.trim();
     if (k.isEmpty || p.isEmpty || a.isEmpty) return;
     final ref = '$k $p:$a';
     if (ref == _savedLabel) return;
     _savedLabel = ref;
-    await widget.onSave(ref);
+    await widget.notifier.saveVerseRef(ref);
     if (mounted) setState(() {});
   }
 
   Future<void> _clear() async {
-    _kitab.clear(); _pasal.clear(); _ayat.clear();
+    _selectedKitab = null; _pasal.clear(); _ayat.clear();
     _savedLabel = '';
-    await widget.onSave(null);
+    await widget.notifier.saveVerseRef(null);
     if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _kitab.dispose(); _pasal.dispose(); _ayat.dispose();
+    _pasal.dispose(); _ayat.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasInput = _selectedKitab != null || _pasal.text.isNotEmpty || _ayat.text.isNotEmpty;
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final hasInput = _kitab.text.isNotEmpty || _pasal.text.isNotEmpty || _ayat.text.isNotEmpty;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              width: 28, height: 28,
-              decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(8)),
-              child: const Center(child: Text('2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
-            ),
-            const SizedBox(width: 8),
-            Text('Hafal Ayat Mingguan', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-          ]),
-          const SizedBox(height: 10),
-          const Divider(height: 1),
-          const SizedBox(height: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Hafal Ayat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          const SizedBox(height: 8),
           Text(
             'Pilih satu ayat dari porsi bacaan hari ini.',
             style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _kitab,
-            textCapitalization: TextCapitalization.words,
-            decoration: _inputDeco('Kitab (cth. Yohanes)'),
-            onEditingComplete: _save,
+          DropdownButtonFormField<String>(
+            value: _selectedKitab,
+            decoration: _inputDeco('Pilih Kitab'),
+            isExpanded: true,
+            menuMaxHeight: 300,
+            items: _bibleBooks.map((b) => DropdownMenuItem(value: b, child: Text(b))).toList(),
+            onChanged: (val) {
+              setState(() => _selectedKitab = val);
+            },
           ),
           const SizedBox(height: 8),
           Row(children: [
             Expanded(
-              child: TextField(
-                controller: _pasal,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: _inputDeco('Pasal'),
-                onEditingComplete: _save,
+              child: Semantics(
+                identifier: 'pasalInput',
+                textField: true,
+                child: TextField(
+                  controller: _pasal,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: _inputDeco('Pasal'),
+                  onEditingComplete: _save,
+                ),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: TextField(
-                controller: _ayat,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: _inputDeco('Ayat'),
-                onEditingComplete: _save,
+              child: Semantics(
+                identifier: 'ayatInput',
+                textField: true,
+                child: TextField(
+                  controller: _ayat,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: _inputDeco('Ayat'),
+                  onEditingComplete: _save,
+                ),
               ),
             ),
           ]),
@@ -508,7 +491,7 @@ class _VerseInputCardState extends State<_VerseInputCard> {
                 ),
             ]),
           ]),
-        ]),
+        ],
       ),
     );
   }
@@ -525,14 +508,131 @@ class _VerseInputCardState extends State<_VerseInputCard> {
       );
 }
 
-class _VerseSection extends StatelessWidget {
-  final String? verseRef;
-  const _VerseSection({this.verseRef});
+// Deleted duplicate _SectionCard and _VerseInputCard components
+
+class _CheckRow extends StatelessWidget {
+  final String label;
+  final String? subtitle;
+  final bool checked;
+  final VoidCallback onTap;
+
+  const _CheckRow({required this.label, this.subtitle, required this.checked, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Checkbox(
+                value: checked,
+                onChanged: (_) => onTap(),
+                visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                  ),
+                ],
+              ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _PhotoCard extends StatefulWidget {
+  final JournalSnapshot snap;
+  final JournalNotifier notifier;
+
+  const _PhotoCard({required this.snap, required this.notifier});
+
+  @override
+  State<_PhotoCard> createState() => _PhotoCardState();
+}
+
+class _PhotoCardState extends State<_PhotoCard> {
+  final ImagePicker _picker = ImagePicker();
+  bool _uploading = false;
+
+  Future<void> _pickAndUpload() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
+      if (image == null) return;
+      
+      setState(() => _uploading = true);
+      await widget.notifier.uploadPhoto(image);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  Future<void> _removePhoto() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Foto?'),
+        content: const Text('Yakin ingin menghapus foto ini?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Hapus', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (ok == true) {
+      setState(() => _uploading = true);
+      try {
+        await widget.notifier.deletePhoto();
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      } finally {
+        if (mounted) setState(() => _uploading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final hasPhoto = widget.snap.photoUrl != null && widget.snap.photoUrl!.isNotEmpty;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -549,19 +649,57 @@ class _VerseSection extends StatelessWidget {
               child: const Center(child: Text('2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
             ),
             const SizedBox(width: 8),
-            Text('Hafal Ayat Mingguan', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+            Text('Foto Saat Belajar', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(width: 4),
+            Text('(opsional)', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
           ]),
           const SizedBox(height: 10),
           const Divider(height: 1),
           const SizedBox(height: 12),
-          if (verseRef != null && verseRef!.isNotEmpty)
-            Row(children: [
-              const Icon(Icons.check_circle, size: 16, color: Colors.green),
-              const SizedBox(width: 8),
-              Text(verseRef!, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-            ])
-          else
-            Text('Belum ada ayat hafalan hari ini.', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500])),
+          
+          if (hasPhoto)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    widget.snap.photoUrl!,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (_uploading) const CircularProgressIndicator(),
+              ],
+            ),
+            
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ElevatedButton.icon(
+                onPressed: _uploading ? null : _pickAndUpload,
+                icon: const Icon(Icons.photo_camera, size: 18),
+                label: Text(hasPhoto ? 'Ganti Foto' : 'Upload Foto'),
+                style: ElevatedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  backgroundColor: theme.colorScheme.primary, // Teal button
+                ),
+              ),
+              if (hasPhoto)
+                TextButton.icon(
+                  onPressed: _uploading ? null : _removePhoto,
+                  icon: const Icon(Icons.delete, size: 18),
+                  label: const Text('Hapus'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+            ],
+          ),
         ]),
       ),
     );
