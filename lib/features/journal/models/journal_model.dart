@@ -4,6 +4,8 @@ class BibleReading {
   final bool plChecked;
   final bool pbChecked;
   final int? dayNo;
+  final String? plText;
+  final String? pbText;
 
   const BibleReading({
     required this.plPorsi,
@@ -11,23 +13,39 @@ class BibleReading {
     required this.plChecked,
     required this.pbChecked,
     this.dayNo,
+    this.plText,
+    this.pbText,
   });
 
-  factory BibleReading.fromJson(Map<String, dynamic> j) => BibleReading(
+  factory BibleReading.fromJson(
+    Map<String, dynamic> j, {
+    int? dayNo,
+    Map<String, dynamic>? collegeBible,
+  }) =>
+      BibleReading(
         plPorsi:   j['pl_porsi'] ?? '',
         pbPorsi:   j['pb_porsi'] ?? '',
         plChecked: j['pl_checked'] == true,
         pbChecked: j['pb_checked'] == true,
-        dayNo:     j['day_no'] as int?,
+        dayNo:     dayNo,
+        plText:    collegeBible?['pl_text'] as String?,
+        pbText:    collegeBible?['pb_text'] as String?,
       );
 
-  BibleReading copyWith({bool? plChecked, bool? pbChecked, int? dayNo}) => BibleReading(
-        plPorsi: plPorsi,
-        pbPorsi: pbPorsi,
+  BibleReading copyWith({bool? plChecked, bool? pbChecked}) => BibleReading(
+        plPorsi:   plPorsi,
+        pbPorsi:   pbPorsi,
         plChecked: plChecked ?? this.plChecked,
         pbChecked: pbChecked ?? this.pbChecked,
-        dayNo: dayNo ?? this.dayNo,
+        dayNo:     dayNo,
+        plText:    plText,
+        pbText:    pbText,
       );
+
+  String get collegePorsiHint {
+    final parts = [if (plText?.isNotEmpty == true) plText!, if (pbText?.isNotEmpty == true) pbText!];
+    return parts.isNotEmpty ? parts.join(' / ') : '';
+  }
 }
 
 class LifeItem {
@@ -83,7 +101,11 @@ class JournalSnapshot {
 
   factory JournalSnapshot.fromJson(Map<String, dynamic> j) => JournalSnapshot(
         date:      j['date'] ?? '',
-        bible:     BibleReading.fromJson(j['bible'] as Map<String, dynamic>),
+        bible:     BibleReading.fromJson(
+          j['bible'] as Map<String, dynamic>,
+          dayNo: j['day_no'] as int?,
+          collegeBible: j['college_bible'] as Map<String, dynamic>?,
+        ),
         verseRef:  j['verse_ref'] as String?,
         photoUrl:  _parsePhotoUrl(j),
         lifeItems: (j['life_items'] as List? ?? []).map((e) => LifeItem.fromJson(e)).toList(),

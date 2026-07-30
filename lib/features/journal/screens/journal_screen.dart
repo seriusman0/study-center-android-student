@@ -100,7 +100,16 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          _ProgressHeader(checked: snap.checkedCount, total: snap.totalCount, date: snap.date, streak: streak),
+          _ProgressHeader(
+            checked: snap.checkedCount,
+            total: snap.totalCount,
+            date: snap.date,
+            streak: streak,
+            isToday: state.isToday,
+            onPrev: () => notifier.goToPrevDay(),
+            onNext: state.isToday ? null : () => notifier.goToNextDay(),
+            onToday: state.isToday ? null : () => notifier.goToToday(),
+          ),
           _LifeScheduleCard(snap: snap, notifier: notifier),
           const SizedBox(height: 12),
           _PhotoCard(snap: snap, notifier: notifier),
@@ -115,8 +124,21 @@ class _ProgressHeader extends StatelessWidget {
   final int total;
   final String date;
   final int? streak;
+  final bool isToday;
+  final VoidCallback onPrev;
+  final VoidCallback? onNext;
+  final VoidCallback? onToday;
 
-  const _ProgressHeader({required this.checked, required this.total, required this.date, this.streak});
+  const _ProgressHeader({
+    required this.checked,
+    required this.total,
+    required this.date,
+    this.streak,
+    required this.isToday,
+    required this.onPrev,
+    this.onNext,
+    this.onToday,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +149,7 @@ class _ProgressHeader extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0F766E), Color(0xFF0D9488)], // Teal gradient
+          colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -145,6 +167,42 @@ class _ProgressHeader extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
+          // Date navigation buttons
+          _NavBtn(icon: Icons.chevron_left, onTap: onPrev),
+          const SizedBox(width: 4),
+          _NavBtn(icon: Icons.chevron_right, onTap: onNext),
+          if (onToday != null) ...[
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: onToday,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF97316),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Hari ini',
+                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ]),
+        const SizedBox(height: 12),
+        Row(children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: Colors.white.withOpacity(0.2),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFDE047)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -160,16 +218,6 @@ class _ProgressHeader extends StatelessWidget {
             ),
           ),
         ]),
-        const SizedBox(height: 16),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-            value: progress,
-            minHeight: 8,
-            backgroundColor: Colors.white.withOpacity(0.2),
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFDE047)), // Yellow accent
-          ),
-        ),
         if (streak != null && streak! > 0) ...[
           const SizedBox(height: 14),
           Row(
@@ -179,7 +227,7 @@ class _ProgressHeader extends StatelessWidget {
               Text(
                 'Streak $streak hari berturut-turut',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFFFDE047), // Yellow text
+                  color: const Color(0xFFFDE047),
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -198,6 +246,33 @@ class _ProgressHeader extends StatelessWidget {
     } catch (_) {
       return date;
     }
+  }
+}
+
+class _NavBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _NavBtn({required this.icon, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = onTap == null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32, height: 32,
+        decoration: BoxDecoration(
+          color: disabled ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: disabled ? Colors.white.withOpacity(0.3) : Colors.white,
+          size: 20,
+        ),
+      ),
+    );
   }
 }
 
@@ -300,13 +375,17 @@ class _BibleReadingInline extends StatelessWidget {
           const SizedBox(height: 8),
           _CheckRow(
             label: 'Perjanjian Lama',
-            subtitle: snap.bible.plPorsi.isNotEmpty ? snap.bible.plPorsi : '—',
+            subtitle: snap.bible.plText?.isNotEmpty == true
+                ? snap.bible.plText
+                : (snap.bible.plPorsi.isNotEmpty ? snap.bible.plPorsi : null),
             checked: snap.bible.plChecked,
             onTap: () => notifier.checkBible('pl', !snap.bible.plChecked),
           ),
           _CheckRow(
             label: 'Perjanjian Baru',
-            subtitle: snap.bible.pbPorsi.isNotEmpty ? snap.bible.pbPorsi : '—',
+            subtitle: snap.bible.pbText?.isNotEmpty == true
+                ? snap.bible.pbText
+                : (snap.bible.pbPorsi.isNotEmpty ? snap.bible.pbPorsi : null),
             checked: snap.bible.pbChecked,
             onTap: () => notifier.checkBible('pb', !snap.bible.pbChecked),
           ),
@@ -403,6 +482,7 @@ class _VerseInputInlineState extends State<_VerseInputInline> {
   Widget build(BuildContext context) {
     final hasInput = _selectedKitab != null || _pasal.text.isNotEmpty || _ayat.text.isNotEmpty;
     final theme = Theme.of(context);
+    final hint = widget.snap.bible.collegePorsiHint;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -417,7 +497,7 @@ class _VerseInputInlineState extends State<_VerseInputInline> {
           const Text('Hafal Ayat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const SizedBox(height: 8),
           Text(
-            'Pilih satu ayat dari porsi bacaan hari ini.',
+            hint.isNotEmpty ? 'Dari porsi hari ini: $hint' : 'Pilih satu ayat dari porsi bacaan hari ini.',
             style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 12),
@@ -508,8 +588,6 @@ class _VerseInputInlineState extends State<_VerseInputInline> {
       );
 }
 
-// Deleted duplicate _SectionCard and _VerseInputCard components
-
 class _CheckRow extends StatelessWidget {
   final String label;
   final String? subtitle;
@@ -591,7 +669,7 @@ class _PhotoCardState extends State<_PhotoCard> {
         imageQuality: 80,
       );
       if (image == null) return;
-      
+
       setState(() => _uploading = true);
       await widget.notifier.uploadPhoto(image);
     } catch (e) {
@@ -656,7 +734,7 @@ class _PhotoCardState extends State<_PhotoCard> {
           const SizedBox(height: 10),
           const Divider(height: 1),
           const SizedBox(height: 12),
-          
+
           if (hasPhoto)
             Stack(
               alignment: Alignment.center,
@@ -673,7 +751,7 @@ class _PhotoCardState extends State<_PhotoCard> {
                 if (_uploading) const CircularProgressIndicator(),
               ],
             ),
-            
+
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -685,7 +763,7 @@ class _PhotoCardState extends State<_PhotoCard> {
                 label: Text(hasPhoto ? 'Ganti Foto' : 'Upload Foto'),
                 style: ElevatedButton.styleFrom(
                   visualDensity: VisualDensity.compact,
-                  backgroundColor: theme.colorScheme.primary, // Teal button
+                  backgroundColor: theme.colorScheme.primary,
                 ),
               ),
               if (hasPhoto)

@@ -9,10 +9,12 @@ class JournalRepository {
 
   const JournalRepository(this._dio);
 
-  Future<JournalSnapshot> today() async {
-    final res = await _dio.get(ApiConstants.jurnalToday);
+  Future<JournalSnapshot> today({String? date}) async {
+    final res = await _dio.get(
+      ApiConstants.jurnalToday,
+      queryParameters: date != null ? {'date': date} : null,
+    );
     final data = res.data;
-    // API may return data directly or wrapped in a 'data' key
     final payload = (data is Map && data.containsKey('data') && data['data'] is Map)
         ? data['data'] as Map<String, dynamic>
         : data as Map<String, dynamic>;
@@ -34,7 +36,6 @@ class JournalRepository {
       if (date != null) 'date': date,
     });
     final data = res.data as Map<String, dynamic>;
-    // Return updated snapshot from 'state' key or the data itself
     final statePayload = data['state'] ?? data;
     return JournalSnapshot.fromJson(statePayload as Map<String, dynamic>);
   }
