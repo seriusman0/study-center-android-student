@@ -1,4 +1,5 @@
 appId: com.studycenter.sc_student
+name: "Config - Smoke check app launches"
 ---
 # Study Center Student App — Maestro E2E Configuration
 #
@@ -26,3 +27,6 @@ appId: com.studycenter.sc_student
 # Environment variables you can override:
 #   STUDENT_EMAIL     (default: test@studycenter.test)
 #   STUDENT_PASSWORD  (default: password123)
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000

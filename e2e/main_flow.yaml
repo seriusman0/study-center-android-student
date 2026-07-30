@@ -1,0 +1,119 @@
+appId: com.studycenter.sc_student
+name: "Full E2E — Login sekali, test semua fitur student"
+---
+
+# ═══════════════════════════════════════════════════════════════
+# LAUNCH & LOGIN (hanya sekali)
+# ═══════════════════════════════════════════════════════════════
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+
+- tapOn: "Email"
+- inputText: "test@studycenter.test"
+
+- tapOn: "Password"
+- inputText: "password123"
+
+- tapOn:
+    text: "Masuk"
+    index: 0
+
+# Verifikasi berhasil masuk — gunakan teks konten yang accessible
+- extendedWaitUntil:
+    visible: "Artikel Terbaru"
+    timeout: 20000
+
+- assertVisible: "Galeri Kegiatan"
+- takeScreenshot: "01_beranda_setelah_login"
+
+# ═══════════════════════════════════════════════════════════════
+# FITUR: BERANDA — scroll lihat semua konten
+# ═══════════════════════════════════════════════════════════════
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: "01b_beranda_scroll"
+
+# ═══════════════════════════════════════════════════════════════
+# FITUR: JURNAL — tab ke-2 (koordinat karena label tidak accessible)
+# ═══════════════════════════════════════════════════════════════
+- tapOn:
+    point: "270,1433"
+
+- extendedWaitUntil:
+    visible: "Perjanjian Lama"
+    timeout: 20000
+
+- assertVisible: "Perjanjian Baru"
+- assertVisible: "Baca Alkitab"
+- takeScreenshot: "02_jurnal_today"
+
+# Centang PL
+- tapOn: "Perjanjian Lama"
+- waitForAnimationToEnd
+- takeScreenshot: "02b_jurnal_pl_checked"
+
+# Centang PB
+- tapOn: "Perjanjian Baru"
+- waitForAnimationToEnd
+- takeScreenshot: "02c_jurnal_pb_checked"
+
+# ═══════════════════════════════════════════════════════════════
+# FITUR: LAPORAN — tab ke-3
+# ═══════════════════════════════════════════════════════════════
+- tapOn:
+    point: "450,1433"
+
+- extendedWaitUntil:
+    visible: "Matriks Harian"
+    timeout: 20000
+
+- takeScreenshot: "03_laporan"
+
+# ═══════════════════════════════════════════════════════════════
+# FITUR: PROFIL — tab ke-4
+# ═══════════════════════════════════════════════════════════════
+- tapOn:
+    point: "630,1433"
+
+- extendedWaitUntil:
+    visible: "Keluar"
+    timeout: 10000
+
+- assertVisible: "Keluar"
+- takeScreenshot: "04_profil"
+
+# ═══════════════════════════════════════════════════════════════
+# FITUR: KEMBALI KE BERANDA — tab ke-1
+# ═══════════════════════════════════════════════════════════════
+- tapOn:
+    point: "90,1433"
+
+- extendedWaitUntil:
+    visible: "Artikel Terbaru"
+    timeout: 10000
+
+- takeScreenshot: "05_beranda_kembali"
+
+# ═══════════════════════════════════════════════════════════════
+# FITUR: LOGOUT dari profil
+# ═══════════════════════════════════════════════════════════════
+- tapOn:
+    point: "630,1433"
+
+- extendedWaitUntil:
+    visible: "Keluar"
+    timeout: 10000
+
+- tapOn: "Keluar"
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 10000
+
+- assertVisible: "Email"
+- takeScreenshot: "06_logout_sukses"
