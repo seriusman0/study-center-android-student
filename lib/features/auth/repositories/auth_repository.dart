@@ -15,9 +15,9 @@ class AuthRepository {
 
   const AuthRepository(this._dio, this._storage);
 
-  Future<UserModel> login(String email, String password) async {
+  Future<UserModel> login(String login, String password) async {
     final response = await _dio.post(ApiConstants.login, data: {
-      'email': email,
+      'login': login,
       'password': password,
     });
 

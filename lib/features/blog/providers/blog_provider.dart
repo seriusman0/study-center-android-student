@@ -61,19 +61,7 @@ class BlogDetailNotifier
           .read(blogRepositoryProvider)
           .postComment(blogId: state.blog!.id, body: body);
       final updatedComments = [...state.blog!.comments, comment];
-      final updatedBlog = BlogDetail(
-        id:           state.blog!.id,
-        title:        state.blog!.title,
-        slug:         state.blog!.slug,
-        image:        state.blog!.image,
-        body:         state.blog!.body,
-        publishedAt:  state.blog!.publishedAt,
-        authorName:   state.blog!.authorName,
-        authorAvatar: state.blog!.authorAvatar,
-        cabangNama:   state.blog!.cabangNama,
-        comments:     updatedComments,
-      );
-      state = BlogDetailState(blog: updatedBlog);
+      state = BlogDetailState(blog: state.blog!.copyWithComments(updatedComments));
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -87,19 +75,7 @@ class BlogDetailNotifier
       await ref.read(blogRepositoryProvider).deleteComment(commentId);
       final updatedComments =
           state.blog!.comments.where((c) => c.id != commentId).toList();
-      final updatedBlog = BlogDetail(
-        id:           state.blog!.id,
-        title:        state.blog!.title,
-        slug:         state.blog!.slug,
-        image:        state.blog!.image,
-        body:         state.blog!.body,
-        publishedAt:  state.blog!.publishedAt,
-        authorName:   state.blog!.authorName,
-        authorAvatar: state.blog!.authorAvatar,
-        cabangNama:   state.blog!.cabangNama,
-        comments:     updatedComments,
-      );
-      state = state.copyWith(blog: updatedBlog);
+      state = state.copyWith(blog: state.blog!.copyWithComments(updatedComments));
     } catch (e) {
       state = state.copyWith(error: extractErrorMessage(e));
     }
@@ -145,6 +121,7 @@ class BlogCreateNotifier
   Future<bool> create({
     required String title,
     required String body,
+    required int cabangId,
     String? imageUrl,
   }) async {
     state = state.copyWith(loading: true, clearError: true);
@@ -152,6 +129,7 @@ class BlogCreateNotifier
       final slug = await ref.read(blogRepositoryProvider).createBlog(
             title:    title,
             body:     body,
+            cabangId: cabangId,
             imageUrl: imageUrl,
           );
       state = BlogCreateState(createdSlug: slug);

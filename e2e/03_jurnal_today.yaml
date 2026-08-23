@@ -8,13 +8,14 @@ appId: com.studycenter.sc_student
 
 # ---- Login first ----
 - assertVisible: "Masuk"
-- tapOn: "Email"
+- tapOn: "email@contoh.com / username"
+- eraseText
 - inputText: "test@studycenter.test"
-- tapOn: "Password"
+- tapOn: "Masukkan password"
+- eraseText
 - inputText: "password123"
-- tapOn:
-    text: "Masuk"
-    index: 0
+- hideKeyboard
+- tapOn: "Login Sekarang"
 
 - extendedWaitUntil:
     visible: "Beranda"
@@ -30,7 +31,7 @@ appId: com.studycenter.sc_student
 # ---- Verify key sections are visible ----
 - assertVisible: "Perjanjian Lama"
 - assertVisible: "Perjanjian Baru"
-- assertVisible: "Ayat Hafalan"
+- assertVisible: "Hafal Ayat"
 
 - takeScreenshot: "03_jurnal_bible_section"
 
@@ -51,10 +52,10 @@ appId: com.studycenter.sc_student
 
 # ---- Test: Ayat Hafalan section ----
 - scrollUntilVisible:
-    element: "Ayat Hafalan"
+    element: "Hafal Ayat"
     direction: DOWN
 
-- assertVisible: "Ayat Hafalan"
+- assertVisible: "Hafal Ayat"
 - takeScreenshot: "03_jurnal_verse_section"
 
 # ---- Test: Check a life item ----
@@ -65,17 +66,18 @@ appId: com.studycenter.sc_student
 - assertVisible: "Jadwal Kehidupan"
 - takeScreenshot: "03_jurnal_life_section"
 
-# Tap the first visible life item
+# Tap the first visible life item (default seeded label — see
+# docs/android-api-reference.md § JurnalLifeItem defaults)
 - scrollUntilVisible:
-    element: "Berdoa pagi"
+    element: "Mengawali hari dengan berdoa"
     direction: DOWN
 
-- tapOn: "Berdoa pagi"
+- tapOn: "Mengawali hari dengan berdoa"
 - waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_life_item_checked"
 
 # Uncheck the same item
-- tapOn: "Berdoa pagi"
+- tapOn: "Mengawali hari dengan berdoa"
 - waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_life_item_unchecked"
 

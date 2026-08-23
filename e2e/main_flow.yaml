@@ -12,15 +12,16 @@ name: "Full E2E — Login sekali, test semua fitur student"
     visible: "Masuk"
     timeout: 15000
 
-- tapOn: "Email"
+- tapOn: "email@contoh.com / username"
+- eraseText
 - inputText: "test@studycenter.test"
 
-- tapOn: "Password"
+- tapOn: "Masukkan password"
+- eraseText
 - inputText: "password123"
+- hideKeyboard
 
-- tapOn:
-    text: "Masuk"
-    index: 0
+- tapOn: "Login Sekarang"
 
 # Verifikasi berhasil masuk — gunakan teks konten yang accessible
 - extendedWaitUntil:
@@ -43,6 +44,8 @@ name: "Full E2E — Login sekali, test semua fitur student"
 - tapOn:
     point: "270,1433"
 
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
     visible: "Perjanjian Lama"
     timeout: 20000
@@ -115,5 +118,5 @@ name: "Full E2E — Login sekali, test semua fitur student"
     visible: "Masuk"
     timeout: 10000
 
-- assertVisible: "Email"
+- assertVisible: "Email atau Username"
 - takeScreenshot: "06_logout_sukses"

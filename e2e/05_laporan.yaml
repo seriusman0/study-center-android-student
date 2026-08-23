@@ -8,13 +8,14 @@ appId: com.studycenter.sc_student
 
 # ---- Login ----
 - assertVisible: "Masuk"
-- tapOn: "Email"
+- tapOn: "email@contoh.com / username"
+- eraseText
 - inputText: "test@studycenter.test"
-- tapOn: "Password"
+- tapOn: "Masukkan password"
+- eraseText
 - inputText: "password123"
-- tapOn:
-    text: "Masuk"
-    index: 0
+- hideKeyboard
+- tapOn: "Login Sekarang"
 
 - extendedWaitUntil:
     visible: "Beranda"

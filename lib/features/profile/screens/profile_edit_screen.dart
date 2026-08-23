@@ -28,17 +28,21 @@ class _EditNotifier extends AutoDisposeNotifier<_EditState> {
   @override
   _EditState build() => const _EditState();
 
+  /// NOTE: The backend's PUT /profile endpoint (ProfileController::update)
+  /// does NOT accept a `password` field at all — there is no change-password
+  /// API. Only `name`, `bio`, `cabang_id`, `avatar`, `profile_public`,
+  /// `cv_enabled`, `social_links` are validated/persisted. Sending a
+  /// `password` field here would be silently dropped by Laravel's
+  /// validate() (unknown fields are ignored), giving the user a false
+  /// impression their password changed. Password change is therefore not
+  /// exposed until the backend adds that endpoint.
   Future<bool> save({
     required String name,
-    String? password,
   }) async {
     state = const _EditState(loading: true);
     try {
       final dio = ref.read(dioProvider);
-      final body = <String, dynamic>{
-        'name': name,
-        if (password != null && password.isNotEmpty) 'password': password,
-      };
+      final body = <String, dynamic>{'name': name};
       final res = await dio.put(ApiConstants.profile, data: body);
       final data = res.data as Map<String, dynamic>;
       final userJson = (data['user'] ?? data) as Map<String, dynamic>;
@@ -70,8 +74,6 @@ class ProfileEditScreen extends ConsumerStatefulWidget {
 class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   final _formKey  = GlobalKey<FormState>();
   late final TextEditingController _nameCtrl;
-  final _passCtrl = TextEditingController();
-  bool _obscure   = true;
 
   @override
   void initState() {
@@ -83,7 +85,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _passCtrl.dispose();
     super.dispose();
   }
 
@@ -92,8 +93,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     FocusScope.of(context).unfocus();
 
     final ok = await ref.read(_editProvider.notifier).save(
-          name:     _nameCtrl.text.trim(),
-          password: _passCtrl.text.isEmpty ? null : _passCtrl.text,
+          name: _nameCtrl.text.trim(),
         );
 
     if (ok && mounted) {
@@ -107,7 +107,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(_editProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Profil')),
@@ -146,33 +145,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     }
                     return null;
                   },
-                ),
-                const SizedBox(height: 14),
-
-                TextFormField(
-                  controller: _passCtrl,
-                  obscureText: _obscure,
-                  decoration: InputDecoration(
-                    labelText: 'Password Baru (opsional)',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscure = !_obscure),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v != null && v.isNotEmpty && v.length < 8) {
-                      return 'Password minimal 8 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Kosongkan jika tidak ingin mengubah password.',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey[500]),
                 ),
                 const SizedBox(height: 32),
 

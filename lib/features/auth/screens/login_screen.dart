@@ -181,11 +181,16 @@ class _LoginFormCard extends ConsumerWidget {
           if (state.error != null) _ErrorBox(error: state.error!),
           const Text('Email atau Username', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           const SizedBox(height: 4),
-          TextField(
-            controller: emailCtrl,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(hintText: 'email@contoh.com / username'),
+          Semantics(
+            identifier: 'emailField',
+            textField: true,
+            child: TextField(
+              key: const Key('emailField'),
+              controller: emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(hintText: 'email@contoh.com / username'),
+            ),
           ),
           const SizedBox(height: 16),
           const Text('Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
@@ -247,10 +252,11 @@ class _GoogleLoginButton extends StatelessWidget {
         side: BorderSide(color: Colors.grey.shade300),
       ),
       onPressed: () {},
-      icon: Image.network(
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/512px-Google_%22G%22_logo.svg.png',
-        height: 20,
-      ),
+      // A remote-hosted logo means the button silently shows an ugly
+      // "HTTP request failed" accessibility text (and no icon) whenever the
+      // network is slow/blocked/offline. Use the Material "G" glyph instead
+      // — no network dependency, always renders.
+      icon: const Icon(Icons.g_mobiledata, size: 28, color: Color(0xFF4285F4)),
       label: const Text('Masuk dengan Google', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
     );
   }

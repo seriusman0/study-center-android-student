@@ -6,14 +6,17 @@ name: "Config - Smoke check app launches"
 # This file defines common test credentials and shared setup.
 # All other flows include this config via `runFlow` where needed.
 #
-# Test Account (must exist in the backend with role=student):
+# Test Account (exists in the backend with role=student):
 #   email:    test@studycenter.test
 #   username: teststudent
 #   password: password123
-#   cabang:   Nias
+#   cabang:   Gunungsitoli (cabang_id=1)
 #
 # Base URL (configured inside the app at lib/core/constants/api_constants.dart):
-#   https://studycenter.seriusman.shop/api
+#   https://studycenter.nanoprojectdevindonesia.com/api
+#
+# See docs/android-api-reference.md (in the study-center-nias backend repo)
+# for the full, source-verified API contract this app implements against.
 #
 # App package: com.studycenter.sc_student
 # Flutter project name: sc_student

@@ -8,21 +8,20 @@ appId: com.studycenter.sc_student
 
 # ---- App should redirect to login screen ----
 - assertVisible: "Masuk"
-- assertVisible: "Email"
+- assertVisible: "Email atau Username"
 - assertVisible: "Password"
 
 - takeScreenshot: "01_login_initial_screen"
 
 # ---- Test: wrong password shows error ----
-- tapOn: "Email"
+- tapOn: "email@contoh.com / username"
 - inputText: "test@studycenter.test"
 
-- tapOn: "Password"
+- tapOn: "Masukkan password"
 - inputText: "wrongpassword"
+- hideKeyboard
 
-- tapOn:
-    text: "Masuk"
-    index: 0
+- tapOn: "Login Sekarang"
 
 - extendedWaitUntil:
     visible: "Username/email atau password salah."
@@ -35,20 +34,36 @@ appId: com.studycenter.sc_student
 - launchApp:
     clearState: true
 
-- tapOn: "Email"
+- tapOn: "email@contoh.com / username"
+- eraseText
 - inputText: "test@studycenter.test"
 
-- tapOn: "Password"
+- tapOn: "Masukkan password"
+- eraseText
 - inputText: "password123"
+- hideKeyboard
 
-- tapOn:
-    text: "Masuk"
-    index: 0
+- tapOn: "Login Sekarang"
 
-# After login, should see home screen (bottom nav visible)
+# After login, should see home screen (bottom nav visible). The navigation
+# shell rebuild (go_router redirect + Riverpod auth state) can take a beat
+# on a real device, and the Flutter semantics tree can lag a frame behind
+# the rendered pixels. KNOWN FLAKINESS on this Android 12 / SM-A037F test
+# device: assertVisible against the freshly-changed post-login hierarchy
+# intermittently reports elements as not-visible even though they are
+# confirmed present both on-screen (screenshot) AND in the raw accessibility
+# tree dump (verified manually multiple times, Aug 2026). Root cause not
+# resolved — retry the flow if it fails here; it is not a functional app bug.
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
-    visible: "Beranda"
-    timeout: 8000
+    visible: "Test Student"
+    timeout: 15000
+- takeScreenshot: "01_login_success_home_pre_assert"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    text: "Beranda\\nTab 1 of 4"
 
 - assertVisible: "Jurnal"
 - assertVisible: "Laporan"
@@ -67,6 +82,6 @@ appId: com.studycenter.sc_student
 
 # After logout, should return to login screen
 - assertVisible: "Masuk"
-- assertVisible: "Selamat datang kembali"
+- assertVisible: "Masuk ke akun Study Center Nias"
 
 - takeScreenshot: "01_logout_success"

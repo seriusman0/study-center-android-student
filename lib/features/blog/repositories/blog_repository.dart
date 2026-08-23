@@ -9,22 +9,41 @@ class BlogRepository {
 
   const BlogRepository(this._dio);
 
+  /// Fetches the blog detail AND its comments (two separate backend
+  /// endpoints — GET /blogs/{slug} does not embed comments).
   Future<BlogDetail> fetchDetail(String slug) async {
     final res = await _dio.get(ApiConstants.blogDetail(slug));
     final data = res.data as Map<String, dynamic>;
     // API may wrap in 'data' key or return directly
-    final payload = data['data'] ?? data;
-    return BlogDetail.fromJson(payload as Map<String, dynamic>);
+    final payload = (data['data'] ?? data) as Map<String, dynamic>;
+    final blog = BlogDetail.fromJson(payload);
+
+    final blogId = payload['id'] as num?;
+    if (blogId == null) return blog;
+
+    final comments = await fetchComments(blogId.toInt());
+    return blog.copyWithComments(comments);
   }
 
+  Future<List<BlogComment>> fetchComments(int blogId) async {
+    final res = await _dio.get(ApiConstants.blogComments(blogId));
+    final data = res.data;
+    final list = data is Map ? (data['data'] as List? ?? []) : (data as List? ?? []);
+    return list.map((e) => BlogComment.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// [cabangId] is required by the backend (BlogController::store).
   Future<String> createBlog({
     required String title,
     required String body,
+    required int cabangId,
     String? imageUrl,
   }) async {
     final res = await _dio.post(ApiConstants.blogs, data: {
       'title': title,
-      'body': body,
+      // Backend field is `content`, not `body`.
+      'content': body,
+      'cabang_id': cabangId,
       if (imageUrl != null) 'image': imageUrl,
     });
     final data = res.data as Map<String, dynamic>;
@@ -44,10 +63,12 @@ class BlogRepository {
   Future<BlogComment> postComment({
     required int blogId,
     required String body,
+    int? parentId,
   }) async {
     final res = await _dio.post(
       ApiConstants.blogComments(blogId),
-      data: {'body': body},
+      // Backend field is `content`, not `body`.
+      data: {'content': body, if (parentId != null) 'parent_id': parentId},
     );
     final data = res.data as Map<String, dynamic>;
     final payload = data['data'] ?? data;

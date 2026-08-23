@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/blog_provider.dart';
 
 class BlogCreateScreen extends ConsumerStatefulWidget {
@@ -26,9 +27,20 @@ class _BlogCreateScreenState extends ConsumerState<BlogCreateScreen> {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
 
+    // Backend requires cabang_id — take it from the logged-in user's own
+    // cabang (BlogController::store validates it as required|exists).
+    final cabangId = ref.read(authProvider).user?.cabangId;
+    if (cabangId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Akun Anda belum terkait cabang, tidak bisa membuat artikel.')),
+      );
+      return;
+    }
+
     final ok = await ref.read(blogCreateProvider.notifier).create(
-          title: _titleCtrl.text.trim(),
-          body:  _bodyCtrl.text.trim(),
+          title:    _titleCtrl.text.trim(),
+          body:     _bodyCtrl.text.trim(),
+          cabangId: cabangId,
         );
 
     if (!mounted) return;
