@@ -20,12 +20,17 @@ appId: com.studycenter.sc_student
 - hideKeyboard
 - tapOn: "Login Sekarang"
 
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
-    visible: "Beranda"
-    timeout: 8000
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # ---- Navigate to Laporan (which uses history data for the matrix) ----
-- tapOn: "Laporan"
+- tapOn:
+    point: "450,1433"
 - waitForAnimationToEnd
 
 - assertVisible: "Laporan Aktivitas"

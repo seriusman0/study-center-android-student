@@ -17,12 +17,19 @@ appId: com.studycenter.sc_student
 - hideKeyboard
 - tapOn: "Login Sekarang"
 
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
-    visible: "Beranda"
-    timeout: 8000
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
 
-# ---- Navigate to Jurnal tab ----
-- tapOn: "Jurnal"
+# ---- Navigate to Jurnal tab (bottom nav labels aren't plain-text
+# matchable — accessibilityText is "Jurnal\nTab 2 of 4"; use fixed pixel
+# coordinates like main_flow.yaml does) ----
+- tapOn:
+    point: "270,1433"
 - waitForAnimationToEnd
 
 - assertVisible: "Jurnal Harian"

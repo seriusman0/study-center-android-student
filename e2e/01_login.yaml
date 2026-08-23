@@ -72,7 +72,8 @@ appId: com.studycenter.sc_student
 - takeScreenshot: "01_login_success_home"
 
 # ---- Test: logout from profile screen ----
-- tapOn: "Profil"
+- tapOn:
+    point: "630,1433"
 - waitForAnimationToEnd
 
 - assertVisible: "Keluar"

@@ -19,12 +19,17 @@ appId: com.studycenter.sc_student
 - hideKeyboard
 - tapOn: "Login Sekarang"
 
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
-    visible: "Beranda"
-    timeout: 8000
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # ---- Navigate to Beranda tab ----
-- tapOn: "Beranda"
+- tapOn:
+    point: "90,1433"
 - waitForAnimationToEnd
 
 - takeScreenshot: "07_beranda_home"
@@ -45,7 +50,8 @@ appId: com.studycenter.sc_student
     duration: 300
 
 - extendedWaitUntil:
-    visible: "Beranda"
+    visible:
+      text: "Beranda\\nTab 1 of 4"
     timeout: 5000
 
 - scrollUntilVisible:

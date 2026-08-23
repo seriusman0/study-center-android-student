@@ -17,12 +17,17 @@ appId: com.studycenter.sc_student
 - hideKeyboard
 - tapOn: "Login Sekarang"
 
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
-    visible: "Beranda"
-    timeout: 8000
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # ---- Navigate to Profil tab ----
-- tapOn: "Profil"
+- tapOn:
+    point: "630,1433"
 - waitForAnimationToEnd
 
 - assertVisible: "Profil"
@@ -44,11 +49,14 @@ appId: com.studycenter.sc_student
 - takeScreenshot: "08_profile_logout_button"
 
 # ---- Test: Navigate away and come back ----
-- tapOn: "Beranda"
+- tapOn:
+    point: "90,1433"
 - waitForAnimationToEnd
-- assertVisible: "Beranda"
+- assertVisible:
+    text: "Beranda\\nTab 1 of 4"
 
-- tapOn: "Profil"
+- tapOn:
+    point: "630,1433"
 - waitForAnimationToEnd
 - assertVisible: "Profil"
 - assertVisible: "Username"
