@@ -29,6 +29,7 @@ import 'features/admin/screens/pendaftaran_screen.dart';
 import 'features/admin/screens/nametags_screen.dart';
 import 'features/admin/screens/mentor_presensi_admin_screen.dart';
 import 'features/admin/screens/jurnal_monitor_screen.dart';
+import 'features/admin/screens/jurnal_offline_screen.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/widgets/bottom_nav_shell.dart';
 
@@ -183,6 +184,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/admin/mentor-presensi',
         parentNavigatorKey: _rootKey,
         builder: (_, __) => const MentorPresensiAdminScreen(),
+      ),
+      GoRoute(
+        path: '/admin/jurnal-offline',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const JurnalOfflineScreen(),
       ),
 
       // ── Shell with bottom nav ────────────────────────────────────────────

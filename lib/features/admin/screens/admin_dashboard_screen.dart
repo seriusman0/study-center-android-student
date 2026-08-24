@@ -231,6 +231,7 @@ class _AdminFeatureGrid extends StatelessWidget {
     ['Validasi Pendaftaran', '/admin/pendaftaran', Icons.app_registration],
     ['Name Tags', '/admin/nametags', Icons.badge],
     ['Presensi Mentor', '/admin/mentor-presensi', Icons.assignment],
+    ['Jurnal Offline', '/admin/jurnal-offline', Icons.offline_bolt],
   ];
 
   @override
