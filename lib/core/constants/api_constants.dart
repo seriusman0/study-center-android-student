@@ -125,4 +125,20 @@ class ApiConstants {
   static const String adminMentorPresensiReports = '/admin/mentor-presensi/reports';
   static const String adminMentorPresensiExportExcel = '/admin/mentor-presensi/export/excel';
   static const String adminMentorPresensiExportPdf = '/admin/mentor-presensi/export/pdf';
+
+  // Admin: Notifications
+  static const String adminNotifications = '/admin/admin-notifications';
+  static String adminNotificationMarkRead(int id) =>
+      '/admin/admin-notifications/$id/mark-read';
+
+  // Admin: Jurnal offline templates + photo scans
+  static const String adminJurnalOfflineTemplates = '/jurnal-offline-templates';
+  static String adminJurnalOfflineTemplateDetail(int id) => '/jurnal-offline-templates/$id';
+  static String adminJurnalOfflineTemplateDownload(int id) => '/jurnal-offline-templates/$id/download';
+  static const String adminJurnalPhotoScans = '/jurnal-photo-scans';
+
+  // Admin: Jurnal College
+  static const String adminJurnalCollegeDashboard = '/admin/jurnal-college/';
+  static const String adminJurnalCollegeBible     = '/admin/jurnal-college/bible';
+  static const String adminJurnalCollegeItems     = '/admin/jurnal-college/items';
 }

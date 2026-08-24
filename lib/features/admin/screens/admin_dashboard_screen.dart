@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/admin_dashboard_provider.dart';
+import '../providers/admin_notifications_provider.dart';
 
 const _roleLabels = {
   'admin': 'Admin',
@@ -34,16 +35,53 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(adminDashboardProvider.notifier).load());
+    Future.microtask(() {
+      ref.read(adminDashboardProvider.notifier).load();
+      ref.read(adminNotificationsProvider.notifier).load();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminDashboardProvider);
+    final notifState = ref.watch(adminNotificationsProvider);
+    final unreadCount = notifState.unreadCount;
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard Admin')),
+      appBar: AppBar(
+        title: const Text('Dashboard Admin'),
+        actions: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                tooltip: 'Notifikasi',
+                onPressed: () => context.push('/admin/notifications'),
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      unreadCount > 99 ? '99+' : '$unreadCount',
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(adminDashboardProvider.notifier).load(),
         child: state.loading
@@ -232,6 +270,7 @@ class _AdminFeatureGrid extends StatelessWidget {
     ['Name Tags', '/admin/nametags', Icons.badge],
     ['Presensi Mentor', '/admin/mentor-presensi', Icons.assignment],
     ['Jurnal Offline', '/admin/jurnal-offline', Icons.offline_bolt],
+    ['Jurnal Mahasiswa', '/admin/jurnal-college', Icons.school],
   ];
 
   @override
