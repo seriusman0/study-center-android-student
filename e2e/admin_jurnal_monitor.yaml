@@ -1,105 +1,101 @@
 appId: com.studycenter.sc_student
 ---
-# E2E: Admin Jurnal Monitor (visual-verify) — login → dashboard → monitor jurnal → drill-down → export CSV
-# NOTE: Flutter tidak expose text ke uiautomator accessibility tree, jadi tidak
-# pakai assertVisible/text-based tap. Pakai koordinat (720x1600 device, d=300).
-# Koordinat dihitung via adb uiautomator bounds + vision_analyze screenshot.
+# E2E: Admin Jurnal Monitor (coordinate-calibrated, no text assertion)
+# 
+# CRITICAL: Flutter does not expose Text/labels to Android uiautomator
+# accessibility tree. So we CANNOT use tapOn:"text" or
+# extendedWaitUntil: visible:"text". We rely SOLELY on coordinate taps
+# computed from `adb shell uiautomator dump` + bounds parsing, verified
+# via takeScreenshot (visual evidence).
+#
+# Device: SM-A037F 720x1600 @300dpi, UDID R9RT4079YQL
+# App already logged-in as Test Admin (persistent session).
+# If not, app lands on Beranda after login.
 
 - launchApp:
-    clearState: true
+    clearState: false   # DON'T clear — session persists, already logged in
 
-# ── Login as admin ──
-- tapOn: "email@contoh.com / username"
-- eraseText
-- waitForAnimationToEnd: {timeout: 500}
-- inputText: "test_admin@studycenter.test"
-- tapOn: "Masukkan password"
-- eraseText
-- waitForAnimationToEnd: {timeout: 500}
-- inputText: "Test12345"
-- hideKeyboard
-- tapOn: "Login Sekarang"
-- waitForAnimationToEnd: {timeout: 4000}
-
-# ── Verify login landed on Beranda (Home) ---
+# ── 1. Verify on Home/Beranda (Test Admin greeting) ──
+# App bar greeting "Test Admin" at top. If already logged in, skip login.
 - extendedWaitUntil:
     visible: "Test Admin"
-    timeout: 15000
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "home_beranda"
+    timeout: 8000
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: "01_home_beranda"
 
-# ── Navigate to Dashboard tab (Tab 2 of 4 @ center 270,1433) ---
+# ── 2. Tap Dashboard tab (Tab 2 of 4, center=270,1433 verified via bounds) ──
 - tapOn:
     point: "270,1433"
-- waitForAnimationToEnd: {timeout: 5000}
-- takeScreenshot: "admin_dashboard_loaded"
+- waitForAnimationToEnd: { timeout: 5000 }
+- takeScreenshot: "02_admin_dashboard_loaded"
+# Dashboard has "Dashboard Admin" header + 3 stat cards + quick-access grid.
+# Monitor Jurnal teal card is full-width at center=(360,260), size=660x161.
 
-# ── Tap Monitor Jurnal card (teal card at top, centered ~x=360,y=280) ---
+# ── 3. Tap Monitor Jurnal card (center ~360,293) ──
 - tapOn:
-    point: "360,280"
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "jurnal_monitor_summary"
+    point: "360,293"
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: "03_jurnal_monitor_summary"
+# Expected: "Monitor Jurnal" title + 3 role tabs (Siswa/Mahasiswa/Beasiswa) + summary cards + search + user list
 
-# ── Verify role tabs via screenshot (visual) ---
-# Tap College tab (second chip ~x=180,y=180)
+# ── 4. Role tabs: tap College (Tab 2), then Scholarship, then back Student ──
+# Tab bar chips: approx x=90(Siswa)/250(Mahasiswa)/430(Beasiswa) y=180
 - tapOn:
-    point: "180,180"
-- waitForAnimationToEnd: {timeout: 1000}
-- takeScreenshot: "jurnal_college_tab"
-
-# Tap Scholarship teen tab (third chip ~x=280,y=180)
+    point: "250,180"
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: "04_jurnal_college_tab"
 - tapOn:
-    point: "280,180"
-- waitForAnimationToEnd: {timeout: 1000}
-- takeScreenshot: "jurnal_scholarship_tab"
-
-# Back to Student
+    point: "430,180"
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: "05_jurnal_scholarship_tab"
 - tapOn:
     point: "90,180"
-- waitForAnimationToEnd: {timeout: 1000}
+- waitForAnimationToEnd: { timeout: 1500 }
 
-# ── Drill-down: tap first student row (list starts ~y=260, first item center ~180,280) ---
+# ── 5. Drill-down: tap FIRST student row ──
+# From hierarchy: list starts after search bar. First row center ~x=180, y=340.
+# BUT app bar still shows "Monitor Jurnal" for this screen, detail has DIFFERENT layout.
+# First list row is roughly at y=340 (below search bar + summary).
 - tapOn:
-    point: "180,260"
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "jurnal_detail_matrix"
+    point: "180,340"
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: "06_jurnal_detail_matrix"
+# Expected: detail matrix screen with "Monitor Jurnal" header, user name,
+# checklist columns (Hari/Senin/.../Minggu) — NOT the list screen.
 
-# ── Export CSV (appbar download icon top-right ~680,150) ---
+# ── 6. Export CSV — download icon in AppBar top-right ──
+# AppBar actions: download icon approx center (660,140)
 - tapOn:
-    point: "680,150"
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "jurnal_export_done"
+    point: "660,140"
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: "07_jurnal_export_done"
+# Expected: snackbar "CSV berhasil diekspor" or file save confirmation
 
-# ── Back to dashboard ---
+# ── 7. Back to dashboard ──
 - back
-- waitForAnimationToEnd: {timeout: 1500}
+- waitForAnimationToEnd: { timeout: 1500 }
 - back
-- waitForAnimationToEnd: {timeout: 1500}
+- waitForAnimationToEnd: { timeout: 1500 }
+- takeScreenshot: "08_back_to_dashboard"
 
-# ── Users screen ---
+# ── 8. Tap Pengguna (Users) quick-access card (grid row 2, x=360,y=963) ──
 - tapOn:
-    point: "450,1433"
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "admin_users_loaded"
+    point: "360,963"
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: "09_admin_users_loaded"
 - back
-- waitForAnimationToEnd: {timeout: 1000}
+- waitForAnimationToEnd: { timeout: 1000 }
 
-# ── Certificates screen ---
+# ── 9. Tap Sertifikat (Certificates) — grid row 3 (x=136 or 360, y=1198) ──
 - tapOn:
-    point: "270,1433"
-- waitForAnimationToEnd: {timeout: 1500}
-- takeScreenshot: "dashboard_again"
-# Scroll down lalu tap Sertifikat card (grid row 3, x=180,y=620)
-- scroll
-- tapOn:
-    point: "180,620"
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "admin_certificates_loaded"
+    point: "360,1198"
+- waitForAnimationToEnd: { timeout: 3000 }
+- takeScreenshot: "10_admin_certificates_loaded"
 - back
-- waitForAnimationToEnd: {timeout: 1500}
+- waitForAnimationToEnd: { timeout: 1000 }
 
-# ── Final: back ke Beranda, screenshot penuh ---
+# ── 10. Final state ──
 - tapOn:
     point: "90,1433"
-- waitForAnimationToEnd: {timeout: 2000}
-- takeScreenshot: "home_final"
+- waitForAnimationToEnd: { timeout: 2000 }
+- takeScreenshot: "11_home_final"
