@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../auth/models/user_model.dart';
 import '../../journal/providers/journal_provider.dart';
 import '../models/home_model.dart';
 import '../providers/home_provider.dart';
@@ -21,17 +22,170 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      final jState = ref.read(journalProvider);
-      if (jState.snapshot == null && !jState.loading) {
-        ref.read(journalProvider.notifier).load();
+      final user = ref.read(authProvider).user;
+      // Journal + laporan/galeri home widgets are student-only on the
+      // backend (`role:student` middleware on /jurnal/*) — calling them for
+      // other roles just wastes a request and always 403s, so gate it here.
+      if (user?.hasStudentDashboard == true) {
+        final jState = ref.read(journalProvider);
+        if (jState.snapshot == null && !jState.loading) {
+          ref.read(journalProvider.notifier).load();
+        }
       }
       final hState = ref.read(homeProvider);
       if (!hState.loading && hState.blogs.isEmpty && hState.laporan == null) {
-        final user = ref.read(authProvider).user;
         ref.read(homeProvider.notifier).load(user?.cabangSlug);
       }
     });
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = ref.watch(authProvider).user;
+    if (user != null && !user.hasStudentDashboard) {
+      return _NonStudentHome(user: user);
+    }
+    return _StudentHome();
+  }
+}
+
+/// Home tab content for roles without the student journal/laporan flow
+/// (admin, mentor, fulltimer, guest, scholarship_teenager, college).
+/// Each role's dedicated tools live in their own tabs (see BottomNavShell);
+/// this is just a lightweight welcome + shared blog/galeri feed, same as
+/// student sees, minus the journal card that only applies to students.
+class _NonStudentHome extends ConsumerWidget {
+  final UserModel user;
+  const _NonStudentHome({required this.user});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hState = ref.watch(homeProvider);
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+
+    String greeting() {
+      final h = now.hour;
+      if (h < 11) return 'Selamat pagi';
+      if (h < 15) return 'Selamat siang';
+      if (h < 18) return 'Selamat sore';
+      return 'Selamat malam';
+    }
+
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(homeProvider.notifier).load(user.cabangSlug),
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const SizedBox(height: 8),
+            Text('${greeting()},',
+                style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
+            Text(user.name,
+                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text(DateFormat('EEEE, d MMMM yyyy', 'id').format(now),
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500])),
+            const SizedBox(height: 4),
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                _roleLabel(user.primaryRole),
+                style: theme.textTheme.labelMedium
+                    ?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(Icons.article, color: theme.colorScheme.primary, size: 20),
+                const SizedBox(width: 8),
+                Text('Artikel Terbaru',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => context.push('/blog/create'),
+                  child: const Text('Tulis'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (hState.loading && hState.blogs.isEmpty)
+              const Center(
+                  child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ))
+            else if (hState.blogs.isEmpty)
+              Text('Belum ada artikel', style: TextStyle(color: Colors.grey[500]))
+            else
+              ...hState.blogs.map((blog) => _BlogCard(blog: blog, theme: theme)),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(Icons.photo_library, color: theme.colorScheme.primary, size: 20),
+                const SizedBox(width: 8),
+                Text('Galeri Kegiatan',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (hState.loading && hState.galeri.isEmpty)
+              const Center(
+                  child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ))
+            else if (hState.galeri.isEmpty)
+              Text('Belum ada foto kegiatan', style: TextStyle(color: Colors.grey[500]))
+            else
+              SizedBox(
+                height: 160,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: hState.galeri.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (ctx, i) => _GaleriCard(item: hState.galeri[i]),
+                ),
+              ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _roleLabel(String role) {
+    switch (role) {
+      case 'admin':
+        return 'Admin';
+      case 'mentor':
+        return 'Mentor';
+      case 'fulltimer':
+        return 'Fulltimer';
+      case 'scholarship_teenager':
+        return 'Beasiswa Remaja';
+      case 'college':
+        return 'Mahasiswa';
+      case 'guest':
+        return 'Tamu';
+      default:
+        return role;
+    }
+  }
+}
+
+class _StudentHome extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_StudentHome> createState() => _StudentHomeState();
+}
+
+class _StudentHomeState extends ConsumerState<_StudentHome> {
 
   @override
   Widget build(BuildContext context) {

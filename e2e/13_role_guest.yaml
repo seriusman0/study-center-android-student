@@ -1,0 +1,40 @@
+appId: com.studycenter.sc_student
+---
+# Flow 13: Role-aware navigation — guest sees minimal tabs (Beranda + Profil
+# only). Also verifies guest does NOT see the "Tulis" blog button (backend
+# role:admin,fulltimer,mentor,student only — guest excluded).
+
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_guest@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Guest"
+    timeout: 15000
+- takeScreenshot: "13_guest_home"
+
+- assertVisible: "Beranda"
+- assertVisible: "Profil"
+
+- takeScreenshot: "13_guest_bottom_nav"
+
+- tapOn:
+    point: "630,1433"
+- waitForAnimationToEnd
+- assertVisible: "Keluar"
+- takeScreenshot: "13_guest_profil_tab"

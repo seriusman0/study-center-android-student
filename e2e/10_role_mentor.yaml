@@ -1,0 +1,60 @@
+appId: com.studycenter.sc_student
+---
+# Flow 10: Role-aware navigation — mentor sees Kelas/Presensi tabs, NOT
+# Jurnal/Laporan (those are student-only both on backend and in the app's
+# bottom nav). Covers Fase 0 of the multi-role rollout.
+
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_mentor@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Mentor"
+    timeout: 15000
+- takeScreenshot: "10_mentor_home"
+
+# ---- Bottom nav should show mentor-specific tabs ----
+- assertVisible:
+    text: "Beranda\\\\nTab 1 of 4"
+- assertVisible:
+    text: "Kelas\\\\nTab 2 of 4"
+- assertVisible:
+    text: "Presensi\\\\nTab 3 of 4"
+- assertVisible:
+    text: "Profil\\\\nTab 4 of 4"
+
+- takeScreenshot: "10_mentor_bottom_nav"
+
+# ---- Tap Kelas tab — should NOT crash, shows placeholder for now ----
+- tapOn:
+    point: "270,1433"
+- waitForAnimationToEnd
+- takeScreenshot: "10_mentor_kelas_tab"
+
+# ---- Tap Presensi tab ----
+- tapOn:
+    point: "450,1433"
+- waitForAnimationToEnd
+- takeScreenshot: "10_mentor_presensi_tab"
+
+# ---- Tap Profil tab — should work same as student ----
+- tapOn:
+    point: "630,1433"
+- waitForAnimationToEnd
+- assertVisible: "Keluar"
+- takeScreenshot: "10_mentor_profil_tab"

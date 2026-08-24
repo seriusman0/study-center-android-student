@@ -22,6 +22,32 @@ class UserModel {
   });
 
   bool get isStudent => roles.contains('student');
+  bool get isAdmin => roles.contains('admin');
+  bool get isMentor => roles.contains('mentor');
+  bool get isFulltimer => roles.contains('fulltimer');
+  bool get isGuest => roles.contains('guest');
+  bool get isScholarshipTeenager => roles.contains('scholarship_teenager');
+  bool get isCollege => roles.contains('college');
+
+  /// Roles that see the student-style bottom nav (Beranda/Jurnal/Laporan/Profil)
+  /// with journal + laporan + galeri student endpoints.
+  bool get hasStudentDashboard => isStudent;
+
+  /// Roles that can manage kelas/presensi (mentor tooling).
+  bool get hasMentorTools => isMentor || isAdmin;
+
+  /// Primary role label for display/routing purposes — first matching role
+  /// in priority order (a user can technically have multiple role rows).
+  String get primaryRole {
+    if (isAdmin) return 'admin';
+    if (isMentor) return 'mentor';
+    if (isFulltimer) return 'fulltimer';
+    if (isStudent) return 'student';
+    if (isScholarshipTeenager) return 'scholarship_teenager';
+    if (isCollege) return 'college';
+    if (isGuest) return 'guest';
+    return roles.isNotEmpty ? roles.first : 'guest';
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final rolesRaw = json['roles'] as List? ?? [];

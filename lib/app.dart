@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'features/auth/providers/auth_provider.dart';
+import 'features/auth/models/user_model.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
@@ -13,10 +14,48 @@ import 'features/profile/screens/profile_edit_screen.dart';
 import 'features/blog/screens/blog_detail_screen.dart';
 import 'features/blog/screens/blog_create_screen.dart';
 import 'features/galeri/screens/galeri_screen.dart';
+import 'features/mentor/screens/mentor_kelas_screen.dart';
+import 'features/mentor/screens/mentor_presensi_screen.dart';
+import 'features/admin/screens/admin_dashboard_screen.dart';
+import 'features/admin/screens/admin_users_screen.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/widgets/bottom_nav_shell.dart';
 
 final _rootKey  = GlobalKey<NavigatorState>();
+
+/// All tab paths that exist ANYWHERE across roles, in a fixed order that
+/// matches the branch list below. StatefulShellRoute needs a static branch
+/// list at build time, so every role-specific tab is always present as a
+/// branch — BottomNavShell just hides/reorders which ones are *visible*
+/// per role (see navTabsForRole). The redirect guard below still blocks
+/// direct navigation into another role's branch.
+const _allTabPaths = [
+  '/home',           // 0 — everyone
+  '/jurnal',         // 1 — student
+  '/laporan',        // 2 — student
+  '/mentor/kelas',    // 3 — mentor/admin
+  '/mentor/presensi', // 4 — mentor/admin
+  '/admin/dashboard', // 5 — admin
+  '/admin/users',     // 6 — admin
+  '/profil',          // 7 — everyone
+];
+
+bool _canAccessTab(UserModel? user, String path) {
+  if (user == null) return path == '/home' || path == '/profil';
+  switch (path) {
+    case '/jurnal':
+    case '/laporan':
+      return user.isStudent;
+    case '/mentor/kelas':
+    case '/mentor/presensi':
+      return user.hasMentorTools;
+    case '/admin/dashboard':
+    case '/admin/users':
+      return user.isAdmin;
+    default:
+      return true; // /home, /profil
+  }
+}
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -31,6 +70,14 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
       if (isLoggedIn && isAuthRoute) return '/home';
+
+      // Block direct navigation (deep link, back-stack, etc.) into a tab
+      // this role doesn't have — bounce to /home rather than showing a
+      // screen wired to an API the backend will 403 anyway.
+      if (isLoggedIn && _allTabPaths.contains(loc)) {
+        final user = authState.user;
+        if (!_canAccessTab(user, loc)) return '/home';
+      }
       return null;
     },
     routes: [
@@ -75,25 +122,67 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ── Shell with bottom nav ────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
         parentNavigatorKey: _rootKey,
-        builder: (context, state, shell) => BottomNavShell(shell: shell),
+        builder: (context, state, shell) => _RoleAwareShell(shell: shell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: '/home',    builder: (_, __) => const HomeScreen()),
+            GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/jurnal',  builder: (_, __) => const JournalScreen()),
+            GoRoute(path: '/jurnal', builder: (_, __) => const JournalScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/laporan', builder: (_, __) => const LaporanScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/profil',  builder: (_, __) => const ProfileScreen()),
+            GoRoute(path: '/mentor/kelas', builder: (_, __) => const MentorKelasScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/mentor/presensi', builder: (_, __) => const MentorPresensiScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/admin/dashboard', builder: (_, __) => const AdminDashboardScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/admin/users', builder: (_, __) => const AdminUsersScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/profil', builder: (_, __) => const ProfileScreen()),
           ]),
         ],
       ),
     ],
   );
 });
+
+/// Wraps BottomNavShell but only exposes the branch indices this user's
+/// role actually has a visible tab for (see navTabsForRole). Tapping a tab
+/// maps the visible-tab index back to its real branch index in the
+/// underlying StatefulNavigationShell.
+class _RoleAwareShell extends ConsumerWidget {
+  final StatefulNavigationShell shell;
+  const _RoleAwareShell({required this.shell});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).user;
+    final tabs = navTabsForRole(user);
+    final branchIndices = tabs.map((t) => _allTabPaths.indexOf(t.path)).toList();
+
+    // Map the shell's real currentIndex to this role's visible-tab index.
+    final visibleIndex = branchIndices.indexOf(shell.currentIndex);
+
+    return BottomNavShell(
+      shell: shell,
+      tabs: tabs,
+      visibleIndex: visibleIndex < 0 ? 0 : visibleIndex,
+      onTabTap: (visibleIdx) {
+        final realBranchIndex = branchIndices[visibleIdx];
+        shell.goBranch(realBranchIndex,
+            initialLocation: realBranchIndex == shell.currentIndex);
+      },
+    );
+  }
+}
 
 class ScStudentApp extends ConsumerWidget {
   const ScStudentApp({super.key});

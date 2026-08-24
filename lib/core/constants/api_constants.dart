@@ -41,4 +41,17 @@ class ApiConstants {
   // Public
   static const String cabangs = '/cabangs';
   static String cabangDetail(String slug) => '/cabangs/$slug';
+
+  // Kelas Master (mentor/admin)
+  static const String kelasMaster = '/kelas-master';
+  static String kelasMasterDetail(int id) => '/kelas-master/$id';
+
+  // Mentor Presensi — mentor's own attendance log
+  static const String mentorPresensi = '/mentor-presensi';
+  static String mentorPresensiDetail(int id) => '/mentor-presensi/$id';
+
+  // Presensi — student attendance taken by mentor
+  static const String presensi = '/presensi';
+  static String presensiDetail(int id) => '/presensi/$id';
+  static const String presensiSearchStudents = '/presensi/students/search';
 }

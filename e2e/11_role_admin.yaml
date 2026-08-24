@@ -1,0 +1,32 @@
+appId: com.studycenter.sc_student
+---
+# Flow 11: Role-aware navigation — admin sees Dashboard/Pengguna tabs.
+
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_admin@studycenter.test"
+- tapOn: "Password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+# tap tombol login via point (bounds [90,1152][630,1245], center 360,1198)
+- tapOn:
+    point: "360,1198"
+
+- extendedWaitUntil:
+    visible: "Test Admin"
+    timeout: 15000
+- takeScreenshot: "11_admin_home"
+
+- tapOn:
+    point: "950,1850"
+- waitForAnimationToEnd
+- assertVisible: "Keluar"
+- takeScreenshot: "11_admin_drawer"

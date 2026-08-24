@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/services/api_service.dart';
+import '../../../core/services/storage_service.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -14,6 +16,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscure = true;
+  bool _showManualLogin = false;
 
   @override
   void initState() {
@@ -42,12 +45,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _quickLogin(SavedProfile profile) async {
+    await ref.read(authProvider.notifier).loginWithProfile(profile);
+    if (mounted && ref.read(authProvider).isAuthenticated) {
+      context.go('/home');
+    }
+    // If login failed (token expired), the error is shown in the manual
+    // form and the profile is already removed from the list.
+    if (mounted && !ref.read(authProvider).isAuthenticated) {
+      setState(() => _showManualLogin = true);
+      // Pre-fill the email so the user doesn't have to type it again.
+      _emailCtrl.text = profile.email;
+    }
+  }
+
   void _toggleObscure() {
     setState(() => _obscure = !_obscure);
   }
 
   @override
   Widget build(BuildContext context) {
+    final savedProfiles = ref.watch(savedProfilesProvider);
+
     return Scaffold(
       appBar: const _LoginAppBar(),
       body: GestureDetector(
@@ -57,28 +76,270 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF0F766E), Color(0xFF0D9488)], // teal-700 to teal-600
+              colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
             ),
           ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-              child: _LoginFormCard(
-                emailCtrl: _emailCtrl,
-                passCtrl: _passCtrl,
-                obscure: _obscure,
-                onToggleObscure: _toggleObscure,
-                onSubmit: _submit,
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                child: savedProfiles.when(
+                  data: (profiles) {
+                    if (profiles.isNotEmpty && !_showManualLogin) {
+                      return _SavedProfilesCard(
+                        profiles: profiles,
+                        onProfileTap: _quickLogin,
+                        onUseOtherAccount: () {
+                          setState(() => _showManualLogin = true);
+                        },
+                        onRemoveProfile: (userId) async {
+                          await ref
+                              .read(storageServiceProvider)
+                              .removeSavedProfile(userId);
+                          ref.invalidate(savedProfilesProvider);
+                        },
+                      );
+                    }
+                    return _LoginFormCard(
+                      emailCtrl: _emailCtrl,
+                      passCtrl: _passCtrl,
+                      obscure: _obscure,
+                      onToggleObscure: _toggleObscure,
+                      onSubmit: _submit,
+                      showBackToProfiles: profiles.isNotEmpty,
+                      onBackToProfiles: () {
+                        setState(() => _showManualLogin = false);
+                      },
+                    );
+                  },
+                  loading: () => const Center(
+                      child: CircularProgressIndicator(color: Colors.white)),
+                  error: (_, __) => _LoginFormCard(
+                    emailCtrl: _emailCtrl,
+                    passCtrl: _passCtrl,
+                    obscure: _obscure,
+                    onToggleObscure: _toggleObscure,
+                    onSubmit: _submit,
+                    showBackToProfiles: false,
+                    onBackToProfiles: () {},
+                  ),
+                ),
               ),
             ),
           ),
-        ),
         ),
       ),
     );
   }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Saved Profiles Card (quick-switch UI)
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _SavedProfilesCard extends StatelessWidget {
+  final List<SavedProfile> profiles;
+  final Future<void> Function(SavedProfile) onProfileTap;
+  final VoidCallback onUseOtherAccount;
+  final Future<void> Function(int userId) onRemoveProfile;
+
+  const _SavedProfilesCard({
+    required this.profiles,
+    required this.onProfileTap,
+    required this.onUseOtherAccount,
+    required this.onRemoveProfile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 400),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
+        ],
+      ),
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Pilih Akun',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ketuk untuk langsung masuk',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: Colors.grey[500]),
+          ),
+          const SizedBox(height: 20),
+          ...profiles.map((p) => _ProfileTile(
+                profile: p,
+                onTap: () => onProfileTap(p),
+                onRemove: () => onRemoveProfile(p.userId),
+              )),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onUseOtherAccount,
+            icon: const Icon(Icons.person_add_outlined, size: 20),
+            label: const Text('Gunakan akun lain'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(color: Colors.grey.shade300),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileTile extends StatelessWidget {
+  final SavedProfile profile;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  const _ProfileTile({
+    required this.profile,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  String _roleLabel(String role) {
+    switch (role) {
+      case 'admin': return 'Admin';
+      case 'mentor': return 'Mentor';
+      case 'fulltimer': return 'Fulltimer';
+      case 'student': return 'Siswa';
+      case 'scholarship_teenager': return 'Beasiswa Remaja';
+      case 'college': return 'Mahasiswa';
+      case 'guest': return 'Tamu';
+      default: return role;
+    }
+  }
+
+  Color _roleColor(String role) {
+    switch (role) {
+      case 'admin': return const Color(0xFFDC2626);
+      case 'mentor': return const Color(0xFF7C3AED);
+      case 'fulltimer': return const Color(0xFF0891B2);
+      case 'student': return const Color(0xFF059669);
+      case 'scholarship_teenager': return const Color(0xFFD97706);
+      case 'college': return const Color(0xFF2563EB);
+      case 'guest': return const Color(0xFF6B7280);
+      default: return const Color(0xFF6B7280);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = _roleColor(profile.primaryRole);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: color.withValues(alpha: 0.15),
+                  backgroundImage: profile.avatar != null
+                      ? NetworkImage(profile.avatar!)
+                      : null,
+                  child: profile.avatar == null
+                      ? Text(
+                          profile.name.isNotEmpty
+                              ? profile.name[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(profile.name,
+                          style: theme.textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              _roleLabel(profile.primaryRole),
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: color,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              profile.email,
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(color: Colors.grey[500]),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, size: 18, color: Colors.grey[400]),
+                  onPressed: onRemove,
+                  tooltip: 'Hapus dari daftar',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Original Login Form Card (manual email/password)
+// ──────────────────────────────────────────────────────────────────────────────
 
 class _LoginAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _LoginAppBar();
@@ -99,7 +360,7 @@ class _LoginAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           Text(
             'Nias',
-            style: TextStyle(fontWeight: FontWeight.normal, color: Colors.white.withOpacity(0.8), fontSize: 14),
+            style: TextStyle(fontWeight: FontWeight.normal, color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
           ),
         ],
       ),
@@ -134,6 +395,8 @@ class _LoginFormCard extends ConsumerWidget {
     required this.obscure,
     required this.onToggleObscure,
     required this.onSubmit,
+    required this.showBackToProfiles,
+    required this.onBackToProfiles,
   });
 
   final TextEditingController emailCtrl;
@@ -141,6 +404,8 @@ class _LoginFormCard extends ConsumerWidget {
   final bool obscure;
   final VoidCallback onToggleObscure;
   final VoidCallback onSubmit;
+  final bool showBackToProfiles;
+  final VoidCallback onBackToProfiles;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -152,13 +417,23 @@ class _LoginFormCard extends ConsumerWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (showBackToProfiles)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onBackToProfiles,
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text('Kembali ke daftar akun'),
+                style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              ),
+            ),
           Text(
             'Masuk',
             textAlign: TextAlign.center,
@@ -213,8 +488,6 @@ class _LoginFormCard extends ConsumerWidget {
               onSubmitted: (_) => onSubmit(),
             ),
           ),
-          const SizedBox(height: 16),
-          const _RememberMeCheckbox(),
           const SizedBox(height: 24),
           Semantics(
             identifier: 'loginBtn',
@@ -252,10 +525,6 @@ class _GoogleLoginButton extends StatelessWidget {
         side: BorderSide(color: Colors.grey.shade300),
       ),
       onPressed: () {},
-      // A remote-hosted logo means the button silently shows an ugly
-      // "HTTP request failed" accessibility text (and no icon) whenever the
-      // network is slow/blocked/offline. Use the Material "G" glyph instead
-      // — no network dependency, always renders.
       icon: const Icon(Icons.g_mobiledata, size: 28, color: Color(0xFF4285F4)),
       label: const Text('Masuk dengan Google', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
     );
@@ -302,29 +571,6 @@ class _ErrorBox extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-    );
-  }
-}
-
-class _RememberMeCheckbox extends StatelessWidget {
-  const _RememberMeCheckbox();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          height: 24,
-          width: 24,
-          child: Checkbox(
-            value: false,
-            onChanged: (val) {},
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text('Ingat saya', style: TextStyle(color: Colors.grey[700], fontSize: 14)),
-      ],
     );
   }
 }
