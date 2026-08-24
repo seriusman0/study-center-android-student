@@ -18,6 +18,17 @@ import 'features/mentor/screens/mentor_kelas_screen.dart';
 import 'features/mentor/screens/mentor_presensi_screen.dart';
 import 'features/admin/screens/admin_dashboard_screen.dart';
 import 'features/admin/screens/admin_users_screen.dart';
+import 'features/admin/screens/jurnal_life_items_screen.dart';
+import 'features/admin/screens/jurnal_bible_schedule_screen.dart';
+import 'features/admin/screens/jurnal_weekly_verse_screen.dart';
+import 'features/admin/screens/roles_permissions_screen.dart';
+import 'features/admin/screens/mata_pelajaran_screen.dart';
+import 'features/admin/screens/blog_moderation_screen.dart';
+import 'features/admin/screens/certificates_screen.dart';
+import 'features/admin/screens/pendaftaran_screen.dart';
+import 'features/admin/screens/nametags_screen.dart';
+import 'features/admin/screens/mentor_presensi_admin_screen.dart';
+import 'features/admin/screens/jurnal_monitor_screen.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/widgets/bottom_nav_shell.dart';
 
@@ -117,6 +128,61 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile/edit',
         parentNavigatorKey: _rootKey,
         builder: (_, __) => const ProfileEditScreen(),
+      ),
+      GoRoute(
+        path: '/admin/jurnal-monitor',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const JurnalMonitorScreen(),
+      ),
+      GoRoute(
+        path: '/admin/jurnal-life-items',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const JurnalLifeItemsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/jurnal-bible-schedule',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const JurnalBibleScheduleScreen(),
+      ),
+      GoRoute(
+        path: '/admin/jurnal-weekly-verse',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const JurnalWeeklyVerseScreen(),
+      ),
+      GoRoute(
+        path: '/admin/roles-permissions',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const RolesPermissionsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/mata-pelajaran',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const MataPelajaranScreen(),
+      ),
+      GoRoute(
+        path: '/admin/blog-moderation',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const BlogModerationScreen(),
+      ),
+      GoRoute(
+        path: '/admin/certificates',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const CertificatesScreen(),
+      ),
+      GoRoute(
+        path: '/admin/pendaftaran',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const PendaftaranScreen(),
+      ),
+      GoRoute(
+        path: '/admin/nametags',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const NameTagsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/mentor-presensi',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const MentorPresensiAdminScreen(),
       ),
 
       // ── Shell with bottom nav ────────────────────────────────────────────

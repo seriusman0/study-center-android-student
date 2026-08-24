@@ -8,6 +8,7 @@ class UserModel {
   final String? cabang;
   final String? cabangSlug;
   final List<String> roles;
+  final bool isActive;
 
   const UserModel({
     required this.id,
@@ -19,6 +20,7 @@ class UserModel {
     this.cabang,
     this.cabangSlug,
     required this.roles,
+    this.isActive = true,
   });
 
   bool get isStudent => roles.contains('student');
@@ -67,6 +69,7 @@ class UserModel {
           .map((r) => (r is Map ? r['name'] : r) as String? ?? '')
           .where((s) => s.isNotEmpty)
           .toList(),
+      isActive: json['is_active'] as bool? ?? true,
     );
   }
 }

@@ -57,4 +57,72 @@ class ApiConstants {
 
   // App version check (public)
   static const String appVersion = '/app/version';
+
+  // Admin: Dashboard
+  static const String adminDashboard = '/admin/dashboard';
+
+  // Admin: Users (full CRUD)
+  static const String adminUsers = '/admin/users';
+  static String adminUserDetail(int id) => '/admin/users/$id';
+  static String adminUserRole(int id) => '/admin/users/$id/role';
+  static String adminUserToggleActive(int id) => '/admin/users/$id/toggle-active';
+
+  // Admin: Cross-role jurnal monitoring
+  static const String jurnalMonitorSummary = '/admin/jurnal-monitor/summary';
+  static String jurnalMonitorList(String role) => '/admin/jurnal-monitor/$role';
+  static String jurnalMonitorDetail(String role, int userId) =>
+      '/admin/jurnal-monitor/$role/$userId';
+  static String jurnalMonitorExport(String role, int userId) =>
+      '/admin/jurnal-monitor/$role/$userId/export';
+
+  // Admin: Jurnal life items / bible schedules / weekly verses
+  static const String adminJurnalLifeItems = '/admin/jurnal/life-items';
+  static String adminJurnalLifeItemDetail(int id) => '/admin/jurnal/life-items/$id';
+  static String adminJurnalStudentLifeItems(int studentId) =>
+      '/admin/jurnal/students/$studentId/life-items';
+  static const String adminJurnalBibleSchedules = '/admin/jurnal/bible-schedules';
+  static String adminJurnalBibleScheduleDetail(int id) =>
+      '/admin/jurnal/bible-schedules/$id';
+  static const String adminJurnalBibleSchedulesBulk = '/admin/jurnal/bible-schedules/bulk';
+  static const String adminJurnalWeeklyVerses = '/admin/jurnal/weekly-verses';
+  static String adminJurnalWeeklyVerseDetail(int id) => '/admin/jurnal/weekly-verses/$id';
+
+  // Admin: Blog & comment moderation
+  static const String adminBlogs = '/admin/blogs';
+  static String adminBlogDelete(int id) => '/admin/blogs/$id';
+  static const String adminComments = '/admin/comments';
+  static String adminCommentDelete(int id) => '/admin/comments/$id';
+
+  // Admin: Mata Pelajaran
+  static const String adminMataPelajaran = '/admin/mata-pelajaran';
+  static String adminMataPelajaranDetail(int id) => '/admin/mata-pelajaran/$id';
+  static String adminMataPelajaranToggle(int id) => '/admin/mata-pelajaran/$id/toggle';
+
+  // Admin: Pendaftaran
+  static const String adminPendaftaran = '/admin/pendaftaran';
+  static String adminPendaftaranDetail(int userId) => '/admin/pendaftaran/$userId';
+  static String adminPendaftaranValidasi(int userId) => '/admin/pendaftaran/$userId/validasi';
+
+  // Admin: Certificates
+  static const String adminCertTemplates = '/admin/certificates/templates';
+  static String adminCertTemplateDetail(int id) => '/admin/certificates/templates/$id';
+  static const String adminCertIssued = '/admin/certificates/issued';
+  static String adminCertIssuedDetail(int id) => '/admin/certificates/issued/$id';
+  static String adminCertIssuedDownload(int id) => '/admin/certificates/issued/$id/download';
+
+  // Admin: Roles & Permissions
+  static const String adminRoles = '/admin/roles';
+  static String adminRoleDetail(int id) => '/admin/roles/$id';
+  static String adminRolePermissions(int id) => '/admin/roles/$id/permissions';
+  static const String adminPermissions = '/admin/permissions';
+
+  // Admin: Name tags
+  static const String adminNameTags = '/admin/nametags';
+  static const String adminNameTagsGenerate = '/admin/nametags/generate';
+
+  // Admin: Mentor presensi reports
+  static const String adminMentorPresensi = '/admin/mentor-presensi';
+  static const String adminMentorPresensiReports = '/admin/mentor-presensi/reports';
+  static const String adminMentorPresensiExportExcel = '/admin/mentor-presensi/export/excel';
+  static const String adminMentorPresensiExportPdf = '/admin/mentor-presensi/export/pdf';
 }

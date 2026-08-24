@@ -1,0 +1,105 @@
+appId: com.studycenter.sc_student
+---
+# E2E: Admin Jurnal Monitor (visual-verify) — login → dashboard → monitor jurnal → drill-down → export CSV
+# NOTE: Flutter tidak expose text ke uiautomator accessibility tree, jadi tidak
+# pakai assertVisible/text-based tap. Pakai koordinat (720x1600 device, d=300).
+# Koordinat dihitung via adb uiautomator bounds + vision_analyze screenshot.
+
+- launchApp:
+    clearState: true
+
+# ── Login as admin ──
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd: {timeout: 500}
+- inputText: "test_admin@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd: {timeout: 500}
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd: {timeout: 4000}
+
+# ── Verify login landed on Beranda (Home) ---
+- extendedWaitUntil:
+    visible: "Test Admin"
+    timeout: 15000
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "home_beranda"
+
+# ── Navigate to Dashboard tab (Tab 2 of 4 @ center 270,1433) ---
+- tapOn:
+    point: "270,1433"
+- waitForAnimationToEnd: {timeout: 5000}
+- takeScreenshot: "admin_dashboard_loaded"
+
+# ── Tap Monitor Jurnal card (teal card at top, centered ~x=360,y=280) ---
+- tapOn:
+    point: "360,280"
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "jurnal_monitor_summary"
+
+# ── Verify role tabs via screenshot (visual) ---
+# Tap College tab (second chip ~x=180,y=180)
+- tapOn:
+    point: "180,180"
+- waitForAnimationToEnd: {timeout: 1000}
+- takeScreenshot: "jurnal_college_tab"
+
+# Tap Scholarship teen tab (third chip ~x=280,y=180)
+- tapOn:
+    point: "280,180"
+- waitForAnimationToEnd: {timeout: 1000}
+- takeScreenshot: "jurnal_scholarship_tab"
+
+# Back to Student
+- tapOn:
+    point: "90,180"
+- waitForAnimationToEnd: {timeout: 1000}
+
+# ── Drill-down: tap first student row (list starts ~y=260, first item center ~180,280) ---
+- tapOn:
+    point: "180,260"
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "jurnal_detail_matrix"
+
+# ── Export CSV (appbar download icon top-right ~680,150) ---
+- tapOn:
+    point: "680,150"
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "jurnal_export_done"
+
+# ── Back to dashboard ---
+- back
+- waitForAnimationToEnd: {timeout: 1500}
+- back
+- waitForAnimationToEnd: {timeout: 1500}
+
+# ── Users screen ---
+- tapOn:
+    point: "450,1433"
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "admin_users_loaded"
+- back
+- waitForAnimationToEnd: {timeout: 1000}
+
+# ── Certificates screen ---
+- tapOn:
+    point: "270,1433"
+- waitForAnimationToEnd: {timeout: 1500}
+- takeScreenshot: "dashboard_again"
+# Scroll down lalu tap Sertifikat card (grid row 3, x=180,y=620)
+- scroll
+- tapOn:
+    point: "180,620"
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "admin_certificates_loaded"
+- back
+- waitForAnimationToEnd: {timeout: 1500}
+
+# ── Final: back ke Beranda, screenshot penuh ---
+- tapOn:
+    point: "90,1433"
+- waitForAnimationToEnd: {timeout: 2000}
+- takeScreenshot: "home_final"
