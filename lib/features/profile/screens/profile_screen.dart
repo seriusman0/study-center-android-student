@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -71,6 +72,20 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) context.go('/login');
+            },
+          ),
+          const SizedBox(height: 24),
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              final version = snapshot.data?.version ?? '...';
+              final build = snapshot.data?.buildNumber ?? '';
+              return Center(
+                child: Text(
+                  'Versi $version ($build)',
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[400]),
+                ),
+              );
             },
           ),
         ],

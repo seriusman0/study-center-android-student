@@ -7,6 +7,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/models/user_model.dart';
 import '../../journal/providers/journal_provider.dart';
+import '../../../shared/widgets/update_banner.dart';
 import '../models/home_model.dart';
 import '../providers/home_provider.dart';
 
@@ -78,6 +79,7 @@ class _NonStudentHome extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            const UpdateBanner(),
             const SizedBox(height: 8),
             Text('${greeting()},',
                 style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
@@ -215,6 +217,7 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            const UpdateBanner(),
             const SizedBox(height: 8),
             Text(
               '${greeting()},',

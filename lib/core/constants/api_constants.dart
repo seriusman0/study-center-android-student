@@ -54,4 +54,7 @@ class ApiConstants {
   static const String presensi = '/presensi';
   static String presensiDetail(int id) => '/presensi/$id';
   static const String presensiSearchStudents = '/presensi/students/search';
+
+  // App version check (public)
+  static const String appVersion = '/app/version';
 }

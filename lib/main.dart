@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'app.dart';
+import 'core/services/app_update_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 
 void main() async {
@@ -36,6 +37,13 @@ class _AppInitState extends ConsumerState<_AppInit> {
   Future<void> _init() async {
     await ref.read(authProvider.notifier).restoreSession();
     if (mounted) setState(() => _ready = true);
+
+    // Background version check — non-blocking, after UI is ready.
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        ref.read(appUpdateProvider.notifier).checkForUpdate();
+      }
+    });
   }
 
   @override
