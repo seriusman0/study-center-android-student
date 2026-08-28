@@ -9,6 +9,8 @@ import '../../auth/providers/auth_provider.dart';
 import '../../home/providers/home_provider.dart';
 import '../models/journal_model.dart';
 import '../providers/journal_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
+import '../../../shared/widgets/app_widgets.dart';
 
 
 class JournalScreen extends ConsumerStatefulWidget {
@@ -88,7 +90,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       if (!state.loading) {
         return const Center(child: Text('Gagal memuat. Tap refresh.', style: TextStyle(color: Colors.grey)));
       }
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: AppSkeletonLine(height: 16, widthRatio: 0.4)
+      );
     }
 
     final snap = state.snapshot!;
@@ -97,23 +101,33 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
     return RefreshIndicator(
       onRefresh: () => notifier.load(),
-      child: ListView(
+      child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          _ProgressHeader(
-            checked: snap.checkedCount,
-            total: snap.totalCount,
-            date: snap.date,
-            streak: streak,
-            isToday: state.isToday,
-            onPrev: () => notifier.goToPrevDay(),
-            onNext: state.isToday ? null : () => notifier.goToNextDay(),
-            onToday: state.isToday ? null : () => notifier.goToToday(),
-          ),
-          _LifeScheduleCard(snap: snap, notifier: notifier),
-          const SizedBox(height: 12),
-          _PhotoCard(snap: snap, notifier: notifier),
-        ],
+        itemCount: 4,
+        cacheExtent: 300,
+        itemBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return _ProgressHeader(
+                checked: snap.checkedCount,
+                total: snap.totalCount,
+                date: snap.date,
+                streak: streak,
+                isToday: state.isToday,
+                onPrev: () => notifier.goToPrevDay(),
+                onNext: state.isToday ? null : () => notifier.goToNextDay(),
+                onToday: state.isToday ? null : () => notifier.goToToday(),
+              );
+            case 1:
+              return _LifeScheduleCard(snap: snap, notifier: notifier);
+            case 2:
+              return const SizedBox(height: 12);
+            case 3:
+              return _PhotoCard(snap: snap, notifier: notifier);
+            default:
+              return const SizedBox.shrink();
+          }
+        },
       ),
     );
   }
@@ -598,49 +612,11 @@ class _CheckRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0),
-              child: Checkbox(
-                value: checked,
-                onChanged: (_) => onTap(),
-                visualDensity: VisualDensity.compact,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: Colors.grey[900],
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                if (subtitle != null && subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle!,
-                    style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                  ),
-                ],
-              ]),
-            ),
-          ],
-        ),
-      ),
+    return AppChecklistTile(
+      label: label,
+      sublabel: subtitle,
+      checked: checked,
+      onChanged: (_) => onTap(),
     );
   }
 }
@@ -706,41 +682,18 @@ class _PhotoCardState extends State<_PhotoCard> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final hasPhoto = widget.snap.photoUrl != null && widget.snap.photoUrl!.isNotEmpty;
+    Widget build(BuildContext context) {
+      final hasPhoto = widget.snap.photoUrl != null && widget.snap.photoUrl!.isNotEmpty;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              width: 28, height: 28,
-              decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(8)),
-              child: const Center(child: Text('2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
-            ),
-            const SizedBox(width: 8),
-            Text('Foto Saat Belajar', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            const SizedBox(width: 4),
-            Text('(opsional)', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
-          ]),
-          const SizedBox(height: 10),
-          const Divider(height: 1),
-          const SizedBox(height: 12),
-
+      return AppSectionCard(
+        title: 'Foto Saat Belajar (opsional)',
+        rows: [
           if (hasPhoto)
             Stack(
               alignment: Alignment.center,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                   child: Image.network(
                     widget.snap.photoUrl!,
                     height: 200,
@@ -751,35 +704,20 @@ class _PhotoCardState extends State<_PhotoCard> {
                 if (_uploading) const CircularProgressIndicator(),
               ],
             ),
-
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ElevatedButton.icon(
-                onPressed: _uploading ? null : _pickAndUpload,
-                icon: const Icon(Icons.photo_camera, size: 18),
-                label: Text(hasPhoto ? 'Ganti Foto' : 'Upload Foto'),
-                style: ElevatedButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  backgroundColor: theme.colorScheme.primary,
-                ),
-              ),
-              if (hasPhoto)
-                TextButton.icon(
-                  onPressed: _uploading ? null : _removePhoto,
-                  icon: const Icon(Icons.delete, size: 18),
-                  label: const Text('Hapus'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-            ],
+          AppUploadBox(
+            mainText: hasPhoto ? 'Ganti Foto' : 'Upload Foto',
+            onTap: _uploading ? null : _pickAndUpload,
           ),
-        ]),
-      ),
-    );
+          if (hasPhoto)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _uploading ? null : _removePhoto,
+                icon: const Icon(Icons.delete_outline, color: AppColors.danger, size: 18),
+                label: const Text('Hapus', style: TextStyle(color: AppColors.danger)),
+              ),
+            ),
+        ],
+      );
+    }
   }
-}
