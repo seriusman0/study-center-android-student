@@ -118,7 +118,7 @@ class JournalNotifier extends Notifier<JournalState> {
 
   Future<void> _checkRemote(OfflineOpKind kind, Map<String, dynamic> p) async {
     final repo = ref.read(journalRepositoryProvider);
-    final pType = p['item_type'] as String;
+    final pType = p['item_type'] as String? ?? '';
     if (kind == OfflineOpKind.checkBible) {
       await repo.check(
         itemType: pType,
@@ -136,6 +136,12 @@ class JournalNotifier extends Notifier<JournalState> {
       await repo.check(
         itemType: 'life',
         itemId: int.parse(p['item_id'] as String),
+        checked: p['checked'] == 'true',
+        date: p['date'] as String,
+      );
+    } else if (kind == OfflineOpKind.checkVerseCheck) {
+      await repo.check(
+        itemType: 'verse_check',
         checked: p['checked'] == 'true',
         date: p['date'] as String,
       );
@@ -193,13 +199,10 @@ class JournalNotifier extends Notifier<JournalState> {
     if (snap == null) return;
 
     // Optimistic update.
-    final updated = JournalSnapshot(
-      date: snap.date,
+    final updated = snap.copyWith(
       bible: type == 'pl'
           ? snap.bible.copyWith(plChecked: checked)
           : snap.bible.copyWith(pbChecked: checked),
-      verseRef: snap.verseRef,
-      lifeItems: snap.lifeItems,
     );
     state = state.copyWith(snapshot: updated);
 
@@ -220,15 +223,15 @@ class JournalNotifier extends Notifier<JournalState> {
     }
   }
 
+  /// Simpan teks ayat (verse_ref) — per-minggu, shared.
+  /// TIDAK mengubah verseChecked (centang per-hari terpisah).
   Future<void> saveVerseRef(String? verseRef) async {
     final snap = state.snapshot;
     if (snap == null) return;
 
-    final updated = JournalSnapshot(
-      date: snap.date,
-      bible: snap.bible,
+    final updated = snap.copyWith(
       verseRef: verseRef,
-      lifeItems: snap.lifeItems,
+      clearVerseRef: verseRef == null,
     );
     state = state.copyWith(snapshot: updated);
 
@@ -248,6 +251,33 @@ class JournalNotifier extends Notifier<JournalState> {
     }
   }
 
+  /// Centang/hapus centang hafalan per-hari (verse_check).
+  /// verse_ref (teks ayat) harus sudah ada; jika tidak, operasi dibatalkan.
+  Future<void> checkVerseChecked(bool checked) async {
+    final snap = state.snapshot;
+    if (snap == null) return;
+
+    // Optimistic update.
+    final updated = snap.copyWith(verseChecked: checked);
+    state = state.copyWith(snapshot: updated);
+
+    try {
+      final result = await ref.read(journalRepositoryProvider).check(
+            itemType: 'verse_check',
+            checked: checked,
+            date: snap.date,
+          );
+      state = state.copyWith(snapshot: result);
+    } catch (_) {
+      // Queue for offline sync.
+      await _enqueue(OfflineOpKind.checkVerseCheck, {
+        'item_type': 'verse_check',
+        'checked': checked.toString(),
+        'date': snap.date,
+      });
+    }
+  }
+
   Future<void> checkLife(int itemId, bool checked) async {
     final snap = state.snapshot;
     if (snap == null) return;
@@ -255,11 +285,7 @@ class JournalNotifier extends Notifier<JournalState> {
     final updatedItems = snap.lifeItems
         .map((i) => i.id == itemId ? i.copyWith(checked: checked) : i)
         .toList();
-    final updated = JournalSnapshot(
-        date: snap.date,
-        bible: snap.bible,
-        verseRef: snap.verseRef,
-        lifeItems: updatedItems);
+    final updated = snap.copyWith(lifeItems: updatedItems);
     state = state.copyWith(snapshot: updated);
 
     try {

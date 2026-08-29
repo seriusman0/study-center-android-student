@@ -28,9 +28,9 @@ List<NavTab> navTabsForRole(UserModel? user) {
   if (user.isAdmin) return _adminTabs;
   if (user.isMentor) return _mentorTabs;
   if (user.isCollege) return _collegeTabs;
-  // fulltimer/guest/scholarship_teenager: no dedicated tools tab
-  // yet (Fase 3/4) — Beranda (shared blog+galeri feed) + Profil only.
-  if (user.isStudent) return _studentTabs;
+  // student + scholarship_teenager: Beranda + Jurnal + Laporan + Profil
+  if (user.isStudent || user.isScholarshipTeenager) return _studentTabs;
+  // fulltimer/guest: Beranda + Profil only
   return _minimalTabs;
 }
 

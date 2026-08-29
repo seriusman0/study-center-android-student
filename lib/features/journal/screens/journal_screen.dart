@@ -87,11 +87,35 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           ),
         );
       }
-      if (!state.loading) {
-        return const Center(child: Text('Gagal memuat. Tap refresh.', style: TextStyle(color: Colors.grey)));
+      if (state.loading) {
+        // Loading spinner — jangan blank screen.
+        return const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Memuat jurnal…', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        );
       }
-      return const Center(
-        child: AppSkeletonLine(height: 16, widthRatio: 0.4)
+      // snapshot == null && !loading && error == null → belum ada data / gagal diam-diam.
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.inbox_outlined, size: 48, color: Colors.grey),
+            const SizedBox(height: 12),
+            const Text('Belum ada data. Tap refresh.', style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => ref.read(journalProvider.notifier).load(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
       );
     }
 
@@ -336,7 +360,7 @@ class _LifeScheduleCard extends StatelessWidget {
               if (item.label == 'Baca Alkitab')
                 _BibleReadingInline(snap: snap, notifier: notifier)
               else if (item.label == 'Hafal Ayat')
-                _VerseInputInline(snap: snap, notifier: notifier)
+                _HafalAyatSection(snap: snap, notifier: notifier)
               else
                 _CheckRow(
                   label: item.label,
@@ -409,13 +433,18 @@ class _BibleReadingInline extends StatelessWidget {
   }
 }
 
-class _VerseInputInline extends StatefulWidget {
+// ── Hafal Ayat Section ────────────────────────────────────────────────────────
+// Menampilkan dua bagian:
+//   a) Input/display teks ayat (verse_ref) — shared per-minggu
+//   b) Checkbox per-hari (verseChecked) — hanya bisa dicentang jika verse_ref sudah ada
+
+class _HafalAyatSection extends StatefulWidget {
   final JournalSnapshot snap;
   final JournalNotifier notifier;
-  const _VerseInputInline({required this.snap, required this.notifier});
+  const _HafalAyatSection({required this.snap, required this.notifier});
 
   @override
-  State<_VerseInputInline> createState() => _VerseInputInlineState();
+  State<_HafalAyatSection> createState() => _HafalAyatSectionState();
 }
 
 const _bibleBooks = [
@@ -430,7 +459,7 @@ const _bibleBooks = [
   '3 Yohanes', 'Yudas', 'Wahyu'
 ];
 
-class _VerseInputInlineState extends State<_VerseInputInline> {
+class _HafalAyatSectionState extends State<_HafalAyatSection> {
   String? _selectedKitab;
   late final TextEditingController _pasal;
   late final TextEditingController _ayat;
@@ -448,7 +477,7 @@ class _VerseInputInlineState extends State<_VerseInputInline> {
   }
 
   @override
-  void didUpdateWidget(_VerseInputInline old) {
+  void didUpdateWidget(_HafalAyatSection old) {
     super.didUpdateWidget(old);
     final newRef = widget.snap.verseRef ?? '';
     if (newRef != _savedLabel && newRef.isEmpty) {
@@ -497,6 +526,14 @@ class _VerseInputInlineState extends State<_VerseInputInline> {
     final hasInput = _selectedKitab != null || _pasal.text.isNotEmpty || _ayat.text.isNotEmpty;
     final theme = Theme.of(context);
     final hint = widget.snap.bible.collegePorsiHint;
+    final verseRef = widget.snap.verseRef ?? '';
+    final hasVerseRef = verseRef.isNotEmpty;
+    final verseChecked = widget.snap.verseChecked;
+
+    // Subtitle untuk checkbox: potong teks ayat jika > 50 char
+    final verseSubtitle = hasVerseRef
+        ? (verseRef.length > 50 ? '${verseRef.substring(0, 47)}…' : verseRef)
+        : null;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -508,8 +545,34 @@ class _VerseInputInlineState extends State<_VerseInputInline> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Header ──────────────────────────────────────────────────────────
           const Text('Hafal Ayat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const SizedBox(height: 8),
+
+          // ── (a) Checkbox per-hari ────────────────────────────────────────────
+          AppChecklistTile(
+            label: 'Hafal hari ini',
+            sublabel: verseSubtitle,
+            checked: verseChecked,
+            onChanged: (_) async {
+              if (!hasVerseRef) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Isi teks ayat terlebih dahulu'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+                return;
+              }
+              await widget.notifier.checkVerseChecked(!verseChecked);
+            },
+          ),
+
+          const Divider(height: 20),
+
+          // ── (b) Input/display teks ayat (verse_ref) per-minggu ──────────────
           Text(
             hint.isNotEmpty ? 'Dari porsi hari ini: $hint' : 'Pilih satu ayat dari porsi bacaan hari ini.',
             style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),

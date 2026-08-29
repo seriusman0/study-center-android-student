@@ -6,7 +6,6 @@ import 'features/auth/models/user_model.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
-import 'features/journal/screens/journal_screen.dart';
 import 'features/journal/screens/journal_history_screen.dart';
 import 'features/laporan/screens/laporan_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
@@ -63,8 +62,8 @@ bool _canAccessTab(UserModel? user, String path) {
   switch (path) {
     case '/jurnal':
     case '/laporan':
-      // College role also needs journal access to fill daily entries.
-      return user.isStudent || user.isCollege;
+      // College + scholarship_teenager also need journal access.
+      return user.hasJournalAccess;
     case '/mentor/kelas':
     case '/mentor/presensi':
       return user.hasMentorTools;
