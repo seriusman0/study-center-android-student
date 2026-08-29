@@ -49,3 +49,19 @@ app.*.map.json
 **/android/app/*.jks
 **/android/app/*.keystore
 **/android/keystore-secrets/
+
+# Temp/backup files
+_temp/
+*.yaml.bak
+*.bak
+login_h.xml
+post_redesign.xml
+prof.xml
+windows.xml
+query.php
+setup_login.yaml
+plan/
+ngobrol-src/
+references/
+scripts/
+playstore-deployment/

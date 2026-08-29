@@ -94,7 +94,7 @@ class CollegeJournalNotifier extends Notifier<CollegeJournalState> {
 
   Future<void> _initConnectivity() async {
     final conn = await ref.read(connectivityProvider.future);
-    state = state.copyWith(isOnline: conn ?? false);
+    state = state.copyWith(isOnline: conn);
   }
 
   String _dateString(DateTime d) =>

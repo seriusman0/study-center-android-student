@@ -33,7 +33,13 @@ class UserModel {
 
   /// Roles that see the student-style bottom nav (Beranda/Jurnal/Laporan/Profil)
   /// with journal + laporan + galeri student endpoints.
-  bool get hasStudentDashboard => isStudent;
+  bool get hasStudentDashboard => isStudent || isScholarshipTeenager;
+
+  /// Roles that have access to journal API (/api/jurnal/*)
+  bool get hasJournalAccess => isStudent || isCollege || isScholarshipTeenager;
+
+  /// True if user has multiple roles
+  bool get hasMultipleRoles => roles.length > 1;
 
   /// Roles that can manage kelas/presensi (mentor tooling).
   bool get hasMentorTools => isMentor || isAdmin;

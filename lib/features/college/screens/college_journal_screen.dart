@@ -255,11 +255,10 @@ class _BibleSection extends StatelessWidget {
     ];
 
     String? subtitle;
-    if (snap.bible.dayNo != null &&
-        (snap.bible.plText.isNotEmpty || snap.bible.pbText.isNotEmpty)) {
+    if (snap.bible.plText.isNotEmpty || snap.bible.pbText.isNotEmpty) {
       subtitle =
           'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText} / ${snap.bible.pbText}';
-    } else if (snap.bible.dayNo != null) {
+    } else {
       subtitle = 'Jadwal hari ke-${snap.bible.dayNo} belum diisi admin.';
     }
 
@@ -268,8 +267,7 @@ class _BibleSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (subtitle != null)
-            Padding(
+          Padding(
               padding: const EdgeInsets.only(
                   left: AppSpacing.xs, bottom: AppSpacing.xs),
               child: Text(
@@ -479,7 +477,7 @@ class _TimeRangeItem extends StatelessWidget {
             style: TextStyle(color: isEnabled ? Colors.black87 : Colors.grey[400], fontWeight: FontWeight.w500),
           )),
           if (hasValue) ...[
-            Text('${studyLog!.jamMulai}–${studyLog.jamSelesai}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+            Text('${studyLog.jamMulai}—${studyLog.jamSelesai}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
             const SizedBox(width: 6),
             Icon(Icons.chevron_right, size: 16, color: Colors.grey[400]),
           ],

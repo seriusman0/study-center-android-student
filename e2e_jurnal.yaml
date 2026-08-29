@@ -11,7 +11,7 @@ appId: com.studycenter.sc_student
     timeout: 20000
 
 # ─── NAVIGASI KE JURNAL ────────────────────────────────────────────────────────
-- tapOn: "Jurnal.*"
+- tapOn: "Jurnal Hari Ini"
 
 - extendedWaitUntil:
     visible: ".*Baca Alkitab.*"
@@ -29,20 +29,20 @@ appId: com.studycenter.sc_student
 # ─── AYAT HAFALAN ────────────────────────────────────────────────────────
 - scrollUntilVisible:
     element:
-      text: ".*Ayat Hafalan.*"
+      text: ".*Hafal Ayat.*"
     direction: DOWN
 
 - tapOn: ".*Kitab.*"
 - inputText: "Yohanes"
-- tapOn: ".*Ayat Hafalan.*"
+- tapOn: ".*Hafal Ayat.*"
 - tapOn:
     id: "pasalInput"
 - inputText: "3"
-- tapOn: ".*Ayat Hafalan.*"
+- tapOn: ".*Hafal Ayat.*"
 - tapOn:
     id: "ayatInput"
 - inputText: "16"
-- tapOn: ".*Ayat Hafalan.*"
+- tapOn: ".*Hafal Ayat.*"
 - tapOn: ".*Simpan.*"
 - waitForAnimationToEnd:
     timeout: 2000

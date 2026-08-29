@@ -12,10 +12,10 @@ class AuthRepository {
   const AuthRepository(this._dio, this._storage);
 
   Future<UserModel> login(String login, String password) async {
-    final response = await _dio.post(ApiConstants.login, data: {
-      'login': login,
-      'password': password,
-    });
+    final response = await _dio.post(
+      ApiConstants.login,
+      data: {'login': login, 'password': password},
+    );
 
     final data = response.data as Map<String, dynamic>;
     final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);

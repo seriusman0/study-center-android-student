@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'app.dart';
 import 'core/services/app_update_service.dart';
+import 'core/services/offline_service.dart';
+import 'core/services/connectivity_service.dart';
+import 'core/providers/journal_sync_signal.dart';
 import 'features/auth/providers/auth_provider.dart';
 
 void main() async {
@@ -15,6 +18,9 @@ void main() async {
 
   runApp(
     ProviderScope(
+      overrides: [
+        offlineServiceProvider.overrideWithValue(OfflineService()),
+      ],
       child: _AppInit(),
     ),
   );
@@ -35,6 +41,7 @@ class _AppInitState extends ConsumerState<_AppInit> {
   }
 
   Future<void> _init() async {
+    // Attempt offline session restore before showing the app.
     await ref.read(authProvider.notifier).restoreSession();
     if (mounted) setState(() => _ready = true);
 
@@ -54,6 +61,16 @@ class _AppInitState extends ConsumerState<_AppInit> {
         debugShowCheckedModeBanner: false,
       );
     }
+    // Listen for network restore to trigger journal sync — must be in build().
+    ref.listen<bool>(
+      connectivityProvider.select((s) => s.valueOrNull ?? false),
+      (prev, online) {
+        if (online) {
+          debugPrint('[AppInit] Network restored — triggering journal sync');
+          ref.invalidate(journalSyncSignalProvider);
+        }
+      },
+    );
     return const ScStudentApp();
   }
 }

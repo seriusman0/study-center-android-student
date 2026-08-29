@@ -27,7 +27,8 @@ List<NavTab> navTabsForRole(UserModel? user) {
 
   if (user.isAdmin) return _adminTabs;
   if (user.isMentor) return _mentorTabs;
-  // fulltimer/guest/scholarship_teenager/college: no dedicated tools tab
+  if (user.isCollege) return _collegeTabs;
+  // fulltimer/guest/scholarship_teenager: no dedicated tools tab
   // yet (Fase 3/4) — Beranda (shared blog+galeri feed) + Profil only.
   if (user.isStudent) return _studentTabs;
   return _minimalTabs;
@@ -56,6 +57,13 @@ const _adminTabs = [
 
 const _minimalTabs = [
   NavTab(path: '/home', icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Beranda'),
+  NavTab(path: '/profil', icon: Icons.person_outline, activeIcon: Icons.person, label: 'Profil'),
+];
+
+const _collegeTabs = [
+  NavTab(path: '/home', icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Beranda'),
+  NavTab(path: '/jurnal', icon: Icons.book_outlined, activeIcon: Icons.book, label: 'Jurnal'),
+  NavTab(path: '/college/review', icon: Icons.assignment_outlined, activeIcon: Icons.assignment, label: 'Review'),
   NavTab(path: '/profil', icon: Icons.person_outline, activeIcon: Icons.person, label: 'Profil'),
 ];
 

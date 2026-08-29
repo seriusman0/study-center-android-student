@@ -1,38 +1,24 @@
 appId: com.studycenter.sc_student
 ---
-# Flow 15: Role-aware navigation — college sees minimal tabs.
-
-- launchApp:
-    clearState: true
-
-- assertVisible: "Masuk"
+- launchApp: {clearState: true}
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
 - tapOn: "email@contoh.com / username"
 - eraseText
-- waitForAnimationToEnd:
-    timeout: 500
-- inputText: "test_college@studycenter.test"
+- inputText: "jelita.efni@example.com"
 - tapOn: "Masukkan password"
 - eraseText
+- inputText: "12345"
+- tapOn: 'SC Student'
+- tapOn: 'Login Sekarang'
 - waitForAnimationToEnd:
-    timeout: 500
-- inputText: "Test12345"
-- hideKeyboard
-- tapOn: "Login Sekarang"
-
-- waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 8000
 - extendedWaitUntil:
-    visible: "Test College"
-    timeout: 15000
-- takeScreenshot: "15_college_home"
-
-- assertVisible: "Beranda"
-- assertVisible: "Profil"
-
-- takeScreenshot: "15_college_bottom_nav"
-
-- tapOn:
-    point: "630,1433"
-- waitForAnimationToEnd
-- assertVisible: "Keluar"
-- takeScreenshot: "15_college_profil_tab"
+    visible: "Jelita Efni Telaumbanua"
+    timeout: 30000
+- tapOn: {text: "Jurnal Hari Ini"}
+- extendedWaitUntil:
+    visible: "Jurnal Harian"
+    timeout: 20000
+- takeScreenshot: journal_open

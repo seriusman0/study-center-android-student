@@ -103,6 +103,9 @@ class _NonStudentHome extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
+            // --- Journal card (college + student roles) ---
+            _JournalCard(user: user, theme: theme),
+            const SizedBox(height: 24),
             Row(
               children: [
                 Icon(Icons.article, color: theme.colorScheme.primary, size: 20),
@@ -283,8 +286,11 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
             ],
 
             // Jurnal Hari Ini
-            Card(
-              child: Padding(
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => context.push('/jurnal'),
+              child: Card(
+                child: Padding(
                 padding: const EdgeInsets.all(18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,6 +344,7 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
                   ],
                 ),
               ),
+            ),
             ),
 
             // Streak
@@ -591,6 +598,58 @@ class _BlogCard extends StatelessWidget {
     } catch (_) {
       return raw;
     }
+  }
+}
+
+/// Compact journal card shown on both student and non-student home screens.
+/// Displays the "Jurnal Hari Ini" entry and navigates to /jurnal when tapped.
+class _JournalCard extends StatelessWidget {
+  final UserModel user;
+  final ThemeData theme;
+
+  const _JournalCard({required this.user, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Jurnal Hari Ini',
+      button: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push('/jurnal'),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Row(
+                children: [
+                  Icon(Icons.book,
+                      color: theme.colorScheme.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Jurnal Hari Ini',
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right,
+                      color: Colors.grey[400], size: 20),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Hari ini • ${user.primaryRole}',
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+        ),
+      ),
+    );
   }
 }
 

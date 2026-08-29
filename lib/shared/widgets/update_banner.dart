@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/app_update_service.dart';
 
-/// A slim banner shown at the top of the home screen when an update is
-/// available. Three states:
-///   1. Downloading → shows progress bar
-///   2. Download complete → "Ketuk untuk instal" button
-///   3. Dismissed → hidden until next app launch
+/// A slim banner shown when an update is available.
+/// Tapping "Unduh Pembaruan" opens the download URL in the browser —
+/// in-app APK installation is not permitted on the Play Store.
 class UpdateBanner extends ConsumerWidget {
   const UpdateBanner({super.key});
 
@@ -14,10 +12,7 @@ class UpdateBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(appUpdateProvider);
 
-    // Nothing to show.
-    if (!state.updateAvailable && !state.downloading && !state.downloadComplete) {
-      return const SizedBox.shrink();
-    }
+    if (!state.updateAvailable) return const SizedBox.shrink();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -44,11 +39,7 @@ class UpdateBanner extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  state.downloadComplete
-                      ? 'Pembaruan siap diinstal'
-                      : state.downloading
-                          ? 'Mengunduh pembaruan...'
-                          : 'Versi ${state.info?.latestVersion ?? ""} tersedia',
+                  'Versi ${state.info?.latestVersion ?? ""} tersedia',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -56,52 +47,14 @@ class UpdateBanner extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (!state.downloading)
-                GestureDetector(
-                  onTap: () => ref.read(appUpdateProvider.notifier).dismiss(),
-                  child: const Icon(Icons.close, color: Colors.white70, size: 18),
-                ),
+              GestureDetector(
+                onTap: () => ref.read(appUpdateProvider.notifier).dismiss(),
+                child: const Icon(Icons.close, color: Colors.white70, size: 18),
+              ),
             ],
           ),
-          if (state.downloading) ...[
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: state.downloadProgress > 0 ? state.downloadProgress : null,
-                backgroundColor: Colors.white24,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                minHeight: 4,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${(state.downloadProgress * 100).toStringAsFixed(0)}%',
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
-          if (state.downloadComplete) ...[
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => ref.read(appUpdateProvider.notifier).installUpdate(),
-                icon: const Icon(Icons.install_mobile, size: 18),
-                label: const Text('Instal Sekarang'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF0F766E),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-          ],
           if (state.info?.releaseNotes != null &&
-              state.info!.releaseNotes.isNotEmpty &&
-              !state.downloading) ...[
+              state.info!.releaseNotes.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
               state.info!.releaseNotes,
@@ -110,6 +63,24 @@ class UpdateBanner extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ],
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  ref.read(appUpdateProvider.notifier).installUpdate(),
+              icon: const Icon(Icons.open_in_browser, size: 18),
+              label: const Text('Unduh Pembaruan'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF0F766E),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

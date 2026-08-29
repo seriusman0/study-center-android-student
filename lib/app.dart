@@ -32,6 +32,9 @@ import 'features/admin/screens/jurnal_monitor_screen.dart';
 import 'features/admin/screens/jurnal_offline_screen.dart';
 import 'features/admin/screens/admin_notifications_screen.dart';
 import 'features/admin/screens/college_jurnal_screen.dart';
+import 'features/college/screens/journal_router_screen.dart';
+import 'features/college/screens/college_review_screen.dart';
+import 'features/college/screens/college_review_detail_screen.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/widgets/bottom_nav_shell.dart';
 
@@ -52,6 +55,7 @@ const _allTabPaths = [
   '/admin/dashboard', // 5 — admin
   '/admin/users',     // 6 — admin
   '/profil',          // 7 — everyone
+  '/college/review',  // 8 — college
 ];
 
 bool _canAccessTab(UserModel? user, String path) {
@@ -59,13 +63,16 @@ bool _canAccessTab(UserModel? user, String path) {
   switch (path) {
     case '/jurnal':
     case '/laporan':
-      return user.isStudent;
+      // College role also needs journal access to fill daily entries.
+      return user.isStudent || user.isCollege;
     case '/mentor/kelas':
     case '/mentor/presensi':
       return user.hasMentorTools;
     case '/admin/dashboard':
     case '/admin/users':
       return user.isAdmin;
+    case '/college/review':
+      return user.isCollege;
     default:
       return true; // /home, /profil
   }
@@ -212,11 +219,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/jurnal', builder: (_, __) => const JournalScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/laporan', builder: (_, __) => const LaporanScreen()),
-          ]),
+                GoRoute(path: '/jurnal', builder: (_, __) => const JournalRouterScreen()),
+              ]),
+              StatefulShellBranch(routes: [
+                GoRoute(path: '/laporan', builder: (_, __) => const LaporanScreen()),
+              ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/mentor/kelas', builder: (_, __) => const MentorKelasScreen()),
           ]),
@@ -231,6 +238,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/profil', builder: (_, __) => const ProfileScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/college/review', builder: (_, __) => const CollegeReviewScreen()),
+            GoRoute(path: '/college/review/:id', builder: (ctx, state) => CollegeReviewDetailScreen(journalId: int.parse(state.pathParameters['id']!))),
           ]),
         ],
       ),

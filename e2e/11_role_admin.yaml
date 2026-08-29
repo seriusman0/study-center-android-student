@@ -1,32 +1,102 @@
 appId: com.studycenter.sc_student
 ---
-# Flow 11: Role-aware navigation — admin sees Dashboard/Pengguna tabs.
+# Flow: Admin login + dashboard navigation + jurnal monitor + logout
 
 - launchApp:
     clearState: true
 
+# ── 1. Login ──
+- waitForAnimationToEnd:
+    timeout: 3000
 - assertVisible: "Masuk"
-- tapOn: "email@contoh.com / username"
+- tapOn:
+    id: "emailField"
 - eraseText
 - waitForAnimationToEnd:
     timeout: 500
 - inputText: "test_admin@studycenter.test"
-- tapOn: "Password"
+- tapOn:
+    id: "passwordField"
 - eraseText
 - waitForAnimationToEnd:
     timeout: 500
 - inputText: "Test12345"
-# tap tombol login via point (bounds [90,1152][630,1245], center 360,1198)
 - tapOn:
-    point: "360,1198"
+    id: "loginBtn"
 
+# ── 2. Verify home screen ──
 - extendedWaitUntil:
     visible: "Test Admin"
-    timeout: 15000
-- takeScreenshot: "11_admin_home"
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "admin_01_home_beranda"
+
+# ── 3. Tap Dashboard tab (Tab 2 of 4, center=270,1455) ──
+- tapOn:
+    point: "270,1455"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: "admin_02_dashboard_loaded"
+
+# ── 4. Tap Monitor Jurnal card ──
+- tapOn:
+    point: "360,293"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "admin_03_jurnal_monitor"
+
+# ── 5. Role tabs ──
+- tapOn:
+    point: "250,180"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: "admin_04_jurnal_college_tab"
 
 - tapOn:
-    point: "950,1850"
-- waitForAnimationToEnd
-- assertVisible: "Keluar"
-- takeScreenshot: "11_admin_drawer"
+    point: "430,180"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: "admin_05_jurnal_scholarship_tab"
+
+- tapOn:
+    point: "90,180"
+- waitForAnimationToEnd:
+    timeout: 1500
+
+# ── 6. Drill-down ──
+- tapOn:
+    point: "180,340"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "admin_06_jurnal_detail"
+
+# ── 7. Back to dashboard ──
+- back
+- waitForAnimationToEnd:
+    timeout: 1500
+- back
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: "admin_07_back_to_dashboard"
+
+# ── 8. Tap Pengguna tab (Tab 3 of 4, center=450,1455) ──
+- tapOn:
+    point: "450,1455"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "admin_08_admin_users"
+
+# ── 9. Tap Profil tab (Tab 4 of 4, center=630,1455) ──
+- tapOn:
+    point: "630,1455"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "admin_09_admin_profile"
+
+# ── 10. Logout via Profil screen ──
+- tapOn: "Keluar"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Masuk"
+- takeScreenshot: "admin_10_logged_out"

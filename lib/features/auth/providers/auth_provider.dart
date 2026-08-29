@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/storage_service.dart';
@@ -35,6 +36,20 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final user = await ref.read(authRepositoryProvider).login(email, password);
       state = AuthState(user: user);
+      // Persist token + profile so restoreSession() can recover the session
+      // on next launch (critical for offline behaviour).
+      final token = await ref.read(storageServiceProvider).getToken();
+      if (token != null) {
+        await ref.read(storageServiceProvider).saveProfile(SavedProfile(
+            userId: user.id,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar,
+            primaryRole: user.primaryRole,
+            token: token,
+            savedAt: DateTime.now(),
+          ));
+      }
     } catch (e) {
       state = AuthState(error: extractErrorMessage(e));
     }
@@ -96,13 +111,45 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> restoreSession() async {
-    final token = await ref.read(storageServiceProvider).getToken();
+    final storage = ref.read(storageServiceProvider);
+    final token = await storage.getToken();
     if (token == null) return;
+
     try {
       final user = await ref.read(authRepositoryProvider).me();
       state = AuthState(user: user);
     } catch (_) {
-      await ref.read(storageServiceProvider).deleteToken();
+      // Network error — likely offline. Restore user from the most recently
+      // saved profile so the app is usable without connectivity.
+      final profiles = await storage.getSavedProfiles();
+      if (profiles.isNotEmpty) {
+        // Use the most recently saved profile as a fallback user.
+        final saved = profiles.first;
+        final cached = SavedProfile(
+          userId: saved.userId,
+          name: saved.name,
+          email: saved.email,
+          avatar: saved.avatar,
+          primaryRole: saved.primaryRole,
+          token: token, // keep existing token for re-validation later
+          savedAt: saved.savedAt,
+        );
+        // Reconstruct a UserModel from the saved profile.
+        state = AuthState(
+          user: UserModel(
+            id: cached.userId,
+            name: cached.name,
+            username: cached.email.split('@').first,
+            email: cached.email,
+            avatar: cached.avatar,
+            roles: [cached.primaryRole],
+          ),
+        );
+        debugPrint('[Auth] Offline restore: using cached profile for ${cached.email}');
+      } else {
+        // No profile and no network — just keep the token for re-validation later.
+        debugPrint('[Auth] Offline restore: no cached profile, token preserved');
+      }
     }
   }
 }

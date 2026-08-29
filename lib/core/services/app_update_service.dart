@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/api_constants.dart';
 
 /// Holds the result of a version check against the backend.
@@ -37,44 +35,28 @@ class AppUpdateInfo {
 
 class AppUpdateState {
   final bool checking;
-  final bool downloading;
-  final double downloadProgress; // 0.0 – 1.0
   final bool updateAvailable;
-  final bool downloadComplete;
   final AppUpdateInfo? info;
   final String? error;
-  final String? apkPath;
 
   const AppUpdateState({
     this.checking = false,
-    this.downloading = false,
-    this.downloadProgress = 0,
     this.updateAvailable = false,
-    this.downloadComplete = false,
     this.info,
     this.error,
-    this.apkPath,
   });
 
   AppUpdateState copyWith({
     bool? checking,
-    bool? downloading,
-    double? downloadProgress,
     bool? updateAvailable,
-    bool? downloadComplete,
     AppUpdateInfo? info,
     String? error,
-    String? apkPath,
   }) =>
       AppUpdateState(
         checking: checking ?? this.checking,
-        downloading: downloading ?? this.downloading,
-        downloadProgress: downloadProgress ?? this.downloadProgress,
         updateAvailable: updateAvailable ?? this.updateAvailable,
-        downloadComplete: downloadComplete ?? this.downloadComplete,
         info: info ?? this.info,
         error: error ?? this.error,
-        apkPath: apkPath ?? this.apkPath,
       );
 }
 
@@ -123,8 +105,6 @@ class AppUpdateNotifier extends Notifier<AppUpdateState> {
 
       if (hasUpdate) {
         debugPrint('[UPDATE] New version available: ${info.latestVersion} (current: $currentVersion)');
-        // Start background download automatically.
-        await downloadUpdate();
       } else {
         debugPrint('[UPDATE] App is up to date ($currentVersion)');
       }
@@ -135,69 +115,19 @@ class AppUpdateNotifier extends Notifier<AppUpdateState> {
     }
   }
 
-  /// Download the APK in the background. Shows progress via state.
-  Future<void> downloadUpdate() async {
-    final info = state.info;
-    if (info == null || info.downloadUrl.isEmpty) return;
-
-    state = state.copyWith(downloading: true, downloadProgress: 0);
-
-    try {
-      final dir = await getTemporaryDirectory();
-      final apkPath = '${dir.path}/study-center-nias-${info.latestVersion}.apk';
-      final file = File(apkPath);
-
-      // Skip download if already downloaded.
-      if (file.existsSync()) {
-        debugPrint('[UPDATE] APK already downloaded at $apkPath');
-        state = state.copyWith(
-          downloading: false,
-          downloadComplete: true,
-          apkPath: apkPath,
-        );
-        return;
-      }
-
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(minutes: 10),
-      ));
-
-      await dio.download(
-        info.downloadUrl,
-        apkPath,
-        onReceiveProgress: (received, total) {
-          if (total > 0) {
-            state = state.copyWith(
-              downloadProgress: received / total,
-            );
-          }
-        },
-      );
-
-      debugPrint('[UPDATE] APK downloaded to $apkPath');
-      state = state.copyWith(
-        downloading: false,
-        downloadComplete: true,
-        apkPath: apkPath,
-      );
-    } catch (e) {
-      debugPrint('[UPDATE] Download failed: $e');
-      state = state.copyWith(
-        downloading: false,
-        error: 'Gagal mengunduh pembaruan.',
-      );
-    }
-  }
-
-  /// Open the downloaded APK for installation.
+  /// Open the download URL in the browser so the user can install the update
+  /// manually. Using REQUEST_INSTALL_PACKAGES to install APKs in-app is not
+  /// allowed on the Play Store (restricted permission).
   Future<void> installUpdate() async {
-    final path = state.apkPath;
-    if (path == null) return;
+    final url = state.info?.downloadUrl;
+    if (url == null || url.isEmpty) return;
     try {
-      await OpenFilex.open(path, type: 'application/vnd.android.package-archive');
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
     } catch (e) {
-      debugPrint('[UPDATE] Install trigger failed: $e');
+      debugPrint('[UPDATE] Open browser failed: $e');
     }
   }
 

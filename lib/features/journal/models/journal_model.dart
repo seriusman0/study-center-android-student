@@ -23,10 +23,10 @@ class BibleReading {
     Map<String, dynamic>? collegeBible,
   }) =>
       BibleReading(
-        plPorsi:   j['pl_porsi'] ?? '',
-        pbPorsi:   j['pb_porsi'] ?? '',
-        plChecked: j['pl_checked'] == true,
-        pbChecked: j['pb_checked'] == true,
+        plPorsi:   j['pl_porsi']?.toString() ?? '',
+        pbPorsi:   j['pb_porsi']?.toString() ?? '',
+        plChecked: j['pl_checked'] == true || j['pl_checked'] == 1 || j['pl_checked'] == '1',
+        pbChecked: j['pb_checked'] == true || j['pb_checked'] == 1 || j['pb_checked'] == '1',
         dayNo:     dayNo,
         plText:    collegeBible?['pl_text'] as String?,
         pbText:    collegeBible?['pb_text'] as String?,
@@ -62,10 +62,10 @@ class LifeItem {
   });
 
   factory LifeItem.fromJson(Map<String, dynamic> j) => LifeItem(
-        id:       j['id'] as int,
-        kategori: j['kategori'] ?? '',
-        label:    j['label'] ?? '',
-        checked:  j['checked'] == true,
+        id:       int.tryParse(j['id']?.toString() ?? '0') ?? 0,
+        kategori: j['kategori']?.toString() ?? '',
+        label:    j['label']?.toString() ?? '',
+        checked:  j['checked'] == true || j['checked'] == 1 || j['checked'] == '1',
       );
 
   LifeItem copyWith({bool? checked}) => LifeItem(
@@ -88,6 +88,8 @@ class JournalSnapshot {
   final String date;
   final BibleReading bible;
   final String? verseRef;
+  /// Per-hari: apakah hafalan sudah dicentang hari ini.
+  final bool verseChecked;
   final String? photoUrl;
   final List<LifeItem> lifeItems;
 
@@ -95,21 +97,42 @@ class JournalSnapshot {
     required this.date,
     required this.bible,
     this.verseRef,
+    this.verseChecked = false,
     this.photoUrl,
     required this.lifeItems,
   });
 
-  factory JournalSnapshot.fromJson(Map<String, dynamic> j) => JournalSnapshot(
-        date:      j['date'] ?? '',
-        bible:     BibleReading.fromJson(
-          j['bible'] as Map<String, dynamic>,
-          dayNo: j['day_no'] as int?,
-          collegeBible: j['college_bible'] as Map<String, dynamic>?,
+  factory JournalSnapshot.fromJson(Map<String, dynamic> j) {
+    final parsedItems = (j['life_items'] as List? ?? []).map((e) => LifeItem.fromJson(e)).toList();
+    if (!parsedItems.any((i) => i.label == 'Baca Alkitab')) {
+      parsedItems.insert(0, const LifeItem(id: -1, kategori: 'kerohanian', label: 'Baca Alkitab', checked: false));
+    }
+    if (!parsedItems.any((i) => i.label == 'Hafal Ayat')) {
+      parsedItems.insert(1, const LifeItem(id: -2, kategori: 'kerohanian', label: 'Hafal Ayat', checked: false));
+    }
+    
+    Map<String, dynamic> bibleMap = {};
+    if (j['bible'] is Map) {
+      bibleMap = Map<String, dynamic>.from(j['bible']);
+    }
+
+    final verseChecked = j['verse_checked'] == true
+        || j['verse_checked'] == 1
+        || j['verse_checked'] == '1';
+
+    return JournalSnapshot(
+        date:         j['date'] ?? '',
+        bible:        BibleReading.fromJson(
+          bibleMap,
+          dayNo: int.tryParse(j['day_no']?.toString() ?? '') ?? int.tryParse(bibleMap['day_no']?.toString() ?? ''),
+          collegeBible: j['college_bible'] is Map ? Map<String, dynamic>.from(j['college_bible']) : null,
         ),
-        verseRef:  j['verse_ref'] as String?,
-        photoUrl:  _parsePhotoUrl(j),
-        lifeItems: (j['life_items'] as List? ?? []).map((e) => LifeItem.fromJson(e)).toList(),
+        verseRef:     j['verse_ref'] as String?,
+        verseChecked: verseChecked,
+        photoUrl:     _parsePhotoUrl(j),
+        lifeItems:    parsedItems,
       );
+  }
 
   static String? _parsePhotoUrl(Map<String, dynamic> j) {
     final path = j['foto_belajar_url'] ?? j['foto_belajar'] ?? j['photo_url'] ?? j['foto_url'] ?? j['foto'] as String?;
@@ -118,11 +141,34 @@ class JournalSnapshot {
     return 'https://studycenter.nanoprojectdevindonesia.com/storage/$path';
   }
 
+  JournalSnapshot copyWith({
+    String? date,
+    BibleReading? bible,
+    String? verseRef,
+    bool? verseChecked,
+    String? photoUrl,
+    List<LifeItem>? lifeItems,
+    // Sentinel to allow clearing verseRef to null explicitly.
+    bool clearVerseRef = false,
+    bool clearPhotoUrl = false,
+  }) {
+    return JournalSnapshot(
+      date:         date ?? this.date,
+      bible:        bible ?? this.bible,
+      verseRef:     clearVerseRef ? null : (verseRef ?? this.verseRef),
+      verseChecked: verseChecked ?? this.verseChecked,
+      photoUrl:     clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
+      lifeItems:    lifeItems ?? this.lifeItems,
+    );
+  }
+
+  /// Jumlah item yang sudah dicentang/diselesaikan.
+  /// verse_checked (bukan verseRef) dipakai untuk menghitung centang hafalan.
   int get checkedCount {
     int c = 0;
     if (bible.plChecked) c++;
     if (bible.pbChecked) c++;
-    if (verseRef != null && verseRef!.isNotEmpty) c++;
+    if (verseChecked) c++;
     if (photoUrl != null && photoUrl!.isNotEmpty) c++;
     c += lifeItems.where((i) => i.checked && i.label != 'Baca Alkitab' && i.label != 'Hafal Ayat').length;
     return c;
