@@ -449,10 +449,6 @@ class _LoginFormCard extends ConsumerWidget {
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
-          const _GoogleLoginButton(),
-          const SizedBox(height: 24),
-          const _DividerAtau(),
-          const SizedBox(height: 24),
           if (state.error != null) _ErrorBox(error: state.error!),
           const Text('Email atau Username', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           const SizedBox(height: 4),
@@ -509,42 +505,6 @@ class _LoginFormCard extends ConsumerWidget {
           const _DaftarLink(),
         ],
       ),
-    );
-  }
-}
-
-class _GoogleLoginButton extends StatelessWidget {
-  const _GoogleLoginButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: Colors.grey.shade300),
-      ),
-      onPressed: () {},
-      icon: const Icon(Icons.g_mobiledata, size: 28, color: Color(0xFF4285F4)),
-      label: const Text('Masuk dengan Google', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
-    );
-  }
-}
-
-class _DividerAtau extends StatelessWidget {
-  const _DividerAtau();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(child: Divider()),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text('atau', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-        ),
-        const Expanded(child: Divider()),
-      ],
     );
   }
 }

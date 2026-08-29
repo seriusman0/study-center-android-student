@@ -150,4 +150,10 @@ class ApiConstants {
   static const String collegeProfile       = '/college/profile';
   static const String collegeReviewList    = '/college/review';
   static String collegeReviewDetail(int id) => '/college/review/$id';
+
+  // ── Scholarship Teenager self-service (API, role:scholarship_teenager) ───
+  static const String scholarshipJurnalToday   = '/scholarship-teenager-jurnal/today';
+  static const String scholarshipJurnalCheck   = '/scholarship-teenager-jurnal/check';
+  static const String scholarshipJurnalHistory = '/scholarship-teenager-jurnal/history';
+  static const String scholarshipJurnalFoto    = '/scholarship-teenager-jurnal/foto';
 }

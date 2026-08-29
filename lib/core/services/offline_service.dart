@@ -9,7 +9,9 @@ enum OfflineOpKind {
   // Journal verse check (per-day)
   checkVerseCheck,
   // College-specific operations
-  collegeCheck, collegeStudyLog, collegeFoto
+  collegeCheck, collegeStudyLog, collegeFoto,
+  // Scholarship teenager-specific operations
+  scholarshipCheck, scholarshipFoto
 }
 
 /// One queued mutation waiting to be sent to the server.
