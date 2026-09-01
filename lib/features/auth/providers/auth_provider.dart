@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/api_service.dart';
@@ -9,8 +10,9 @@ class AuthState {
   final UserModel? user;
   final bool loading;
   final String? error;
+  final String? expiredEmail; // email whose token expired (pre-fill on manual form)
 
-  const AuthState({this.user, this.loading = false, this.error});
+  const AuthState({this.user, this.loading = false, this.error, this.expiredEmail});
 
   bool get isAuthenticated => user != null;
 
@@ -18,12 +20,14 @@ class AuthState {
     UserModel? user,
     bool? loading,
     String? error,
+    String? expiredEmail,
     bool clearUser = false,
   }) =>
       AuthState(
-        user:    clearUser ? null : (user ?? this.user),
-        loading: loading ?? this.loading,
-        error:   error,
+        user:         clearUser ? null : (user ?? this.user),
+        loading:      loading ?? this.loading,
+        error:        error,
+        expiredEmail:  expiredEmail,
       );
 }
 
@@ -31,44 +35,115 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() => const AuthState();
 
+  /// Last known password for auto re-login on token expiry.
+  String? _lastPassword;
+
+  /// Saves a password to be used for auto re-login if the token expires.
+  void rememberPassword(String password) {
+    _lastPassword = password;
+  }
+
   Future<void> login(String email, String password) async {
     state = state.copyWith(loading: true, error: null);
     try {
       final user = await ref.read(authRepositoryProvider).login(email, password);
       state = AuthState(user: user);
+      _lastPassword = password;
+
       // Persist token + profile so restoreSession() can recover the session
       // on next launch (critical for offline behaviour).
       final token = await ref.read(storageServiceProvider).getToken();
       if (token != null) {
         await ref.read(storageServiceProvider).saveProfile(SavedProfile(
-            userId: user.id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar,
-            primaryRole: user.primaryRole,
-            token: token,
-            savedAt: DateTime.now(),
-          ));
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          primaryRole: user.primaryRole,
+          token: token,
+          password: password, // <-- auto re-login support
+          savedAt: DateTime.now(),
+        ));
       }
     } catch (e) {
+      _lastPassword = null;
       state = AuthState(error: extractErrorMessage(e));
     }
   }
 
-  /// Quick-switch login from a previously saved profile. Token is
-  /// validated against GET /me — if expired the user is shown an error
-  /// and needs to re-enter credentials.
+  /// Quick-switch from a previously saved profile.
+  ///
+  /// 1. Validate token via GET /me
+  /// 2. If token expired → auto re-login with stored password (if any)
+  /// 3. If no stored password → show manual login form
   Future<void> loginWithProfile(SavedProfile profile) async {
     state = state.copyWith(loading: true, error: null);
+
+    // Step 1: Try token validation
     try {
-      final user = await ref.read(authRepositoryProvider).loginWithToken(profile);
+      await ref.read(storageServiceProvider).saveToken(profile.token);
+      final user = await ref.read(authRepositoryProvider).me();
       state = AuthState(user: user);
+
+      // Refresh profile snapshot
+      await ref.read(storageServiceProvider).saveProfile(SavedProfile(
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        primaryRole: user.primaryRole,
+        token: profile.token,
+        password: profile.password, // preserve stored password
+        savedAt: DateTime.now(),
+      ));
+      return;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+        // Token expired — step 2: try auto re-login with stored password
+        if (profile.password != null && profile.password!.isNotEmpty) {
+          debugPrint('[Auth] Token expired, attempting auto re-login for ${profile.email}');
+          final success = await _autoLogin(profile.email, profile.password!);
+          if (success) return;
+          // Auto login failed — fall through to manual
+        }
+      }
+    } catch (_) {}
+
+    // Step 3: No stored password or auto re-login failed — show manual form
+    await ref.read(storageServiceProvider).removeSavedProfile(profile.userId);
+    state = AuthState(
+      error: 'Sesi habis. Silakan login ulang.',
+      expiredEmail: profile.email,
+    );
+    // Pre-fill email so user only needs password
+    // (handled in LoginScreen via the error + savedProfiles state)
+  }
+
+  /// Attempts silent login with email + password. Returns true on success.
+  Future<bool> _autoLogin(String email, String password) async {
+    try {
+      final user = await ref.read(authRepositoryProvider).login(email, password);
+      state = AuthState(user: user);
+      _lastPassword = password;
+
+      final token = await ref.read(storageServiceProvider).getToken();
+      if (token != null) {
+        await ref.read(storageServiceProvider).saveProfile(SavedProfile(
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          primaryRole: user.primaryRole,
+          token: token,
+          password: password,
+          savedAt: DateTime.now(),
+        ));
+      }
+      debugPrint('[Auth] Auto re-login success for $email');
+      return true;
     } catch (e) {
-      // Token expired — remove from saved profiles so it doesn't show
-      // a stale entry that always fails.
-      await ref.read(storageServiceProvider).removeSavedProfile(profile.userId);
-      state = AuthState(
-          error: 'Sesi habis. Silakan login ulang dengan password.');
+      debugPrint('[Auth] Auto re-login failed for $email: $e');
+      return false;
     }
   }
 
@@ -132,6 +207,7 @@ class AuthNotifier extends Notifier<AuthState> {
           avatar: saved.avatar,
           primaryRole: saved.primaryRole,
           token: token, // keep existing token for re-validation later
+          password: saved.password,
           savedAt: saved.savedAt,
         );
         // Reconstruct a UserModel from the saved profile.

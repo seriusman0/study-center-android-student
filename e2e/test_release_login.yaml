@@ -1,0 +1,18 @@
+appId: com.studycenter.sc_student
+---
+- launchApp: {clearState: true}
+- extendedWaitUntil:
+    visible: "Email atau Username"
+    timeout: 10000
+- tapOn: "Email atau Username"
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn: "Password"
+- eraseText
+- inputText: "password123"
+- tapOn: 'Login Sekarang'
+- waitForAnimationToEnd:
+    timeout: 12000
+- takeScreenshot: release_login_verify
+# Student role: tab should be "Beranda" (3 tabs only, no Review)
+- assertVisible: ".*Beranda.*"

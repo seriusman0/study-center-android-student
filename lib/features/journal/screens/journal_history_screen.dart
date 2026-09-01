@@ -22,10 +22,10 @@ class JournalHistoryEntry {
 
   factory JournalHistoryEntry.fromJson(Map<String, dynamic> j) =>
       JournalHistoryEntry(
-        date:    j['date'] as String? ?? '',
+        date: j['date'] as String? ?? '',
         checked: (j['checked'] as num?)?.toInt() ?? 0,
-        total:   (j['total'] as num?)?.toInt() ?? 0,
-        pct:     (j['pct'] as num?)?.toDouble() ?? 0.0,
+        total: (j['total'] as num?)?.toInt() ?? 0,
+        pct: (j['pct'] as num?)?.toDouble() ?? 0.0,
       );
 }
 
@@ -55,11 +55,11 @@ class _HistoryState {
     String? to,
   }) =>
       _HistoryState(
-        items:   items   ?? this.items,
+        items: items ?? this.items,
         loading: loading ?? this.loading,
-        error:   error,
-        from:    from    ?? this.from,
-        to:      to      ?? this.to,
+        error: error,
+        from: from ?? this.from,
+        to: to ?? this.to,
       );
 }
 
@@ -122,8 +122,7 @@ class JournalHistoryScreen extends ConsumerStatefulWidget {
       _JournalHistoryScreenState();
 }
 
-class _JournalHistoryScreenState
-    extends ConsumerState<JournalHistoryScreen> {
+class _JournalHistoryScreenState extends ConsumerState<JournalHistoryScreen> {
   DateTimeRange? _range;
 
   Future<void> _pickRange() async {
@@ -141,7 +140,7 @@ class _JournalHistoryScreenState
     if (picked != null && mounted) {
       setState(() => _range = picked);
       final from = picked.start.toIso8601String().substring(0, 10);
-      final to   = picked.end.toIso8601String().substring(0, 10);
+      final to = picked.end.toIso8601String().substring(0, 10);
       ref.read(_historyProvider.notifier).load(from: from, to: to);
     }
   }
@@ -251,8 +250,8 @@ class _JournalHistoryScreenState
                 ),
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 12, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   itemCount: state.items.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (ctx, i) =>
@@ -297,7 +296,9 @@ class _HistoryTile extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+                  isComplete
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
                   size: 18,
                   color: isComplete ? Colors.green : Colors.grey[400],
                 ),
@@ -332,8 +333,8 @@ class _HistoryTile extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               '${entry.pct.toStringAsFixed(0)}% selesai',
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: Colors.grey[500]),
+              style:
+                  theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
             ),
           ],
         ),

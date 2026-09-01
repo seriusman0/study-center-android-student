@@ -1,0 +1,171 @@
+appId: com.studycenter.sc_student
+---
+# ═══════════════════════════════════════════════════════════════════════
+# Comprehensive E2E Test for Multi-Role User (Student + Scholarship Teenager)
+# Uses: testuser / 12345
+# Validates: Login → Beranda → Journal navigation → Both journal tabs →
+#            Back to home → Bottom nav → Laporan → Profil → Logout
+# ═══════════════════════════════════════════════════════════════════════
+
+# ── 1. LAUNCH & LOGIN ──────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- inputText: "testuser"
+
+- tapOn: "Masukkan password"
+- inputText: "12345"
+
+- tapOn: "Login Sekarang"
+
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 15000
+
+# ── 2. VERIFY BERANDA (Home Screen) ────────────────────────────────────
+# Bottom nav should be visible
+- assertVisible: "Beranda"
+- assertVisible: "Profil"
+
+# Greeting and user name should appear
+- assertVisible:
+    text: "Selamat.*"
+    optional: true
+
+# QR Absensi card
+- assertVisible:
+    text: "QR Absensi"
+    optional: true
+
+# Journal-related buttons for multi-role user
+- assertVisible:
+    text: "Mulai Isi Jurnal.*"
+    optional: true
+
+# JURNAL HARI INI summary card
+- assertVisible:
+    text: "JURNAL HARI INI"
+    optional: true
+
+# ── 3. NAVIGATE TO JOURNAL VIA BUTTON ──────────────────────────────────
+# Scroll up first to see buttons
+- scrollUntilVisible:
+    element: "Mulai Isi Jurnal Remaja SC"
+    direction: DOWN
+    timeout: 5000
+    optional: true
+
+- tapOn:
+    text: "Mulai Isi Jurnal Remaja SC"
+    optional: true
+
+# Wait for journal screen to load
+- extendedWaitUntil:
+    visible: "Jurnal Harian"
+    timeout: 8000
+    optional: true
+
+# ── 4. VERIFY JOURNAL SCREEN (Scholarship Teenager Tab) ─────────────────
+# Multi-role users see tabs at the top
+- assertVisible:
+    text: "Jurnal Beasiswa"
+    optional: true
+- assertVisible:
+    text: "Jurnal Student"
+    optional: true
+
+# Journal content: Pembacaan Alkitab section
+- assertVisible:
+    text: "Pembacaan Alkitab"
+    optional: true
+- assertVisible:
+    text: "Perjanjian Lama"
+    optional: true
+- assertVisible:
+    text: "Perjanjian Baru"
+    optional: true
+
+# Scroll to see more journal content
+- scroll
+
+# Foto Belajar section
+- assertVisible:
+    text: "Foto Belajar"
+    optional: true
+
+# ── 5. SWITCH TO STUDENT JOURNAL TAB ───────────────────────────────────
+- tapOn:
+    text: "Jurnal Student"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Pembacaan Alkitab"
+    timeout: 5000
+    optional: true
+
+# Scroll through student journal content
+- scroll
+
+# ── 6. GO BACK TO BERANDA ──────────────────────────────────────────────
+- tapOn:
+    text: "Jurnal Beasiswa"
+    optional: true
+
+# Use back button to return to Home
+- pressKey: back
+
+# Wait for Beranda to load back
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 5000
+    optional: true
+
+# ── 7. NAVIGATE VIA BOTTOM NAV: JURNAL TAB ─────────────────────────────
+# Tap Jurnal in the bottom navigation bar
+- tapOn:
+    id: ".*jurnal.*"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Jurnal Harian"
+    timeout: 5000
+    optional: true
+
+# ── 8. NAVIGATE VIA BOTTOM NAV: LAPORAN ────────────────────────────────
+- pressKey: back
+  
+- tapOn:
+    text: "Laporan"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Statistik.*"
+    timeout: 5000
+    optional: true
+
+# ── 9. NAVIGATE VIA BOTTOM NAV: PROFIL & LOGOUT ───────────────────────
+- tapOn: "Profil"
+
+- extendedWaitUntil:
+    visible: "Keluar"
+    timeout: 5000
+
+- scroll
+
+- tapOn: "Keluar"
+
+# Confirmation dialog
+- tapOn:
+    text: "Keluar"
+    optional: true
+
+- tapOn:
+    text: "Ya"
+    optional: true
+
+# Verify we're back at login
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 8000

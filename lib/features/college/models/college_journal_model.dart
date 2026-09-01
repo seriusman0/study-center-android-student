@@ -181,6 +181,8 @@ class CollegeJournalSnapshot {
   final CollegeBible bible;
   final List<CollegeLifeItem> lifeItems;
   final Map<int, StudyLog> studyLogs;
+  final String? verseRef;
+  final bool verseChecked;
   final String? fotoBelajarUrl;
   final int streak;
 
@@ -191,6 +193,8 @@ class CollegeJournalSnapshot {
     required this.bible,
     required this.lifeItems,
     required this.studyLogs,
+    this.verseRef,
+    this.verseChecked = false,
     this.fotoBelajarUrl,
     this.streak = 0,
   });
@@ -224,6 +228,8 @@ class CollegeJournalSnapshot {
       bible:           CollegeBible.fromJson(j['bible'] is Map ? Map<String, dynamic>.from(j['bible']) : {}),
       lifeItems:       lifeItems,
       studyLogs:       studyLogs,
+      verseRef:        j['verse_ref'] as String?,
+      verseChecked:    j['verse_checked'] == true || j['verse_checked'] == 1 || j['verse_checked'] == '1',
       fotoBelajarUrl:  _parseFotoUrl(j),
       streak:          j['streak'] as int? ?? 0,
     );
@@ -240,11 +246,12 @@ class CollegeJournalSnapshot {
     int c = 0;
     if (bible.plChecked) c++;
     if (bible.pbChecked) c++;
+    if (verseChecked) c++;
     c += lifeItems.where((i) => i.checked).length;
     return c;
   }
 
-  int get totalCount => 2 + lifeItems.length;
+  int get totalCount => 2 + (verseRef != null ? 1 : 0) + lifeItems.length;
 
   Map<String, List<CollegeLifeItem>> get lifeItemsByKategori {
     final map = <String, List<CollegeLifeItem>>{};
@@ -277,7 +284,10 @@ class CollegeJournalSnapshot {
     bool? biblePbChecked,
     List<CollegeLifeItem>? lifeItems,
     Map<int, StudyLog>? studyLogs,
+    String? verseRef,
+    bool? verseChecked,
     String? fotoBelajarUrl,
+    bool clearVerseRef = false,
   }) => CollegeJournalSnapshot(
         date:            date,
         week:            week,
@@ -288,6 +298,8 @@ class CollegeJournalSnapshot {
         ),
         lifeItems:         lifeItems ?? this.lifeItems,
         studyLogs:         studyLogs ?? this.studyLogs,
+        verseRef:          clearVerseRef ? null : (verseRef ?? this.verseRef),
+        verseChecked:      verseChecked ?? this.verseChecked,
         fotoBelajarUrl:    fotoBelajarUrl ?? this.fotoBelajarUrl,
         streak:            streak,
     );

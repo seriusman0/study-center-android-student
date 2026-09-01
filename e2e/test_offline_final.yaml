@@ -1,0 +1,6 @@
+appId: com.studycenter.sc_student
+---
+- launchApp
+- waitForAnimationToEnd: {timeout: 8000}
+- assertVisible: {text: "Email atau Username"}
+- takeScreenshot: login_visible

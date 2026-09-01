@@ -1,0 +1,23 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- inputText: "testuser"
+
+- tapOn: "Masukkan password"
+- inputText: "12345"
+- pressKey: Back
+
+- scrollUntilVisible:
+    element: "Login Sekarang"
+    direction: DOWN
+- tapOn: "Login Sekarang"
+
+- extendedWaitUntil:
+    visible: "Beranda.*|Jurnal|Profil"
+    timeout: 15000
+
+- takeScreenshot: "test_login_testuser_success"

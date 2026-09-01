@@ -22,8 +22,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      if (ref.read(authProvider).error != null) {
+      final auth = ref.read(authProvider);
+      if (auth.error != null) {
         ref.read(authProvider.notifier).clearError();
+      }
+      // If a previous session expired, pre-fill the email so user only needs password
+      if (auth.expiredEmail != null) {
+        _emailCtrl.text = auth.expiredEmail!;
+        _showManualLogin = true;
       }
     });
   }

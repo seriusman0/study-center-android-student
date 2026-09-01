@@ -1,0 +1,24 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: Masuk
+- tapOn: "email@contoh.com / username"
+- inputText: test_college@studycenter.test
+- tapOn: "Masukkan password"
+- inputText: Test12345
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd: 3000
+- assertVisible:
+    text: Test College
+- takeScreenshot: college_home
+- tapOn:
+    id: Jurnal
+- waitForAnimationToEnd: 2000
+- takeScreenshot: college_journal_screen
+- tapOn:
+    id: Beranda
+- waitForAnimationToEnd: 1000
+- takeScreenshot: college_final_home

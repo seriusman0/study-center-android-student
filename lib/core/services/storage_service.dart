@@ -12,6 +12,7 @@ class SavedProfile {
   final String? avatar;
   final String primaryRole;
   final String token;
+  final String? password; // disimpan agar auto-re-login saat token expired
   final DateTime savedAt;
 
   const SavedProfile({
@@ -21,6 +22,7 @@ class SavedProfile {
     this.avatar,
     required this.primaryRole,
     required this.token,
+    this.password,
     required this.savedAt,
   });
 
@@ -31,6 +33,7 @@ class SavedProfile {
         'avatar': avatar,
         'primaryRole': primaryRole,
         'token': token,
+        'password': password,
         'savedAt': savedAt.toIso8601String(),
       };
 
@@ -41,6 +44,7 @@ class SavedProfile {
         avatar: json['avatar'] as String?,
         primaryRole: json['primaryRole'] as String? ?? 'student',
         token: json['token'] as String? ?? '',
+        password: json['password'] as String?,
         savedAt: DateTime.tryParse(json['savedAt'] as String? ?? '') ??
             DateTime.now(),
       );

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +10,6 @@ import '../models/journal_model.dart';
 import '../providers/journal_provider.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/widgets/app_widgets.dart';
-
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
@@ -54,7 +52,11 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           if (state.loading)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))),
+              child: Center(
+                  child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2))),
             )
           else
             IconButton(
@@ -76,7 +78,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 12),
-              Text(state.error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+              Text(state.error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red)),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () => ref.read(journalProvider.notifier).load(),
@@ -107,7 +111,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           children: [
             const Icon(Icons.inbox_outlined, size: 48, color: Colors.grey),
             const SizedBox(height: 12),
-            const Text('Belum ada data. Tap refresh.', style: TextStyle(color: Colors.grey)),
+            const Text('Belum ada data. Tap refresh.',
+                style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => ref.read(journalProvider.notifier).load(),
@@ -193,7 +198,10 @@ class _ProgressHeader extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4)),
         ],
       ),
       padding: const EdgeInsets.all(20),
@@ -202,7 +210,8 @@ class _ProgressHeader extends StatelessWidget {
           Expanded(
             child: Text(
               'Jurnal $formatted',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
           // Date navigation buttons
@@ -221,7 +230,10 @@ class _ProgressHeader extends StatelessWidget {
                 ),
                 child: const Text(
                   'Hari ini',
-                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -236,7 +248,8 @@ class _ProgressHeader extends StatelessWidget {
                 value: progress,
                 minHeight: 8,
                 backgroundColor: Colors.white.withOpacity(0.2),
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFDE047)),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Color(0xFFFDE047)),
               ),
             ),
           ),
@@ -299,9 +312,12 @@ class _NavBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 32, height: 32,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
-          color: disabled ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.2),
+          color: disabled
+              ? Colors.white.withOpacity(0.05)
+              : Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -337,12 +353,21 @@ class _LifeScheduleCard extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Container(
-              width: 28, height: 28,
-              decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(8)),
-              child: const Center(child: Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                  color: primary, borderRadius: BorderRadius.circular(8)),
+              child: const Center(
+                  child: Text('1',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13))),
             ),
             const SizedBox(width: 8),
-            Text('Jadwal Kehidupan', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+            Text('Jadwal Kehidupan',
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700)),
           ]),
           const SizedBox(height: 10),
           const Divider(height: 1),
@@ -356,17 +381,16 @@ class _LifeScheduleCard extends StatelessWidget {
                 letterSpacing: 0.5,
               ),
             ),
+            if (entry.key == 'kerohanian') ...[
+              _BibleReadingInline(snap: snap, notifier: notifier),
+              _HafalAyatSection(snap: snap, notifier: notifier),
+            ],
             for (final item in entry.value)
-              if (item.label == 'Baca Alkitab')
-                _BibleReadingInline(snap: snap, notifier: notifier)
-              else if (item.label == 'Hafal Ayat')
-                _HafalAyatSection(snap: snap, notifier: notifier)
-              else
-                _CheckRow(
-                  label: item.label,
-                  checked: item.checked,
-                  onTap: () => notifier.checkLife(item.id, !item.checked),
-                ),
+              _CheckRow(
+                label: item.label,
+                checked: item.checked,
+                onTap: () => notifier.checkLife(item.id, !item.checked),
+              ),
           ],
         ]),
       ),
@@ -375,10 +399,14 @@ class _LifeScheduleCard extends StatelessWidget {
 
   String _kategoriLabel(String k) {
     switch (k) {
-      case 'kerohanian': return 'KEROHANIAN';
-      case 'pendidikan': return 'PENDIDIKAN';
-      case 'karakter': return 'KARAKTER';
-      default: return k.toUpperCase();
+      case 'kerohanian':
+        return 'KEROHANIAN';
+      case 'pendidikan':
+        return 'PENDIDIKAN';
+      case 'karakter':
+        return 'KARAKTER';
+      default:
+        return k.toUpperCase();
     }
   }
 }
@@ -402,7 +430,8 @@ class _BibleReadingInline extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('Baca Alkitab', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const Text('Baca Alkitab',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               if (snap.bible.dayNo != null)
                 Text(
                   ' — Hari ke-${snap.bible.dayNo}',
@@ -448,15 +477,72 @@ class _HafalAyatSection extends StatefulWidget {
 }
 
 const _bibleBooks = [
-  'Kejadian', 'Keluaran', 'Imamat', 'Bilangan', 'Ulangan', 'Yosua', 'Hakim-hakim', 'Rut',
-  '1 Samuel', '2 Samuel', '1 Raja-raja', '2 Raja-raja', '1 Tawarikh', '2 Tawarikh', 'Ezra',
-  'Nehemia', 'Ester', 'Ayub', 'Mazmur', 'Amsal', 'Pengkhotbah', 'Kidung Agung', 'Yesaya',
-  'Yeremia', 'Ratapan', 'Yehezkiel', 'Daniel', 'Hosea', 'Yoel', 'Amos', 'Obaja', 'Yunus',
-  'Mikha', 'Nahum', 'Habakuk', 'Zefanya', 'Hagai', 'Zakharia', 'Maleakhi',
-  'Matius', 'Markus', 'Lukas', 'Yohanes', 'Kisah Para Rasul', 'Roma', '1 Korintus', '2 Korintus',
-  'Galatia', 'Efesus', 'Filipi', 'Kolose', '1 Tesalonika', '2 Tesalonika', '1 Timotius', '2 Timotius',
-  'Titus', 'Filemon', 'Ibrani', 'Yakobus', '1 Petrus', '2 Petrus', '1 Yohanes', '2 Yohanes',
-  '3 Yohanes', 'Yudas', 'Wahyu'
+  'Kejadian',
+  'Keluaran',
+  'Imamat',
+  'Bilangan',
+  'Ulangan',
+  'Yosua',
+  'Hakim-hakim',
+  'Rut',
+  '1 Samuel',
+  '2 Samuel',
+  '1 Raja-raja',
+  '2 Raja-raja',
+  '1 Tawarikh',
+  '2 Tawarikh',
+  'Ezra',
+  'Nehemia',
+  'Ester',
+  'Ayub',
+  'Mazmur',
+  'Amsal',
+  'Pengkhotbah',
+  'Kidung Agung',
+  'Yesaya',
+  'Yeremia',
+  'Ratapan',
+  'Yehezkiel',
+  'Daniel',
+  'Hosea',
+  'Yoel',
+  'Amos',
+  'Obaja',
+  'Yunus',
+  'Mikha',
+  'Nahum',
+  'Habakuk',
+  'Zefanya',
+  'Hagai',
+  'Zakharia',
+  'Maleakhi',
+  'Matius',
+  'Markus',
+  'Lukas',
+  'Yohanes',
+  'Kisah Para Rasul',
+  'Roma',
+  '1 Korintus',
+  '2 Korintus',
+  'Galatia',
+  'Efesus',
+  'Filipi',
+  'Kolose',
+  '1 Tesalonika',
+  '2 Tesalonika',
+  '1 Timotius',
+  '2 Timotius',
+  'Titus',
+  'Filemon',
+  'Ibrani',
+  'Yakobus',
+  '1 Petrus',
+  '2 Petrus',
+  '1 Yohanes',
+  '2 Yohanes',
+  '3 Yohanes',
+  'Yudas',
+  'Wahyu'
 ];
 
 class _HafalAyatSectionState extends State<_HafalAyatSection> {
@@ -470,9 +556,11 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
     super.initState();
     final ref = widget.snap.verseRef ?? '';
     final parsed = _parseRef(ref);
-    _selectedKitab = parsed.$1.isNotEmpty && _bibleBooks.contains(parsed.$1) ? parsed.$1 : null;
+    _selectedKitab = parsed.$1.isNotEmpty && _bibleBooks.contains(parsed.$1)
+        ? parsed.$1
+        : null;
     _pasal = TextEditingController(text: parsed.$2);
-    _ayat  = TextEditingController(text: parsed.$3);
+    _ayat = TextEditingController(text: parsed.$3);
     _savedLabel = ref;
   }
 
@@ -483,7 +571,9 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
     if (newRef != _savedLabel && newRef.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _selectedKitab = null; _pasal.clear(); _ayat.clear();
+          _selectedKitab = null;
+          _pasal.clear();
+          _ayat.clear();
           setState(() => _savedLabel = '');
         }
       });
@@ -509,7 +599,9 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
   }
 
   Future<void> _clear() async {
-    _selectedKitab = null; _pasal.clear(); _ayat.clear();
+    _selectedKitab = null;
+    _pasal.clear();
+    _ayat.clear();
     _savedLabel = '';
     await widget.notifier.saveVerseRef(null);
     if (mounted) setState(() {});
@@ -517,13 +609,16 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
 
   @override
   void dispose() {
-    _pasal.dispose(); _ayat.dispose();
+    _pasal.dispose();
+    _ayat.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasInput = _selectedKitab != null || _pasal.text.isNotEmpty || _ayat.text.isNotEmpty;
+    final hasInput = _selectedKitab != null ||
+        _pasal.text.isNotEmpty ||
+        _ayat.text.isNotEmpty;
     final theme = Theme.of(context);
     final hint = widget.snap.bible.collegePorsiHint;
     final verseRef = widget.snap.verseRef ?? '';
@@ -546,7 +641,8 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Header ──────────────────────────────────────────────────────────
-          const Text('Hafal Ayat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          const Text('Hafal Ayat',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const SizedBox(height: 8),
 
           // ── (a) Checkbox per-hari ────────────────────────────────────────────
@@ -574,7 +670,9 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
 
           // ── (b) Input/display teks ayat (verse_ref) per-minggu ──────────────
           Text(
-            hint.isNotEmpty ? 'Dari porsi hari ini: $hint' : 'Pilih satu ayat dari porsi bacaan hari ini.',
+            hint.isNotEmpty
+                ? 'Dari porsi hari ini: $hint'
+                : 'Pilih satu ayat dari porsi bacaan hari ini.',
             style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 12),
@@ -583,7 +681,9 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
             decoration: _inputDeco('Pilih Kitab'),
             isExpanded: true,
             menuMaxHeight: 300,
-            items: _bibleBooks.map((b) => DropdownMenuItem(value: b, child: Text(b))).toList(),
+            items: _bibleBooks
+                .map((b) => DropdownMenuItem(value: b, child: Text(b)))
+                .toList(),
             onChanged: (val) {
               setState(() => _selectedKitab = val);
             },
@@ -625,7 +725,8 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
                 const Icon(Icons.check_circle, size: 14, color: Colors.green),
                 const SizedBox(width: 4),
                 Text('Tersimpan: $_savedLabel',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.green[700], fontWeight: FontWeight.w500)),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.green[700], fontWeight: FontWeight.w500)),
               ])
             else
               const SizedBox.shrink(),
@@ -643,7 +744,8 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
               if (!hasInput || _savedLabel.isEmpty)
                 ElevatedButton(
                   onPressed: hasInput ? _save : null,
-                  style: ElevatedButton.styleFrom(visualDensity: VisualDensity.compact),
+                  style: ElevatedButton.styleFrom(
+                      visualDensity: VisualDensity.compact),
                   child: const Text('Simpan'),
                 ),
             ]),
@@ -656,7 +758,8 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
   InputDecoration _inputDeco(String hint) => InputDecoration(
         hintText: hint,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -671,7 +774,11 @@ class _CheckRow extends StatelessWidget {
   final bool checked;
   final VoidCallback onTap;
 
-  const _CheckRow({required this.label, this.subtitle, required this.checked, required this.onTap});
+  const _CheckRow(
+      {required this.label,
+      this.subtitle,
+      required this.checked,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -683,7 +790,6 @@ class _CheckRow extends StatelessWidget {
     );
   }
 }
-
 
 class _PhotoCard extends StatefulWidget {
   final JournalSnapshot snap;
@@ -713,7 +819,8 @@ class _PhotoCardState extends State<_PhotoCard> {
       await widget.notifier.uploadPhoto(image);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _uploading = false);
@@ -727,8 +834,12 @@ class _PhotoCardState extends State<_PhotoCard> {
         title: const Text('Hapus Foto?'),
         content: const Text('Yakin ingin menghapus foto ini?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Hapus', style: TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Batal')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Hapus', style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -737,7 +848,9 @@ class _PhotoCardState extends State<_PhotoCard> {
       try {
         await widget.notifier.deletePhoto();
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        if (mounted)
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(e.toString())));
       } finally {
         if (mounted) setState(() => _uploading = false);
       }
@@ -745,42 +858,52 @@ class _PhotoCardState extends State<_PhotoCard> {
   }
 
   @override
-    Widget build(BuildContext context) {
-      final hasPhoto = widget.snap.photoUrl != null && widget.snap.photoUrl!.isNotEmpty;
+  Widget build(BuildContext context) {
+    final hasPhoto =
+        widget.snap.photoUrl != null && widget.snap.photoUrl!.isNotEmpty;
 
-      return AppSectionCard(
-        title: 'Foto Saat Belajar (opsional)',
-        rows: [
-          if (hasPhoto)
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  child: Image.network(
-                    widget.snap.photoUrl!,
+    return AppSectionCard(
+      title: 'Foto Saat Belajar (opsional)',
+      rows: [
+        if (hasPhoto)
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                child: Image.network(
+                  widget.snap.photoUrl!,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
                     height: 200,
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.broken_image,
+                        color: Colors.grey, size: 48),
                   ),
                 ),
-                if (_uploading) const CircularProgressIndicator(),
-              ],
-            ),
-          AppUploadBox(
-            mainText: hasPhoto ? 'Ganti Foto' : 'Upload Foto',
-            onTap: _uploading ? null : _pickAndUpload,
-          ),
-          if (hasPhoto)
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: _uploading ? null : _removePhoto,
-                icon: const Icon(Icons.delete_outline, color: AppColors.danger, size: 18),
-                label: const Text('Hapus', style: TextStyle(color: AppColors.danger)),
               ),
+              if (_uploading) const CircularProgressIndicator(),
+            ],
+          ),
+        AppUploadBox(
+          mainText: hasPhoto ? 'Ganti Foto' : 'Upload Foto',
+          onTap: _uploading ? null : _pickAndUpload,
+        ),
+        if (hasPhoto)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: _uploading ? null : _removePhoto,
+              icon: const Icon(Icons.delete_outline,
+                  color: AppColors.danger, size: 18),
+              label: const Text('Hapus',
+                  style: TextStyle(color: AppColors.danger)),
             ),
-        ],
-      );
-    }
+          ),
+      ],
+    );
   }
+}

@@ -148,7 +148,8 @@ class JournalNotifier extends Notifier<JournalState> {
     }
   }
 
-  Future<void> _enqueue(OfflineOpKind kind, Map<String, dynamic> payload) async {
+  Future<void> _enqueue(
+      OfflineOpKind kind, Map<String, dynamic> payload) async {
     await ref.read(offlineServiceProvider).enqueue(kind, payload);
     await _refreshPendingCount();
   }
@@ -174,11 +175,13 @@ class JournalNotifier extends Notifier<JournalState> {
       try {
         await _checkRemote(op.kind, op.payload);
         await svc.remove(op.id!);
-        debugPrint('[Journal] Synced op id=${op.id} (${op.kind}) — removed from queue');
+        debugPrint(
+            '[Journal] Synced op id=${op.id} (${op.kind}) — removed from queue');
       } catch (e) {
         final exceeded = await svc.markRetry(op.id!, op.retryCount ?? 0);
         if (exceeded) {
-          debugPrint('[Journal] Op id=${op.id} exceeded max retries — removing');
+          debugPrint(
+              '[Journal] Op id=${op.id} exceeded max retries — removing');
           await svc.remove(op.id!);
         } else {
           debugPrint('[Journal] Op id=${op.id} retry failed: $e');
@@ -311,7 +314,8 @@ class JournalNotifier extends Notifier<JournalState> {
 
     try {
       final bytes = await file.readAsBytes();
-      final result = await ref.read(journalRepositoryProvider)
+      final result = await ref
+          .read(journalRepositoryProvider)
           .uploadPhoto(bytes, file.name, snap.date);
       state = state.copyWith(snapshot: result);
     } catch (e) {
@@ -325,8 +329,8 @@ class JournalNotifier extends Notifier<JournalState> {
     if (snap == null) return;
 
     try {
-      final result = await ref.read(journalRepositoryProvider)
-          .deletePhoto(snap.date);
+      final result =
+          await ref.read(journalRepositoryProvider).deletePhoto(snap.date);
       state = state.copyWith(snapshot: result);
     } catch (e) {
       debugPrint('[Journal] deletePhoto error: $e');

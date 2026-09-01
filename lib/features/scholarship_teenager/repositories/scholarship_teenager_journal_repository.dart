@@ -26,12 +26,14 @@ class ScholarshipTeenagerJournalRepository {
     int? itemId,
     bool? checked,
     String? date,
+    String? verseRef,
   }) async {
     final res = await _dio.post(ApiConstants.scholarshipJurnalCheck, data: {
       'item_type': itemType,
       if (itemId != null) 'item_id': itemId,
       if (checked != null) 'checked': checked,
       if (date != null) 'date': date,
+      if (verseRef != null) 'verse_ref': verseRef,
     });
     final data = res.data as Map<String, dynamic>;
     final payload = data['state'] ?? data;

@@ -1,0 +1,7 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000

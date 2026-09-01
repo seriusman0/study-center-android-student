@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../shared/widgets/app_widgets.dart';
 import '../../auth/models/user_model.dart';
 import '../../journal/providers/journal_provider.dart';
+import '../../scholarship_teenager/providers/scholarship_teenager_journal_provider.dart';
+import '../../college/providers/college_journal_provider.dart';
 import '../../../shared/widgets/update_banner.dart';
 import '../models/home_model.dart';
 import '../providers/home_provider.dart';
@@ -24,13 +27,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     Future.microtask(() {
       final user = ref.read(authProvider).user;
-      // Journal + laporan/galeri home widgets are student-only on the
-      // backend (`role:student` middleware on /jurnal/*) — calling them for
-      // other roles just wastes a request and always 403s, so gate it here.
-      if (user?.hasStudentDashboard == true) {
+      // /jurnal/* (student journal) is role:student-gated on the backend —
+      // calling it for a scholarship_teenager-only account just 403s, so
+      // gate strictly on isStudent, not the broader hasStudentDashboard
+      // (which also covers scholarship_teenager for nav/shell purposes).
+      if (user?.isStudent == true) {
         final jState = ref.read(journalProvider);
         if (jState.snapshot == null && !jState.loading) {
           ref.read(journalProvider.notifier).load();
+        }
+      }
+      // Scholarship_teenager journal lives under /scholarship-teenager-jurnal/*
+      // — a user can hold this role together with student, so it is loaded
+      // independently rather than as an alternative to the block above.
+      if (user?.isScholarshipTeenager == true) {
+        final sState = ref.read(scholarshipTeenagerJournalProvider);
+        if (sState.snapshot == null && !sState.loading) {
+          ref.read(scholarshipTeenagerJournalProvider.notifier).load();
+        }
+      }
+      // College journal (/college-jurnal/*) — same reasoning: a college
+      // user can also hold student/scholarship_teenager, so load it
+      // independently rather than assuming it's the only role.
+      if (user?.isCollege == true) {
+        final cState = ref.read(collegeJournalProvider);
+        if (cState.snapshot == null && !cState.loading) {
+          ref.read(collegeJournalProvider.notifier).load();
         }
       }
       final hState = ref.read(homeProvider);
@@ -284,68 +306,119 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
               ),
               const SizedBox(height: 16),
             ],
-
-            // Jurnal Hari Ini
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => context.push('/jurnal'),
-              child: Card(
-                child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.book,
-                            color: theme.colorScheme.primary, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Jurnal Hari Ini',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        const Spacer(),
-                        if (jState.loading)
-                          const SizedBox(
-                              height: 14,
-                              width: 14,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (snap != null) ...[
-                      LinearProgressIndicator(
-                        value: snap.totalCount > 0
-                            ? snap.checkedCount / snap.totalCount
-                            : 0,
-                        borderRadius: BorderRadius.circular(4),
-                        minHeight: 8,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${snap.checkedCount} dari ${snap.totalCount} item selesai',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 14),
-                      _BibleRow(
-                          'PL', snap.bible.plPorsi, snap.bible.plChecked),
-                      const SizedBox(height: 6),
-                      _BibleRow(
-                          'PB', snap.bible.pbPorsi, snap.bible.pbChecked),
-                    ] else if (jState.error != null)
-                      Text('Gagal memuat jurnal',
-                          style: TextStyle(color: Colors.red[400], fontSize: 13))
-                    else
-                      const Text('Memuat...',
-                          style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
+            // Web-style navigation buttons for multi-role users
+            if (user?.isScholarshipTeenager == true) ...[
+              AppPrimaryButton(
+                label: 'Mulai Isi Jurnal Remaja Beasiswa',
+                icon: Icons.edit_document,
+                onPressed: () => context.push('/jurnal'),
               ),
-            ),
-            ),
+              const SizedBox(height: 8),
+            ],
+            if (user?.isStudent == true) ...[
+              AppPrimaryButton(
+                label: 'Mulai Isi Jurnal Remaja SC',
+                icon: Icons.edit_document,
+                onPressed: () => context.push('/jurnal'),
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (user?.isCollege == true) ...[
+              AppPrimaryButton(
+                label: 'Mulai Isi Jurnal College',
+                icon: Icons.edit_document,
+                onPressed: () => context.push('/jurnal'),
+              ),
+              const SizedBox(height: 8),
+            ],
+            const SizedBox(height: 8),
+
+            // Unified JURNAL HARI INI Summary
+            if (user?.hasJournalAccess == true) ...[
+              Builder(
+                builder: (ctx) {
+                  // Fallback snapshot priority
+                  final bool isLoading = jState.loading || 
+                                       ref.watch(scholarshipTeenagerJournalProvider).loading || 
+                                       ref.watch(collegeJournalProvider).loading;
+                  final String? errorMsg = jState.error ?? 
+                                         ref.watch(scholarshipTeenagerJournalProvider).error ?? 
+                                         ref.watch(collegeJournalProvider).error;
+                  final dynamic activeSnap = jState.snapshot ?? 
+                                           ref.watch(scholarshipTeenagerJournalProvider).snapshot ?? 
+                                           ref.watch(collegeJournalProvider).snapshot;
+                  
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.book,
+                                  color: theme.colorScheme.primary, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'JURNAL HARI INI',
+                                style: theme.textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 1.1),
+                              ),
+                              const Spacer(),
+                              if (isLoading)
+                                const SizedBox(
+                                    height: 14,
+                                    width: 14,
+                                    child: CircularProgressIndicator(strokeWidth: 2)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          if (activeSnap != null) ...[
+                            Text(
+                              'Hari ke-${activeSnap.bible.dayNo ?? '-'}',
+                              style: theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 12),
+                            Text('PERJANJIAN LAMA',
+                                style: theme.textTheme.labelSmall
+                                    ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                            Text(activeSnap.bible.plPorsi, style: theme.textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('PERJANJIAN BARU',
+                                style: theme.textTheme.labelSmall
+                                    ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                            Text(activeSnap.bible.pbPorsi, style: theme.textTheme.bodyMedium),
+                            const SizedBox(height: 16),
+                            Text('Progress Jadwal Kehidupan',
+                                style: theme.textTheme.labelSmall
+                                    ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            LinearProgressIndicator(
+                              value: activeSnap.totalCount > 0
+                                  ? activeSnap.checkedCount / activeSnap.totalCount
+                                  : 0,
+                              borderRadius: BorderRadius.circular(4),
+                              minHeight: 8,
+                            ),
+                            const SizedBox(height: 6),
+                            Text('${activeSnap.checkedCount}/${activeSnap.totalCount}',
+                                style: theme.textTheme.bodySmall
+                                    ?.copyWith(color: Colors.grey[800], fontWeight: FontWeight.bold)),
+                          ] else if (errorMsg != null)
+                            Text('Gagal memuat jurnal',
+                                style: TextStyle(color: Colors.red[400], fontSize: 13))
+                          else
+                            const Text('Memuat...',
+                                style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              ),
+              const SizedBox(height: 12),
+            ],
 
             // Streak
             if (hState.laporan != null && hState.laporan!.streak > 0) ...[
@@ -603,14 +676,159 @@ class _BlogCard extends StatelessWidget {
 
 /// Compact journal card shown on both student and non-student home screens.
 /// Displays the "Jurnal Hari Ini" entry and navigates to /jurnal when tapped.
+class _ScholarshipJournalHomeCard extends ConsumerWidget {
+  const _ScholarshipJournalHomeCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(scholarshipTeenagerJournalProvider);
+    final snap = state.snapshot;
+    final theme = Theme.of(context);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => context.push('/jurnal'),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.book, color: theme.colorScheme.secondary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Jurnal Beasiswa',
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  if (state.loading)
+                    const SizedBox(
+                        height: 14,
+                        width: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (snap != null) ...[
+                LinearProgressIndicator(
+                  value: snap.totalCount > 0
+                      ? snap.checkedCount / snap.totalCount
+                      : 0,
+                  borderRadius: BorderRadius.circular(4),
+                  minHeight: 8,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${snap.checkedCount} dari ${snap.totalCount} item selesai',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Colors.grey[600]),
+                ),
+              ] else if (state.error != null)
+                Text('Gagal memuat jurnal beasiswa',
+                    style: TextStyle(color: Colors.red[400], fontSize: 13))
+              else
+                const Text('Memuat...', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CollegeJournalHomeCard extends ConsumerWidget {
+  const _CollegeJournalHomeCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(collegeJournalProvider);
+    final snap = state.snapshot;
+    final theme = Theme.of(context);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => context.push('/jurnal'),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.school, color: theme.colorScheme.secondary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Jurnal College',
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  if (state.loading)
+                    const SizedBox(
+                        height: 14,
+                        width: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (snap != null) ...[
+                LinearProgressIndicator(
+                  value: snap.totalCount > 0
+                      ? snap.checkedCount / snap.totalCount
+                      : 0,
+                  borderRadius: BorderRadius.circular(4),
+                  minHeight: 8,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${snap.checkedCount} dari ${snap.totalCount} item selesai',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Colors.grey[600]),
+                ),
+              ] else if (state.error != null)
+                Text('Gagal memuat jurnal college',
+                    style: TextStyle(color: Colors.red[400], fontSize: 13))
+              else
+                const Text('Memuat...', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _JournalCard extends StatelessWidget {
   final UserModel user;
   final ThemeData theme;
 
   const _JournalCard({required this.user, required this.theme});
 
+  /// Human-readable labels for every journal-eligible role this account
+  /// holds. Kept in sync with JournalRouterScreen's own role→journal
+  /// mapping so the beranda hint and the actual /jurnal tabs never
+  /// disagree about which journals exist for this user.
+  List<String> get _journalRoleLabels {
+    final labels = <String>[];
+    if (user.isCollege) labels.add('College');
+    if (user.isScholarshipTeenager) labels.add('Beasiswa');
+    if (user.isStudent) labels.add('Student');
+    if (labels.isEmpty) labels.add(user.primaryRole);
+    return labels;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final roleLabels = _journalRoleLabels;
+    final isMultiJournal = roleLabels.length > 1;
+    final subtitle = isMultiJournal
+        ? 'Hari ini • ${roleLabels.length} jurnal: ${roleLabels.join(' & ')}'
+        : 'Hari ini • ${roleLabels.first}';
+
     return Semantics(
       label: 'Jurnal Hari Ini',
       button: true,
@@ -640,10 +858,35 @@ class _JournalCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Hari ini • ${user.primaryRole}',
+                subtitle,
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: Colors.grey[600]),
               ),
+              if (isMultiJournal) ...[
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: roleLabels
+                      .map((label) => Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              label,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ],
             ],
           ),
         ),

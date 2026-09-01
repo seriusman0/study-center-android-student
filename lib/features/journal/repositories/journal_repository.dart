@@ -15,9 +15,16 @@ class JournalRepository {
       queryParameters: date != null ? {'date': date} : null,
     );
     final data = res.data;
-    final payload = (data is Map && data.containsKey('data') && data['data'] is Map)
-        ? data['data'] as Map<String, dynamic>
-        : data as Map<String, dynamic>;
+    Map<String, dynamic> payload;
+    if (data is Map) {
+      if (data.containsKey('data') && data['data'] is Map) {
+        payload = Map<String, dynamic>.from(data['data']);
+      } else {
+        payload = Map<String, dynamic>.from(data);
+      }
+    } else {
+      payload = {};
+    }
     return JournalSnapshot.fromJson(payload);
   }
 
@@ -40,7 +47,8 @@ class JournalRepository {
     return JournalSnapshot.fromJson(statePayload as Map<String, dynamic>);
   }
 
-  Future<JournalSnapshot> uploadPhoto(List<int> bytes, String filename, String date) async {
+  Future<JournalSnapshot> uploadPhoto(
+      List<int> bytes, String filename, String date) async {
     final formData = FormData.fromMap({
       'date': date,
       'foto': MultipartFile.fromBytes(bytes, filename: filename),
@@ -52,7 +60,8 @@ class JournalRepository {
   }
 
   Future<JournalSnapshot> deletePhoto(String date) async {
-    final res = await _dio.delete(ApiConstants.jurnalFoto, data: {'date': date});
+    final res =
+        await _dio.delete(ApiConstants.jurnalFoto, data: {'date': date});
     final data = res.data as Map<String, dynamic>;
     final statePayload = data['state'] ?? data;
     return JournalSnapshot.fromJson(statePayload as Map<String, dynamic>);
