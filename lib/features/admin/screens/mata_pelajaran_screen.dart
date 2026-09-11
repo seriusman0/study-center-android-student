@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/mata_pelajaran_model.dart';
 import '../providers/mata_pelajaran_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin: kelola mata pelajaran (CRUD, toggle aktif).
 class MataPelajaranScreen extends ConsumerStatefulWidget {
@@ -88,7 +89,7 @@ class _MataPelajaranScreenState extends ConsumerState<MataPelajaranScreen> {
           : state.error != null
               ? Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])))
               : state.items.isEmpty
-                  ? const Center(child: Text('Belum ada mata pelajaran', style: TextStyle(color: Colors.grey)))
+                  ? const Center(child: Text('Belum ada mata pelajaran', style: TextStyle(color: AppColors.textMuted)))
                   : ListView.separated(
                       itemCount: state.items.length,
                       separatorBuilder: (_, __) => const Divider(height: 1),
@@ -97,7 +98,7 @@ class _MataPelajaranScreenState extends ConsumerState<MataPelajaranScreen> {
                         return ListTile(
                           leading: const Icon(Icons.subject, color: Color(0xFF0F766E)),
                           title: Text(mp.nama, style: const TextStyle(fontWeight: FontWeight.w600)),
-                          subtitle: Text('Urutan: ${mp.urutan}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                          subtitle: Text('Urutan: ${mp.urutan}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                           trailing: Switch(
                             value: mp.isActive,
                             onChanged: (v) => ref.read(mataPelajaranProvider.notifier).update(mp.id, nama: mp.nama, urutan: mp.urutan, isActive: v),

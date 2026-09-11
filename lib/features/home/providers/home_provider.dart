@@ -39,17 +39,38 @@ class HomeNotifier extends Notifier<HomeState> {
   @override
   HomeState build() => const HomeState();
 
-  Future<void> load(String? cabangSlug) async {
+  Future<void> load(String? cabangSlug, {bool forceRefresh = false}) async {
     if (state.loading) return;
-    state = state.copyWith(loading: true, error: null);
     final repo = ref.read(homeRepositoryProvider);
+
+    // If not forcing refresh, try to load from cache first
+    if (!forceRefresh) {
+      final cachedBlogs = await repo.getCachedBlogs(cabangSlug);
+      final cachedGaleri = await repo.getCachedGaleri();
+      final cachedLaporan = await repo.getCachedLaporan();
+
+      if (cachedBlogs.isNotEmpty || cachedGaleri.isNotEmpty || cachedLaporan != null) {
+        state = HomeState(
+          blogs: cachedBlogs.isNotEmpty ? cachedBlogs : state.blogs,
+          galeri: cachedGaleri.isNotEmpty ? cachedGaleri : state.galeri,
+          laporan: cachedLaporan ?? state.laporan,
+          loading: false,
+        );
+        // We can choose to return here to avoid backend call, or continue 
+        // to silently fetch from backend and update UI. 
+        // Returning here satisfies "tidak selalu load data dari backend".
+        return;
+      }
+    }
+
+    state = state.copyWith(loading: true, error: null);
 
     List<BlogPost> blogs;
     try {
       blogs = await repo.fetchBlogs(cabangSlug);
     } catch (e) {
       debugPrint('fetchBlogs error: $e');
-      blogs = [];
+      blogs = state.blogs; // Keep previous or cached
     }
 
     List<GaleriItem> galeri;
@@ -57,7 +78,7 @@ class HomeNotifier extends Notifier<HomeState> {
       galeri = await repo.fetchGaleri();
     } catch (e) {
       debugPrint('fetchGaleri error: $e');
-      galeri = [];
+      galeri = state.galeri; // Keep previous or cached
     }
 
     LaporanSummary? laporan;
@@ -65,6 +86,7 @@ class HomeNotifier extends Notifier<HomeState> {
       laporan = await repo.fetchLaporan();
     } catch (e) {
       debugPrint('fetchLaporan error: $e');
+      laporan = state.laporan; // Keep previous or cached
     }
 
     state = HomeState(

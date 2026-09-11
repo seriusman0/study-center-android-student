@@ -23,6 +23,15 @@ class BlogPost {
         publishedAt: j['published_at'] as String?,
         cabangNama:  (j['cabang'] as Map?)?['nama'] as String?,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'slug': slug,
+        'image': image,
+        'published_at': publishedAt,
+        'cabang': cabangNama != null ? {'nama': cabangNama} : null,
+      };
 }
 
 class GaleriItem {
@@ -37,4 +46,10 @@ class GaleriItem {
         fotoUrl: j['foto_url'] as String? ?? '',
         tanggal: j['tanggal'] as String? ?? '',
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'foto_url': fotoUrl,
+        'tanggal': tanggal,
+      };
 }

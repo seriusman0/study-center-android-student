@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -204,7 +205,7 @@ class _JournalHistoryScreenState extends ConsumerState<JournalHistoryScreen> {
           return Center(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Text('Belum ada riwayat jurnal.',
-                  style: TextStyle(color: Colors.grey[500])),
+                  style: TextStyle(color: AppColors.textMuted)),
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: _pickRange,
@@ -243,7 +244,7 @@ class _JournalHistoryScreenState extends ConsumerState<JournalHistoryScreen> {
                         },
                         child: Text('Reset',
                             style: theme.textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey[500])),
+                                ?.copyWith(color: AppColors.textMuted)),
                       ),
                     ],
                   ),
@@ -300,7 +301,7 @@ class _HistoryTile extends StatelessWidget {
                       ? Icons.check_circle
                       : Icons.radio_button_unchecked,
                   size: 18,
-                  color: isComplete ? Colors.green : Colors.grey[400],
+                  color: isComplete ? AppColors.success : AppColors.textMuted,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -325,7 +326,7 @@ class _HistoryTile extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: pct,
                 minHeight: 6,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: AppColors.divider,
                 valueColor: AlwaysStoppedAnimation<Color>(
                     isComplete ? Colors.green : theme.colorScheme.primary),
               ),
@@ -334,7 +335,7 @@ class _HistoryTile extends StatelessWidget {
             Text(
               '${entry.pct.toStringAsFixed(0)}% selesai',
               style:
-                  theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+                  theme.textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
             ),
           ],
         ),

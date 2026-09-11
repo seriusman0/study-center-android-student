@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/storage_service.dart';
 import '../../auth/models/user_model.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class AdminUsersRepository {
   final Dio _dio;
@@ -101,6 +103,43 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
       await load();
       return true;
     } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> impersonate(int userId) async {
+    try {
+      state = state.copyWith(loading: true);
+      final response = await ref.read(dioProvider).post('/admin/users/$userId/impersonate');
+      final data = response.data as Map<String, dynamic>;
+      final token = data['token'] as String;
+      final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
+      
+      final storage = ref.read(storageServiceProvider);
+      
+      final currentAuth = ref.read(authProvider);
+      if (currentAuth.user != null) {
+          final adminToken = await storage.getToken();
+          if (adminToken != null) {
+              await storage.saveProfile(SavedProfile(
+                  userId: currentAuth.user!.id,
+                  name: currentAuth.user!.name,
+                  email: currentAuth.user!.email,
+                  avatar: currentAuth.user!.avatar,
+                  primaryRole: currentAuth.user!.primaryRole,
+                  token: adminToken,
+                  savedAt: DateTime.now(),
+              ));
+          }
+      }
+      
+      await storage.saveToken(token);
+      ref.read(authProvider.notifier).setUser(user);
+      
+      state = state.copyWith(loading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(loading: false, error: extractErrorMessage(e));
       return false;
     }
   }

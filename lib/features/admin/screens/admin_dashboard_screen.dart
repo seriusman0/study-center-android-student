@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../providers/admin_notifications_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 const _roleLabels = {
   'admin': 'Admin',
@@ -196,7 +197,7 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +205,7 @@ class _StatCard extends StatelessWidget {
           Icon(icon, color: theme.colorScheme.primary, size: 20),
           const SizedBox(height: 8),
           Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
         ],
       ),
     );
@@ -220,7 +221,7 @@ class _RoleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _roleColors[role] ?? Colors.grey;
+    final color = _roleColors[role] ?? AppColors.textMuted;
     final ratio = maxCount > 0 ? count / maxCount : 0.0;
 
     return Padding(
@@ -237,7 +238,7 @@ class _RoleBar extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: ratio,
                 minHeight: 16,
-                backgroundColor: Colors.grey.shade100,
+                backgroundColor: AppColors.divider,
                 valueColor: AlwaysStoppedAnimation(color),
               ),
             ),
@@ -300,7 +301,7 @@ class _AdminFeatureGrid extends StatelessWidget {
                   Icon(f[2] as IconData, color: Theme.of(context).colorScheme.primary, size: 22),
                   const SizedBox(height: 4),
                   Text(f[0] as String, textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 10, color: Colors.grey[700])),
+                      style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
                 ],
               ),
             ),

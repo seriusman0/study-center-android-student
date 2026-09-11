@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/jurnal_config_model.dart';
 import '../providers/jurnal_bible_schedule_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 const _bulanLabels = [
   '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -76,7 +77,7 @@ class _JurnalBibleScheduleScreenState extends ConsumerState<JurnalBibleScheduleS
                                 SizedBox(height: 80),
                                 Center(
                                     child: Text('Belum ada jadwal untuk bulan ini',
-                                        style: TextStyle(color: Colors.grey))),
+                                        style: TextStyle(color: AppColors.textMuted))),
                               ],
                             )
                           : ListView.builder(

@@ -6,6 +6,7 @@ import '../models/kelas_master_model.dart';
 import '../models/presensi_model.dart';
 import '../providers/kelas_master_provider.dart';
 import '../providers/presensi_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class MentorPresensiScreen extends ConsumerStatefulWidget {
   const MentorPresensiScreen({super.key});
@@ -49,7 +50,7 @@ class _MentorPresensiScreenState extends ConsumerState<MentorPresensiScreen> {
                       SizedBox(height: 80),
                       Center(
                           child: Text('Belum ada presensi',
-                              style: TextStyle(color: Colors.grey))),
+                              style: TextStyle(color: AppColors.textMuted))),
                     ],
                   )
                 : ListView.builder(
@@ -101,7 +102,7 @@ class _MentorPresensiScreenState extends ConsumerState<MentorPresensiScreen> {
                   style: Theme.of(ctx).textTheme.titleLarge),
               const SizedBox(height: 4),
               Text('${_formatDate(p.tanggal)} • ${p.jamMulai}-${p.jamSelesai}',
-                  style: TextStyle(color: Colors.grey[600])),
+                  style: TextStyle(color: AppColors.textSecondary)),
               if (p.materi.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text('Materi', style: Theme.of(ctx).textTheme.labelLarge),
@@ -158,7 +159,7 @@ class _StatusChip extends StatelessWidget {
       'sakit': 'Sakit',
       'alpha': 'Alpha',
     };
-    final color = colors[status] ?? Colors.grey;
+    final color = colors[status] ?? AppColors.textMuted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

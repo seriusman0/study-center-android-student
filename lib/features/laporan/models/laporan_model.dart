@@ -23,6 +23,15 @@ class LaporanSummary {
         total:   (j['total'] as num?)?.toInt() ?? 0,
         streak:  (j['streak'] as num?)?.toInt() ?? 0,
       );
+
+  Map<String, dynamic> toJson() => {
+        'from': from,
+        'to': to,
+        'pct': pct,
+        'checked': checked,
+        'total': total,
+        'streak': streak,
+      };
 }
 
 class LaporanMatrix {

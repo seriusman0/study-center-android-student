@@ -44,6 +44,7 @@ class CollegeJournalState {
     CollegeJournalSnapshot? snapshot,
     bool? loading,
     String? error,
+    bool clearError = false,
     DateTime? selectedDate,
     int? pendingOfflineOps,
     CollegeProfile? profile,
@@ -51,7 +52,7 @@ class CollegeJournalState {
   }) => CollegeJournalState(
           snapshot: snapshot ?? this.snapshot,
           loading: loading ?? this.loading,
-          error: error,
+          error: clearError ? null : (error ?? this.error),
           selectedDate: selectedDate ?? this.selectedDate,
           pendingOfflineOps: pendingOfflineOps ?? this.pendingOfflineOps,
           profile: profile ?? this.profile,
@@ -121,7 +122,7 @@ class CollegeJournalNotifier extends Notifier<CollegeJournalState> {
     // that crashes RenderViewport (parentDataDirty assertion + null child).
     if (state.loading) return;
     final target = date ?? state.selectedDate;
-    state = state.copyWith(loading: true, error: null, selectedDate: target);
+    state = state.copyWith(loading: true, clearError: true, selectedDate: target);
     try {
       final snap = await ref.read(collegeJournalRepositoryProvider).today(
             date: state.isToday ? null : _dateString(target),

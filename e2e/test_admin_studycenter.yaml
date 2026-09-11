@@ -1,0 +1,73 @@
+appId: com.studycenter.sc_student
+---
+# Flow: Admin login with admin@studycenter.com and dashboard navigation
+
+- launchApp:
+    clearState: true
+
+# ── 1. Login ──
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Masuk"
+- tapOn:
+    id: "emailField"
+- eraseText
+- inputText: "admin@studycenter.com"
+- tapOn:
+    id: "passwordField"
+- eraseText
+- inputText: "password"
+- tapOn:
+    id: "loginBtn"
+
+# ── 2. Verify home screen ──
+- extendedWaitUntil:
+    visible: "Dashboard"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ── 3. Tap Dashboard tab ──
+# Note: Instead of tapping coordinates, let's try to tap by text or icon. If it fails, we fall back to coordinates.
+- tapOn: "Dashboard"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ── 4. Explore Jurnal Monitor ──
+- tapOn: "Monitor Jurnal"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# ── 5. Role tabs ──
+# Wait for the tabs to load
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Let's see if we can tap on Jurnal College or Jurnal Student
+- tapOn: "College"
+- waitForAnimationToEnd:
+    timeout: 1500
+
+- tapOn: "Scholarship"
+- waitForAnimationToEnd:
+    timeout: 1500
+
+- tapOn: "Student"
+- waitForAnimationToEnd:
+    timeout: 1500
+
+- back
+- waitForAnimationToEnd:
+    timeout: 1500
+
+- tapOn: "Pengguna"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- tapOn: "Profil"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- tapOn: "Keluar"
+- waitForAnimationToEnd:
+    timeout: 2000

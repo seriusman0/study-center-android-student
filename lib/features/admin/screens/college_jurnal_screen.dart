@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/college_jurnal_model.dart';
 import '../providers/college_jurnal_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin screen for Jurnal College monitoring:
 /// Tab 1 — Dashboard (list mahasiswa + progress mingguan)
@@ -91,10 +92,10 @@ class _DashboardTab extends ConsumerWidget {
           return ListTile(
             leading: CircleAvatar(
               backgroundColor:
-                  u.activeToday ? Colors.green : Colors.grey.shade300,
+                  u.activeToday ? AppColors.success : AppColors.border,
               child: Text(u.name.isNotEmpty ? u.name[0].toUpperCase() : '?',
                   style: TextStyle(
-                      color: u.activeToday ? Colors.white : Colors.grey)),
+                      color: u.activeToday ? Colors.white : AppColors.textMuted)),
             ),
             title: Text(u.name),
             subtitle: Text(u.email,
@@ -109,7 +110,7 @@ class _DashboardTab extends ConsumerWidget {
                         color:
                             u.pctWeek >= 70 ? Colors.green : Colors.orange)),
                 Text('minggu ini',
-                    style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                    style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
               ],
             ),
           );
@@ -150,7 +151,7 @@ class _BibleTab extends ConsumerWidget {
             ),
             title: Text(item.title),
             subtitle: Text(item.passage,
-                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
           );
         },
       ),
@@ -183,7 +184,7 @@ class _ItemsTab extends ConsumerWidget {
           return ListTile(
             leading: Icon(
               item.isActive ? Icons.check_circle : Icons.circle_outlined,
-              color: item.isActive ? Colors.green : Colors.grey,
+              color: item.isActive ? AppColors.success : AppColors.textMuted,
             ),
             title: Text(item.name),
             subtitle: item.description != null

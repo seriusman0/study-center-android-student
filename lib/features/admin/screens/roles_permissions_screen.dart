@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/role_permission_model.dart';
 import '../providers/roles_permissions_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 const _protectedRoles = ['admin', 'student', 'mentor', 'guest', 'fulltimer'];
 
@@ -36,7 +37,7 @@ class _RolesPermissionsScreenState extends ConsumerState<RolesPermissionsScreen>
                   child: Text('Gagal memuat: ${state.error}',
                       style: TextStyle(color: Colors.red[400])))
               : state.roles.isEmpty
-                  ? const Center(child: Text('Tidak ada role', style: TextStyle(color: Colors.grey)))
+                  ? const Center(child: Text('Tidak ada role', style: TextStyle(color: AppColors.textMuted)))
                   : RefreshIndicator(
                       onRefresh: () => ref.read(rolesPermissionsProvider.notifier).load(),
                       child: ListView.builder(
@@ -122,13 +123,13 @@ class _RoleCard extends ConsumerWidget {
                               ?.copyWith(fontWeight: FontWeight.w700)),
                       if (isProtected) ...[
                         const SizedBox(width: 6),
-                        Icon(Icons.lock_outline, size: 14, color: Colors.grey[500]),
+                        Icon(Icons.lock_outline, size: 14, color: AppColors.textSecondary),
                       ],
                     ],
                   ),
                 ),
                 Text('${role.usersCount} pengguna',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
                 IconButton(
                   icon: const Icon(Icons.more_vert, size: 20),
                   onPressed: () => _showActions(context, ref),
@@ -137,14 +138,14 @@ class _RoleCard extends ConsumerWidget {
             ),
             if (role.description != null && role.description!.isNotEmpty) ...[
               const SizedBox(height: 2),
-              Text(role.description!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(role.description!, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
             ],
             const SizedBox(height: 10),
             Wrap(
               spacing: 6,
               runSpacing: 6,
               children: role.permissions.isEmpty
-                  ? [const Text('Belum ada permission', style: TextStyle(fontSize: 12, color: Colors.grey))]
+                  ? [const Text('Belum ada permission', style: TextStyle(fontSize: 12, color: AppColors.textMuted))]
                   : role.permissions
                       .map((p) => Chip(
                             label: Text(p.name, style: const TextStyle(fontSize: 11)),
@@ -195,9 +196,9 @@ class _RoleCard extends ConsumerWidget {
             ),
             ListTile(
               enabled: !isProtected,
-              leading: Icon(Icons.delete_outline, color: isProtected ? Colors.grey : Colors.red),
+              leading: Icon(Icons.delete_outline, color: isProtected ? AppColors.textMuted : AppColors.danger),
               title: Text('Hapus Role',
-                  style: TextStyle(color: isProtected ? Colors.grey : Colors.red)),
+                  style: TextStyle(color: isProtected ? AppColors.textMuted : AppColors.danger)),
               subtitle: isProtected ? const Text('Role bawaan tidak dapat dihapus') : null,
               onTap: isProtected
                   ? null

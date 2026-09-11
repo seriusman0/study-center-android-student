@@ -42,4 +42,9 @@ class ConnectivityService {
         return false;
     }
   }
+
+  /// Expose _isOnline untuk unit test (white-box testing).
+  @visibleForTesting
+  bool isOnlinePublic(ConnectivityResult r) => _isOnline(r);
 }
+

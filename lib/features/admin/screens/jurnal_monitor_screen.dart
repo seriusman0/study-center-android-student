@@ -4,16 +4,18 @@ import 'package:intl/intl.dart';
 import '../models/jurnal_monitor_model.dart';
 import '../providers/jurnal_monitor_provider.dart';
 import 'jurnal_monitor_detail_screen.dart';
+import '../../../shared/theme/design_tokens.dart';
 
-const _roles = ['student', 'college', 'scholarship_teenager'];
+const _roles = ['student', 'college', 'scholarship_teenager', 'prajurit'];
 const _roleLabels = {
   'student': 'Siswa',
   'college': 'Mahasiswa',
   'scholarship_teenager': 'Beasiswa Remaja',
+  'prajurit': 'Prajurit',
 };
 
 /// Admin screen: monitor jurnal fill status across ALL roles that
-/// keep a jurnal (student, college, scholarship_teenager) in one place.
+/// keep a jurnal (student, college, scholarship_teenager, prajurit) in one place.
 /// Top section shows a cross-role summary (today/week completion %),
 /// tabs below let the admin drill into each role's user list, tap a
 /// user to see their full checklist matrix.
@@ -151,17 +153,17 @@ class _RoleSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey), maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 4),
           Text('${pctWeek.toStringAsFixed(0)}%',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _color)),
           Text('$activeWeek/$totalUsers aktif',
-              style: const TextStyle(fontSize: 10, color: Colors.grey)),
+              style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
         ],
       ),
     );
@@ -221,7 +223,7 @@ class _RoleUserListState extends ConsumerState<_RoleUserList>
                           style: TextStyle(color: Colors.red[400])))
                   : state.users.isEmpty
                       ? const Center(
-                          child: Text('Tidak ada pengguna', style: TextStyle(color: Colors.grey)))
+                          child: Text('Tidak ada pengguna', style: TextStyle(color: AppColors.textMuted)))
                       : RefreshIndicator(
                           onRefresh: () => ref
                               .read(jurnalMonitorListProvider(widget.role).notifier)
@@ -262,7 +264,7 @@ class _UserJurnalTile extends StatelessWidget {
   }
 
   Color _statusColor() {
-    if (user.lastJurnalDate == null) return Colors.grey;
+    if (user.lastJurnalDate == null) return AppColors.textMuted;
     try {
       final dt = DateTime.parse(user.lastJurnalDate!);
       final now = DateTime.now();
@@ -273,7 +275,7 @@ class _UserJurnalTile extends StatelessWidget {
       if (diff <= 3) return Colors.orange;
       return Colors.red;
     } catch (_) {
-      return Colors.grey;
+      return AppColors.textMuted;
     }
   }
 
@@ -299,13 +301,13 @@ class _UserJurnalTile extends StatelessWidget {
             child: Text(
               '${_formatLastDate(user.lastJurnalDate)} • ${user.checksLast7Days}x minggu ini'
               '${user.cabangNama != null ? " • ${user.cabangNama}" : ""}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
               overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
       ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => JurnalMonitorDetailScreen(role: role, userId: user.id, userName: user.name),

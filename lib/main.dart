@@ -10,9 +10,28 @@ import 'features/auth/providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Capture every Flutter framework error so we get the FULL stack trace
+  // (the per-screen _JournalErrorBoundary overwrites this handler when
+  // mounted — so we must log BEFORE any handler swap can hide the root cause).
+  final previousOnError = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
-    debugPrint('[FlutterError] ${details.exceptionAsString()}');
-    debugPrint('[FlutterError] stack: ${details.stack?.toString().split('\n').take(5).join('\n')}');
+    debugPrint('══════ [FlutterError] ══════');
+    debugPrint('[FlutterError] exception: ${details.exceptionAsString()}');
+    debugPrint('[FlutterError] library:   ${details.library}');
+    debugPrint('[FlutterError] context:   ${details.context}');
+    if (details.informationCollector != null) {
+      try {
+        details.informationCollector!();
+      } catch (_) {}
+    }
+    final stackStr = details.stack?.toString() ?? 'no stack';
+    final firstFrames = stackStr.split('\n').take(100).join('\n');
+    debugPrint('[FlutterError] stack (first 100 frames):');
+    debugPrint(firstFrames);
+    debugPrint('══════ [/FlutterError] ══════');
+    // Also forward to previous handler so the UI still shows the error.
+    previousOnError?.call(details);
   };
   await initializeDateFormatting('id', null);
 
@@ -33,11 +52,36 @@ class _AppInit extends ConsumerStatefulWidget {
 
 class _AppInitState extends ConsumerState<_AppInit> {
   bool _ready = false;
+  ProviderSubscription<bool>? _connectivitySub;
 
   @override
   void initState() {
     super.initState();
     _init();
+    // Pindahkan ref.listen ke initState() menggunakan listenManual agar
+    // tidak pernah dipanggil di dalam frame build — pola di build() menyebabkan
+    // ref.invalidate() ter-fire saat MouseTracker sedang update device,
+    // sehingga assertion '_debugDuringDeviceUpdate is not true' muncul
+    // berulang-ulang di layar Jurnal dan layar lainnya.
+    _connectivitySub = ref.listenManual<bool>(
+      connectivityProvider.select((s) => s.valueOrNull ?? false),
+      (prev, online) {
+        if (online) {
+          debugPrint('[AppInit] Network restored — triggering journal sync');
+          // Gunakan addPostFrameCallback agar invalidate tidak terjadi
+          // di tengah frame yang sedang berjalan.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) ref.invalidate(journalSyncSignalProvider);
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _connectivitySub?.close();
+    super.dispose();
   }
 
   Future<void> _init() async {
@@ -61,16 +105,6 @@ class _AppInitState extends ConsumerState<_AppInit> {
         debugShowCheckedModeBanner: false,
       );
     }
-    // Listen for network restore to trigger journal sync — must be in build().
-    ref.listen<bool>(
-      connectivityProvider.select((s) => s.valueOrNull ?? false),
-      (prev, online) {
-        if (online) {
-          debugPrint('[AppInit] Network restored — triggering journal sync');
-          ref.invalidate(journalSyncSignalProvider);
-        }
-      },
-    );
     return const ScStudentApp();
   }
 }

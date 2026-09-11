@@ -1,22 +1,22 @@
 class CollegeBible {
   final int dayNo;
-  final String plText;
-  final String pbText;
+  final String? plText;
+  final String? pbText;
   final bool plChecked;
   final bool pbChecked;
 
   const CollegeBible({
     required this.dayNo,
-    required this.plText,
-    required this.pbText,
+    this.plText,
+    this.pbText,
     required this.plChecked,
     required this.pbChecked,
   });
 
   factory CollegeBible.fromJson(Map<String, dynamic> j) => CollegeBible(
         dayNo:     j['day_no'] as int? ?? 0,
-        plText:    j['pl_porsi'] ?? j['pl_text'] ?? '',
-        pbText:    j['pb_porsi'] ?? j['pb_text'] ?? '',
+        plText:    j['pl_porsi'] as String? ?? j['pl_text'] as String?,
+        pbText:    j['pb_porsi'] as String? ?? j['pb_text'] as String?,
         plChecked: j['pl_checked'] == true,
         pbChecked: j['pb_checked'] == true,
       );
@@ -203,7 +203,7 @@ class CollegeJournalSnapshot {
     final itemsList = (j['life_items'] as List? ?? []);
     final lifeItems = itemsList.map((e) =>
       CollegeLifeItem.fromJson(e as Map<String, dynamic>)
-    ).toList();
+    ).where((item) => item.label != 'Perjanjian Lama' && item.label != 'Perjanjian Baru').toList();
 
     // Backend may return study_logs as either a Map {item_id: {...}}
     // (student endpoint) or a List [...] (college endpoint). Handle both.
@@ -272,9 +272,9 @@ class CollegeJournalSnapshot {
 
   static String kategoriDisplayName(String k) {
     switch (k) {
-      case 'pembacaan': return 'PEMBUACAAN';
+      case 'pembacaan': return 'PEMBACAAN';
       case 'sidang':    return 'SIDANG-SIDANG GEREJA';
-      case 'rohani':    return 'KEGALANGAN ROHANI';
+      case 'rohani':    return 'KEGIATAN ROHANI';
       default:          return k.toUpperCase();
     }
   }

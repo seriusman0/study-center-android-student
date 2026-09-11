@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../models/college_review_model.dart';
 import '../repositories/college_repository.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class CollegeReviewDetailScreen extends ConsumerStatefulWidget {
   final int journalId;
@@ -97,8 +98,8 @@ class _CollegeReviewDetailScreenState extends ConsumerState<CollegeReviewDetailS
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(s.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            if (s.campus != null) Text(s.campus!, style: TextStyle(color: Colors.grey[600])),
-            if (s.semester != null) Text('Semester ${s.semester}', style: TextStyle(color: Colors.grey[600])),
+            if (s.campus != null) Text(s.campus!, style: TextStyle(color: AppColors.textSecondary)),
+            if (s.semester != null) Text('Semester ${s.semester}', style: TextStyle(color: AppColors.textSecondary)),
           ])),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -110,7 +111,7 @@ class _CollegeReviewDetailScreenState extends ConsumerState<CollegeReviewDetailS
         Text(d.title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text('Periode: $period • Dikirim: ${d.submittedAt ?? "Draft"}',
-            style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
 
         const SizedBox(height: 24),
         // Review form sections
@@ -164,7 +165,7 @@ class _CollegeReviewDetailScreenState extends ConsumerState<CollegeReviewDetailS
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.grey[50] as Color, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey[300] as Color)),
+            decoration: BoxDecoration(color: AppColors.background as Color, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.border as Color)),
             child: Text(d.reviewerNotes!),
           ),
         ],
@@ -209,13 +210,13 @@ class _CollegeReviewDetailScreenState extends ConsumerState<CollegeReviewDetailS
   Widget _kv(String k, String v) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(width: 140, child: Text(k, style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.w500))),
+          SizedBox(width: 140, child: Text(k, style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500))),
           Expanded(child: Text(v, style: const TextStyle(color: Colors.black87))),
         ]),
       );
 
   Widget _paragraph(String label, String text) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.w500, fontSize: 13)),
+        Text(label, style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500, fontSize: 13)),
         const SizedBox(height: 2),
         Text(text, style: const TextStyle(color: Colors.black87, height: 1.4)),
       ]);

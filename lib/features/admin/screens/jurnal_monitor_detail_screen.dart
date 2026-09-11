@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/services/api_service.dart';
 import '../providers/jurnal_monitor_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Full checklist matrix for one user — dates (rows) x jurnal items
 /// (columns), same data shape as the student "Laporan" screen but for
@@ -130,10 +131,10 @@ class _MatrixView extends StatelessWidget {
                   style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: pctColor())),
               const SizedBox(height: 4),
               Text('${matrix.checked} dari ${matrix.total} item terisi',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
+                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: 4),
               Text('Periode: ${detail.from} s/d ${detail.to}',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500])),
+                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textMuted)),
             ],
           ),
         ),
@@ -143,7 +144,7 @@ class _MatrixView extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: SingleChildScrollView(
               child: DataTable(
-                headingRowColor: WidgetStateProperty.all(Colors.grey.shade50),
+                headingRowColor: WidgetStateProperty.all(AppColors.background),
                 columns: (matrix.headers as List<String>)
                     .map((h) => DataColumn(
                           label: Text(h,
@@ -157,7 +158,7 @@ class _MatrixView extends StatelessWidget {
                                     cell,
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: cell == 'Y' ? Colors.green[700] : Colors.grey[400],
+                                      color: cell == 'Y' ? AppColors.success : AppColors.textMuted,
                                       fontWeight: cell == 'Y' ? FontWeight.w700 : FontWeight.normal,
                                     ),
                                   )))

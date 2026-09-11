@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/jurnal_config_model.dart';
 import '../providers/jurnal_life_items_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class JurnalLifeItemsScreen extends ConsumerStatefulWidget {
   const JurnalLifeItemsScreen({super.key});
@@ -55,7 +56,7 @@ class _JurnalLifeItemsScreenState extends ConsumerState<JurnalLifeItemsScreen> {
                           SizedBox(height: 80),
                           Center(
                               child: Text('Belum ada item jurnal',
-                                  style: TextStyle(color: Colors.grey))),
+                                  style: TextStyle(color: AppColors.textMuted))),
                         ],
                       )
                     : ListView(
@@ -148,13 +149,13 @@ class _KategoriSection extends StatelessWidget {
                 title: Text(item.label,
                     style: TextStyle(
                       decoration: item.isActive ? null : TextDecoration.lineThrough,
-                      color: item.isActive ? null : Colors.grey,
+                      color: item.isActive ? null : AppColors.textMuted,
                     )),
                 subtitle: Text(item.isDefault ? 'Default' : 'Opsional',
                     style: const TextStyle(fontSize: 11)),
                 leading: Icon(
                   item.isActive ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: item.isActive ? Colors.green : Colors.grey,
+                  color: item.isActive ? AppColors.success : AppColors.textMuted,
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.more_vert),

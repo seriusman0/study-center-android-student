@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
 import '../models/mentor_presensi_admin_model.dart';
 import '../providers/mentor_presensi_admin_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin: laporan presensi mentor (cross-branch). List sesi + laporan
 /// ringkasan, export CSV/PDF.
@@ -118,7 +119,7 @@ class _MentorPresensiAdminScreenState extends ConsumerState<MentorPresensiAdminS
                 : state.error != null
                     ? Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])))
                     : state.entries.isEmpty
-                        ? const Center(child: Text('Tidak ada data presensi', style: TextStyle(color: Colors.grey)))
+                        ? const Center(child: Text('Tidak ada data presensi', style: TextStyle(color: AppColors.textMuted)))
                         : RefreshIndicator(
                             onRefresh: () => ref.read(mentorPresensiAdminProvider.notifier).load(),
                             child: ListView.separated(
@@ -147,7 +148,7 @@ class _MiniStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
     Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF0F766E))),
-    Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+    Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
   ]);
 }
 
@@ -165,7 +166,7 @@ class _DateChip extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey.shade300),
+        side: BorderSide(color: AppColors.borderStrong),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: ListTile(

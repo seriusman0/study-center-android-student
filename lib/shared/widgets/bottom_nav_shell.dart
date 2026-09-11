@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/models/user_model.dart';
+import '../theme/app_theme.dart';
 
 /// Describes one tab of the bottom nav — icon/label plus the branch route
 /// path it maps to. Built dynamically per role so each role only sees tabs
@@ -28,8 +29,8 @@ List<NavTab> navTabsForRole(UserModel? user) {
   if (user.isAdmin) return _adminTabs;
   if (user.isMentor) return _mentorTabs;
   if (user.isCollege) return _collegeTabs;
-  // student + scholarship_teenager: Beranda + Jurnal + Laporan + Profil
-  if (user.isStudent || user.isScholarshipTeenager) return _studentTabs;
+  // student + scholarship_teenager + prajurit: Beranda + Jurnal + Laporan + Profil
+  if (user.isStudent || user.isScholarshipTeenager || user.isPrajurit) return _studentTabs;
   // fulltimer/guest: Beranda + Profil only
   return _minimalTabs;
 }
@@ -85,17 +86,25 @@ class BottomNavShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: shell,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: visibleIndex,
-        onTap: onTabTap,
-        items: tabs
-            .map((t) => BottomNavigationBarItem(
-                  icon: Icon(t.icon),
-                  activeIcon: Icon(t.activeIcon),
-                  label: t.label,
-                ))
-            .toList(),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: AppColors.border, width: 1),
+          ),
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: visibleIndex,
+          onTap: onTabTap,
+          items: tabs
+              .map((t) => BottomNavigationBarItem(
+                    icon: Icon(t.icon),
+                    activeIcon: Icon(t.activeIcon),
+                    label: t.label,
+                  ))
+              .toList(),
+        ),
       ),
     );
   }

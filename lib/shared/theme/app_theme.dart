@@ -26,7 +26,8 @@ ThemeData buildAppTheme() {
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
-      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent, // Prevents tint overlay on scroll
+      scrolledUnderElevation: 3,            // HIG: "Differentiate controls from content" - shadow on scroll
       centerTitle: true,
       titleTextStyle: TextStyle(
         fontSize: 18,
@@ -36,7 +37,8 @@ ThemeData buildAppTheme() {
       iconTheme: IconThemeData(color: Colors.white, size: 24),
     ),
     cardTheme: CardThemeData(
-      elevation: 0,
+      elevation: 2,                        // IMPROVED: was 0 - adds depth hierarchy
+      shadowColor: Colors.black.withValues(alpha: 0.08),
       color: AppColors.surface,
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       shape: RoundedRectangleBorder(
@@ -108,13 +110,23 @@ ThemeData buildAppTheme() {
       thickness: 1,
       space: 1,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: AppColors.primary,
       unselectedItemColor: AppColors.textMuted,
-      elevation: 8,
+      elevation: 0,                            // IMPROVED: 0 - let the nav bar sit flush with no shadow (cards are elevated now)
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: true,
+      selectedLabelStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,         // IMPROVED: was default - adds hierarchy
+        height: 1.2,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w400,         // IMPROVED: lighter weight for inactive tabs
+        height: 1.2,
+      ),
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: AppColors.primary,

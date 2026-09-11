@@ -74,7 +74,7 @@ class _CollegeJournalScreenState extends ConsumerState<CollegeJournalScreen> {
           ),
         );
       }
-      return const Center(child: Text('Gagal memuat. Tap refresh.', style: TextStyle(color: Colors.grey)));
+      return const Center(child: Text('Gagal memuat. Tap refresh.', style: TextStyle(color: AppColors.textMuted)));
     }
 
     final snap = state.snapshot!;
@@ -220,7 +220,7 @@ class _FormWindowBanner extends StatelessWidget {
         child: Row(children: [
           Icon(Icons.warning_amber_rounded, color: Colors.orange.shade800, size: 20),
           const SizedBox(width: 8),
-          Expanded(child: Text('Form jurnal hanya bisa diisi pukul ${snap.config.formOpenTime.substring(0, 5)}–${snap.config.formCloseTime.substring(0, 5)}.',
+          Expanded(child: Text('Form jurnal hanya bisa diisi pukul ${snap.config.formOpenTime.length >= 5 ? snap.config.formOpenTime.substring(0, 5) : snap.config.formOpenTime.isEmpty ? "-" : snap.config.formOpenTime}–${snap.config.formCloseTime.length >= 5 ? snap.config.formCloseTime.substring(0, 5) : snap.config.formCloseTime.isEmpty ? "-" : snap.config.formCloseTime}.',
               style: TextStyle(color: Colors.orange.shade800))),
         ]),
       );
@@ -242,47 +242,27 @@ class _BibleSection extends StatelessWidget {
     final rows = <Widget>[
       AppChecklistTile(
         label: 'Perjanjian Lama',
+        sublabel: snap.bible.plText?.isNotEmpty == true ? snap.bible.plText : null,
         checked: snap.bible.plChecked,
         enabled: !disabled,
         onChanged: (v) => notifier.checkBible('pl', v),
       ),
       AppChecklistTile(
         label: 'Perjanjian Baru',
+        sublabel: snap.bible.pbText?.isNotEmpty == true ? snap.bible.pbText : null,
         checked: snap.bible.pbChecked,
         enabled: !disabled,
         onChanged: (v) => notifier.checkBible('pb', v),
       ),
     ];
 
-    String? subtitle;
-    if (snap.bible.plText.isNotEmpty || snap.bible.pbText.isNotEmpty) {
-      subtitle =
-          'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText} / ${snap.bible.pbText}';
-    } else {
-      subtitle = 'Jadwal hari ke-${snap.bible.dayNo} belum diisi admin.';
-    }
+    final title = 'Pembacaan Alkitab (Hari ke-${snap.bible.dayNo})';
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-              padding: const EdgeInsets.only(
-                  left: AppSpacing.xs, bottom: AppSpacing.xs),
-              child: Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          AppSectionCard(
-            title: 'Pembacaan Alkitab',
-            rows: rows,
-          ),
-        ],
+      child: AppSectionCard(
+        title: title,
+        rows: rows,
       ),
     );
   }
@@ -465,21 +445,21 @@ class _TimeRangeItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: AppColors.borderStrong),
           borderRadius: BorderRadius.circular(10),
-          color: !isEnabled ? Colors.grey[50] : (hasValue ? Colors.teal.shade50 : null),
+          color: !isEnabled ? AppColors.background : (hasValue ? Colors.teal.shade50 : null),
         ),
         child: Row(children: [
-          Icon(Icons.access_time, size: 18, color: isEnabled ? Colors.teal : Colors.grey[400]),
+          Icon(Icons.access_time, size: 18, color: isEnabled ? AppColors.primary : AppColors.textMuted),
           const SizedBox(width: 8),
           Expanded(child: Text(
             item.label,
-            style: TextStyle(color: isEnabled ? Colors.black87 : Colors.grey[400], fontWeight: FontWeight.w500),
+            style: TextStyle(color: isEnabled ? AppColors.textPrimary : AppColors.textMuted, fontWeight: FontWeight.w500),
           )),
           if (hasValue) ...[
-            Text('${studyLog.jamMulai}—${studyLog.jamSelesai}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+            Text('${studyLog.jamMulai}—${studyLog.jamSelesai}', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
             const SizedBox(width: 6),
-            Icon(Icons.chevron_right, size: 16, color: Colors.grey[400]),
+            Icon(Icons.chevron_right, size: 16, color: AppColors.textMuted),
           ],
         ]),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/kelas_master_model.dart';
 import '../providers/kelas_master_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class MentorKelasScreen extends ConsumerStatefulWidget {
   const MentorKelasScreen({super.key});
@@ -48,7 +49,7 @@ class _MentorKelasScreenState extends ConsumerState<MentorKelasScreen> {
                           SizedBox(height: 80),
                           Center(
                               child: Text('Belum ada kelas',
-                                  style: TextStyle(color: Colors.grey))),
+                                  style: TextStyle(color: AppColors.textMuted))),
                         ],
                       )
                     : ListView.builder(
@@ -74,7 +75,7 @@ class _MentorKelasScreenState extends ConsumerState<MentorKelasScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 8, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey[200],
+                                        color: AppColors.divider,
                                         borderRadius: BorderRadius.circular(999),
                                       ),
                                       child: const Text('Nonaktif',

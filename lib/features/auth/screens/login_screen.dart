@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../providers/auth_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -189,7 +190,7 @@ class _SavedProfilesCard extends StatelessWidget {
             'Ketuk untuk langsung masuk',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium
-                ?.copyWith(color: Colors.grey[500]),
+                ?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 20),
           ...profiles.map((p) => _ProfileTile(
@@ -206,7 +207,7 @@ class _SavedProfilesCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
-              side: BorderSide(color: Colors.grey.shade300),
+              side: const BorderSide(color: AppColors.borderStrong),
             ),
           ),
         ],
@@ -260,7 +261,7 @@ class _ProfileTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: Colors.grey.shade50,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -318,7 +319,7 @@ class _ProfileTile extends StatelessWidget {
                             child: Text(
                               profile.email,
                               style: theme.textTheme.bodySmall
-                                  ?.copyWith(color: Colors.grey[500]),
+                                  ?.copyWith(color: AppColors.textSecondary),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -328,7 +329,7 @@ class _ProfileTile extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.close, size: 18, color: Colors.grey[400]),
+                  icon: Icon(Icons.close, size: 18, color: AppColors.textMuted),
                   onPressed: onRemove,
                   tooltip: 'Hapus dari daftar',
                   padding: EdgeInsets.zero,
@@ -452,7 +453,7 @@ class _LoginFormCard extends ConsumerWidget {
           Text(
             'Masuk ke akun Study Center Nias',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 24),
           if (state.error != null) _ErrorBox(error: state.error!),
@@ -551,7 +552,7 @@ class _DaftarLink extends StatelessWidget {
       children: [
         Text(
           'Belum punya akun? ',
-          style: TextStyle(color: Colors.grey[500], fontSize: 14),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         GestureDetector(
           onTap: () => context.go('/register'),

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/blog_model.dart';
 import '../providers/blog_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class BlogDetailScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -119,15 +120,15 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                         fit: BoxFit.cover,
                         placeholder: (_, __) => Container(
                           height: 220,
-                          color: Colors.grey[200],
+                          color: AppColors.divider,
                           child: const Center(
                               child: CircularProgressIndicator(strokeWidth: 2)),
                         ),
                         errorWidget: (_, __, ___) => Container(
                           height: 220,
-                          color: Colors.grey[200],
+                          color: AppColors.divider,
                           child: Icon(Icons.image,
-                              size: 48, color: Colors.grey[400]),
+                              size: 48, color: AppColors.textMuted),
                         ),
                       ),
 
@@ -182,7 +183,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                                         _formatDate(blog.publishedAt!),
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
-                                                color: Colors.grey[500]),
+                                                color: AppColors.textMuted),
                                       ),
                                   ],
                                 ),
@@ -212,7 +213,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                           else
                             Text('Tidak ada konten.',
                                 style:
-                                    TextStyle(color: Colors.grey[500])),
+                                    TextStyle(color: AppColors.textMuted)),
 
                           const SizedBox(height: 32),
                           const Divider(),
@@ -240,7 +241,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                                   const EdgeInsets.symmetric(vertical: 8),
                               child: Text('Belum ada komentar.',
                                   style:
-                                      TextStyle(color: Colors.grey[500])),
+                                      TextStyle(color: AppColors.textMuted)),
                             )
                           else
                             ...blog.comments.map((c) => _CommentTile(
@@ -274,7 +275,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 border:
-                    Border(top: BorderSide(color: Colors.grey.shade200)),
+                    Border(top: BorderSide(color: AppColors.border)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -307,7 +308,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                           borderSide:
-                              BorderSide(color: Colors.grey.shade300),
+                              BorderSide(color: AppColors.borderStrong),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -387,9 +388,9 @@ class _CommentTile extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: AppColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,7 +408,7 @@ class _CommentTile extends StatelessWidget {
                         Text(
                           _formatDate(comment.createdAt!),
                           style: theme.textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[500]),
+                              ?.copyWith(color: AppColors.textMuted),
                         ),
                       if (canDelete)
                         GestureDetector(
@@ -415,7 +416,7 @@ class _CommentTile extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.only(left: 4),
                             child: Icon(Icons.close,
-                                size: 14, color: Colors.grey[400]),
+                                size: 14, color: AppColors.textMuted),
                           ),
                         ),
                     ],

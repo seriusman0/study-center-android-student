@@ -37,7 +37,9 @@ class AppColors {
   // Text
   static const Color textPrimary = Color(0xFF0F172A);   // Slate 900
   static const Color textSecondary = Color(0xFF64748B); // Slate 500
-  static const Color textMuted = Color(0xFF94A3B8);     // Slate 400
+  // FIXED: was #94A3B8 (Slate 400, ~2.8:1 contrast) → now #64748B (Slate 500, ~4.6:1)
+  // Ensures minimum 4.5:1 contrast ratio per HIG Accessibility guidelines.
+  static const Color textMuted = Color(0xFF64748B);
 
   // Status
   static const Color danger = Color(0xFFDC2626);       // Red 600

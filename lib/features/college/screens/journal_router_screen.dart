@@ -5,6 +5,7 @@ import 'package:sc_student/features/auth/models/user_model.dart';
 import 'package:sc_student/features/journal/screens/journal_screen.dart';
 import 'package:sc_student/features/scholarship_teenager/screens/scholarship_journal_screen.dart';
 import 'college_journal_screen.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Role-aware entry point for the "Jurnal" bottom-nav tab.
 ///
@@ -19,12 +20,9 @@ import 'college_journal_screen.dart';
 /// when a user holds 2+ journal roles we surface a tab switcher instead of
 /// picking one for them.
 class JournalRouterScreen extends ConsumerWidget {
-  const JournalRouterScreen({super.key});
+  final String? initialTab;
+  const JournalRouterScreen({super.key, this.initialTab});
 
-  /// Ordered (label, screen) entries for every journal-eligible role the
-  /// user actually holds. Order mirrors the old single-pick priority
-  /// (college > scholarship_teenager > student) so the first tab matches
-  /// what single-role users already saw.
   List<(String label, Widget screen)> _journalsFor(UserModel? user) {
     if (user == null) return [('Jurnal', const JournalScreen())];
     final entries = <(String, Widget)>[];
@@ -38,8 +36,6 @@ class JournalRouterScreen extends ConsumerWidget {
       entries.add(('Student', const JournalScreen()));
     }
     if (entries.isEmpty) {
-      // No journal role at all — fall back to the student screen, which
-      // will itself show an appropriate empty/unauthorized state.
       entries.add(('Jurnal', const JournalScreen()));
     }
     return entries;
@@ -50,23 +46,20 @@ class JournalRouterScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
     final journals = _journalsFor(user);
 
-    // Single journal role (the common case) — no ambiguity, show it directly.
     if (journals.length == 1) {
       return journals.first.$2;
     }
 
-    // Multiple journal roles on one account — make it explicit which
-    // journal is which so entries are never entered against the wrong role.
-    //
-    // Each entry's screen (JournalScreen / ScholarshipJournalScreen /
-    // CollegeJournalScreen) already brings its own Scaffold+AppBar (with its
-    // own actions, e.g. history). Wrapping those in a second Scaffold+AppBar
-    // would stack two app bars, so instead of a full outer Scaffold we just
-    // put a slim role-switcher TabBar above the selected screen and let that
-    // screen's own AppBar render normally underneath it.
+    int initIndex = 0;
+    if (initialTab != null) {
+      initIndex = journals.indexWhere((j) => j.$1 == initialTab);
+      if (initIndex < 0) initIndex = 0;
+    }
+
     final theme = Theme.of(context);
     return DefaultTabController(
       length: journals.length,
+      initialIndex: initIndex,
       child: Scaffold(
         body: Column(
           children: [
@@ -78,14 +71,33 @@ class JournalRouterScreen extends ConsumerWidget {
                 child: TabBar(
                   tabs: journals.map((j) => Tab(text: 'Jurnal ${j.$1}')).toList(),
                   labelColor: theme.colorScheme.primary,
-                  unselectedLabelColor: Colors.grey[600],
+                  unselectedLabelColor: AppColors.textSecondary,
                   indicatorColor: theme.colorScheme.primary,
                 ),
               ),
             ),
             Expanded(
               child: TabBarView(
-                children: journals.map((j) => j.$2).toList(),
+                children: journals.map((j) {
+                  return KeyedSubtree(
+                    key: PageStorageKey<String>('journal_tab_${j.$1}'),
+                    // MediaQuery.sizeOf untuk mendapat ukuran layar aktual,
+                    // bukan dari constraint TabBarView (yang bisa unbounded
+                    // saat animasi transisi tab → menyebabkan cascade crash
+                    // "BoxConstraints forces an infinite width" di child
+                    // yang punya DropdownButtonFormField / ElevatedButton).
+                    child: Builder(
+                      builder: (ctx) {
+                        final size = MediaQuery.sizeOf(ctx);
+                        return SizedBox(
+                          width: size.width,
+                          height: size.height,
+                          child: j.$2,
+                        );
+                      },
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ],

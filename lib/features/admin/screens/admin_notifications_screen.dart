@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/admin_notification_model.dart';
 import '../providers/admin_notifications_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class AdminNotificationsScreen extends ConsumerStatefulWidget {
   const AdminNotificationsScreen({super.key});
@@ -50,10 +51,10 @@ class _AdminNotificationsScreenState
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.notifications_none,
-                                size: 64, color: Colors.grey),
+                                size: 64, color: AppColors.textMuted),
                             SizedBox(height: 12),
                             Text('Tidak ada notifikasi',
-                                style: TextStyle(color: Colors.grey)),
+                                style: TextStyle(color: AppColors.textMuted)),
                           ],
                         ),
                       )
@@ -99,15 +100,15 @@ class _NotifTile extends ConsumerWidget {
     return ListTile(
       tileColor: isUnread ? Colors.blue.shade50 : null,
       leading: CircleAvatar(
-        backgroundColor: isUnread ? Colors.blue : Colors.grey.shade300,
+        backgroundColor: isUnread ? AppColors.primary : AppColors.border,
         child: Icon(_icon(),
-            color: isUnread ? Colors.white : Colors.grey, size: 20),
+            color: isUnread ? Colors.white : AppColors.textMuted, size: 20),
       ),
       title: Text(notif.message,
           style: TextStyle(
               fontWeight: isUnread ? FontWeight.w600 : FontWeight.normal)),
       subtitle: Text(notif.relativeTime(),
-          style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
       trailing: isUnread
           ? TextButton(
               onPressed: () =>

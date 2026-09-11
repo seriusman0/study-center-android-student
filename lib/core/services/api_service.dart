@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
+import '../providers/maintenance_provider.dart';
 import 'storage_service.dart';
 
 final storageServiceProvider = Provider((_) => StorageService());
@@ -15,7 +16,7 @@ final dioProvider = Provider((ref) {
     headers: {'Accept': 'application/json'},
   ));
 
-  dio.interceptors.add(_AuthInterceptor(dio, storage));
+  dio.interceptors.add(_AuthInterceptor(dio, storage, ref));
 
   return dio;
 });
@@ -29,9 +30,10 @@ final dioProvider = Provider((ref) {
 class _AuthInterceptor extends InterceptorsWrapper {
   final Dio _dio;
   final StorageService _storage;
+  final ProviderRef _ref;
   bool _isRefreshing = false;
 
-  _AuthInterceptor(this._dio, this._storage);
+  _AuthInterceptor(this._dio, this._storage, this._ref);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -54,6 +56,19 @@ class _AuthInterceptor extends InterceptorsWrapper {
     final statusCode = error.response?.statusCode;
     debugPrint('[DIO ERROR] $statusCode ${error.requestOptions.uri}');
     debugPrint('[DIO ERROR] body: ${error.response?.data}');
+
+    // ── Maintenance / Offline Check ────────────────────────────────────────
+    if (statusCode == 502 || statusCode == 503 || statusCode == 504 || 
+        error.type == DioExceptionType.connectionTimeout || 
+        error.type == DioExceptionType.connectionError || 
+        error.type == DioExceptionType.receiveTimeout || 
+        error.type == DioExceptionType.unknown) {
+        
+        // Ensure it's not just a client error (like 400 or 404)
+        if (statusCode == null || statusCode >= 500) {
+           _ref.read(maintenanceProvider.notifier).setMaintenance(true);
+        }
+    }
 
     // ── Auto-refresh on 401 ────────────────────────────────────────────
     if (statusCode == 401 && !_isRefreshing) {

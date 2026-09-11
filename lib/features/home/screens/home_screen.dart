@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/app_widgets.dart';
 import '../../auth/models/user_model.dart';
 import '../../journal/providers/journal_provider.dart';
@@ -97,19 +98,19 @@ class _NonStudentHome extends ConsumerWidget {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () => ref.read(homeProvider.notifier).load(user.cabangSlug),
+        onRefresh: () => ref.read(homeProvider.notifier).load(user.cabangSlug, forceRefresh: true),
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             const UpdateBanner(),
             const SizedBox(height: 8),
             Text('${greeting()},',
-                style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
+                style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary)),
             Text(user.name,
                 style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
             Text(DateFormat('EEEE, d MMMM yyyy', 'id').format(now),
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500])),
+                style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textMuted)),
             const SizedBox(height: 4),
             Container(
               margin: const EdgeInsets.only(top: 4),
@@ -142,16 +143,26 @@ class _NonStudentHome extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (hState.loading && hState.blogs.isEmpty)
-              const Center(
-                  child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ))
-            else if (hState.blogs.isEmpty)
-              Text('Belum ada artikel', style: TextStyle(color: Colors.grey[500]))
-            else
-              ...hState.blogs.map((blog) => _BlogCard(blog: blog, theme: theme)),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: (hState.loading && hState.blogs.isEmpty)
+                  ? const Center(
+                      key: ValueKey('blogs_loading'),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ))
+                  : hState.blogs.isEmpty
+                      ? const Text('Belum ada artikel',
+                          key: ValueKey('blogs_empty'),
+                          style: TextStyle(color: AppColors.textMuted))
+                      : Column(
+                          key: const ValueKey('blogs_list'),
+                          children: hState.blogs
+                              .map((blog) => _BlogCard(blog: blog, theme: theme))
+                              .toList(),
+                        ),
+            ),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -162,24 +173,30 @@ class _NonStudentHome extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (hState.loading && hState.galeri.isEmpty)
-              const Center(
-                  child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ))
-            else if (hState.galeri.isEmpty)
-              Text('Belum ada foto kegiatan', style: TextStyle(color: Colors.grey[500]))
-            else
-              SizedBox(
-                height: 160,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: hState.galeri.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (ctx, i) => _GaleriCard(item: hState.galeri[i]),
-                ),
-              ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: (hState.loading && hState.galeri.isEmpty)
+                  ? const Center(
+                      key: ValueKey('galeri_loading'),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ))
+                  : hState.galeri.isEmpty
+                      ? const Text('Belum ada foto kegiatan',
+                          key: ValueKey('galeri_empty'),
+                          style: TextStyle(color: AppColors.textMuted))
+                      : SizedBox(
+                          key: const ValueKey('galeri_list'),
+                          height: 160,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: hState.galeri.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 10),
+                            itemBuilder: (ctx, i) => _GaleriCard(item: hState.galeri[i]),
+                          ),
+                        ),
+            ),
             const SizedBox(height: 32),
           ],
         ),
@@ -236,7 +253,7 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
         onRefresh: () async {
           await Future.wait([
             ref.read(journalProvider.notifier).load(),
-            ref.read(homeProvider.notifier).load(user?.cabangSlug),
+            ref.read(homeProvider.notifier).load(user?.cabangSlug, forceRefresh: true),
           ]);
         },
         child: ListView(
@@ -246,7 +263,7 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
             const SizedBox(height: 8),
             Text(
               '${greeting()},',
-              style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+              style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
             ),
             Text(
               user?.name ?? '',
@@ -257,7 +274,7 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
             Text(
               DateFormat('EEEE, d MMMM yyyy', 'id').format(now),
               style:
-                  theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+                  theme.textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
             ),
 
             const SizedBox(height: 24),
@@ -298,7 +315,7 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
                         Text(
                           user.cabang!,
                           style: theme.textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[500]),
+                              ?.copyWith(color: AppColors.textMuted),
                         ),
                     ],
                   ),
@@ -307,31 +324,65 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
               const SizedBox(height: 16),
             ],
             // Web-style navigation buttons for multi-role users
-            if (user?.isScholarshipTeenager == true) ...[
-              AppPrimaryButton(
-                label: 'Mulai Isi Jurnal Remaja Beasiswa',
-                icon: Icons.edit_document,
-                onPressed: () => context.push('/jurnal'),
-              ),
-              const SizedBox(height: 8),
-            ],
-            if (user?.isStudent == true) ...[
-              AppPrimaryButton(
-                label: 'Mulai Isi Jurnal Remaja SC',
-                icon: Icons.edit_document,
-                onPressed: () => context.push('/jurnal'),
-              ),
-              const SizedBox(height: 8),
-            ],
-            if (user?.isCollege == true) ...[
-              AppPrimaryButton(
-                label: 'Mulai Isi Jurnal College',
-                icon: Icons.edit_document,
-                onPressed: () => context.push('/jurnal'),
-              ),
-              const SizedBox(height: 8),
-            ],
-            const SizedBox(height: 8),
+            Builder(builder: (context) {
+              final showBeasiswa = user?.isScholarshipTeenager == true;
+              final showStudent = user?.isStudent == true;
+              final showCollege = user?.isCollege == true;
+              
+              if (!showBeasiswa && !showStudent && !showCollege) {
+                return const SizedBox.shrink();
+              }
+              
+              return Column(
+                children: [
+                  if (showBeasiswa || showStudent)
+                    Row(
+                      children: [
+                        if (showBeasiswa)
+                          Expanded(
+                            child: _SquareJournalButton(
+                              label: 'Jurnal Beasiswa',
+                              icon: Icons.school,
+                              color: AppColors.primary,
+                              onPressed: () => context.push('/jurnal?tab=Beasiswa'),
+                            ),
+                          ),
+                        if (showBeasiswa && showStudent)
+                          const SizedBox(width: 12),
+                        if (showStudent)
+                          Expanded(
+                            child: _SquareJournalButton(
+                              label: 'Jurnal SC',
+                              icon: Icons.menu_book,
+                              color: AppColors.primaryDark,
+                              onPressed: () => context.push('/jurnal?tab=Student'),
+                            ),
+                          ),
+                      ],
+                    ),
+                  if ((showBeasiswa || showStudent) && showCollege)
+                    const SizedBox(height: 12),
+                  if (showCollege)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SquareJournalButton(
+                            label: 'Jurnal College',
+                            icon: Icons.account_balance,
+                            color: AppColors.success,
+                            onPressed: () => context.push('/jurnal?tab=College'),
+                          ),
+                        ),
+                        if (showBeasiswa || showStudent) ...[
+                          const SizedBox(width: 12),
+                          const Spacer(),
+                        ]
+                      ],
+                    ),
+                  const SizedBox(height: 16),
+                ],
+              );
+            }),
 
             // Unified JURNAL HARI INI Summary
             if (user?.hasJournalAccess == true) ...[
@@ -382,17 +433,17 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
                             const SizedBox(height: 12),
                             Text('PERJANJIAN LAMA',
                                 style: theme.textTheme.labelSmall
-                                    ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
-                            Text(activeSnap.bible.plPorsi, style: theme.textTheme.bodyMedium),
+                                    ?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                            Text(activeSnap.bible.plText ?? '-', style: theme.textTheme.bodyMedium),
                             const SizedBox(height: 8),
                             Text('PERJANJIAN BARU',
                                 style: theme.textTheme.labelSmall
-                                    ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
-                            Text(activeSnap.bible.pbPorsi, style: theme.textTheme.bodyMedium),
+                                    ?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                            Text(activeSnap.bible.pbText ?? '-', style: theme.textTheme.bodyMedium),
                             const SizedBox(height: 16),
                             Text('Progress Jadwal Kehidupan',
                                 style: theme.textTheme.labelSmall
-                                    ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                                    ?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
                             LinearProgressIndicator(
                               value: activeSnap.totalCount > 0
@@ -404,13 +455,13 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
                             const SizedBox(height: 6),
                             Text('${activeSnap.checkedCount}/${activeSnap.totalCount}',
                                 style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: Colors.grey[800], fontWeight: FontWeight.bold)),
+                                    ?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
                           ] else if (errorMsg != null)
                             Text('Gagal memuat jurnal',
                                 style: TextStyle(color: Colors.red[400], fontSize: 13))
                           else
                             const Text('Memuat...',
-                                style: TextStyle(color: Colors.grey)),
+                                style: TextStyle(color: AppColors.textMuted)),
                         ],
                       ),
                     ),
@@ -497,18 +548,26 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
               ],
             ),
             const SizedBox(height: 12),
-            if (hState.loading && hState.blogs.isEmpty)
-              const Center(
-                  child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ))
-            else if (hState.blogs.isEmpty)
-              Text('Belum ada artikel',
-                  style: TextStyle(color: Colors.grey[500]))
-            else
-              ...hState.blogs
-                  .map((blog) => _BlogCard(blog: blog, theme: theme)),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: (hState.loading && hState.blogs.isEmpty)
+                  ? const Center(
+                      key: ValueKey('blogs_loading'),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ))
+                  : hState.blogs.isEmpty
+                      ? const Text('Belum ada artikel',
+                          key: ValueKey('blogs_empty'),
+                          style: TextStyle(color: AppColors.textMuted))
+                      : Column(
+                          key: const ValueKey('blogs_list'),
+                          children: hState.blogs
+                              .map((blog) => _BlogCard(blog: blog, theme: theme))
+                              .toList(),
+                        ),
+            ),
 
             const SizedBox(height: 24),
 
@@ -531,26 +590,31 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
               ],
             ),
             const SizedBox(height: 12),
-            if (hState.loading && hState.galeri.isEmpty)
-              const Center(
-                  child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ))
-            else if (hState.galeri.isEmpty)
-              Text('Belum ada foto kegiatan',
-                  style: TextStyle(color: Colors.grey[500]))
-            else
-              SizedBox(
-                height: 160,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: hState.galeri.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (ctx, i) =>
-                      _GaleriCard(item: hState.galeri[i]),
-                ),
-              ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: (hState.loading && hState.galeri.isEmpty)
+                  ? const Center(
+                      key: ValueKey('galeri_loading'),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ))
+                  : hState.galeri.isEmpty
+                      ? const Text('Belum ada foto kegiatan',
+                          key: ValueKey('galeri_empty'),
+                          style: TextStyle(color: AppColors.textMuted))
+                      : SizedBox(
+                          key: const ValueKey('galeri_list'),
+                          height: 160,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: hState.galeri.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 10),
+                            itemBuilder: (ctx, i) =>
+                                _GaleriCard(item: hState.galeri[i]),
+                          ),
+                        ),
+            ),
 
             const SizedBox(height: 32),
           ],
@@ -574,7 +638,7 @@ class _BibleRow extends StatelessWidget {
         Icon(
           checked ? Icons.check_circle : Icons.radio_button_unchecked,
           size: 16,
-          color: checked ? Colors.green : Colors.grey[400],
+          color: checked ? AppColors.success : AppColors.textMuted,
         ),
         const SizedBox(width: 8),
         Text('$type — $porsi',
@@ -612,8 +676,8 @@ class _BlogCard extends StatelessWidget {
                     errorWidget: (_, __, ___) => Container(
                       width: 60,
                       height: 60,
-                      color: Colors.grey[200],
-                      child: Icon(Icons.article, color: Colors.grey[400]),
+                      color: AppColors.divider,
+                      child: Icon(Icons.article, color: AppColors.textMuted),
                     ),
                   ),
                 )
@@ -622,7 +686,7 @@ class _BlogCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: AppColors.divider,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(Icons.article,
@@ -645,14 +709,14 @@ class _BlogCard extends StatelessWidget {
                       Text(
                         _formatDate(blog.publishedAt!),
                         style: theme.textTheme.bodySmall
-                            ?.copyWith(color: Colors.grey[500]),
+                            ?.copyWith(color: AppColors.textMuted),
                       ),
                     ],
                     if (blog.cabangNama != null)
                       Text(
                         blog.cabangNama!,
                         style: theme.textTheme.bodySmall
-                            ?.copyWith(color: Colors.grey[400]),
+                            ?.copyWith(color: AppColors.textMuted),
                       ),
                   ],
                 ),
@@ -687,7 +751,7 @@ class _ScholarshipJournalHomeCard extends ConsumerWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () => context.push('/jurnal'),
+      onTap: () => context.push('/jurnal?tab=Beasiswa'),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(18),
@@ -724,13 +788,13 @@ class _ScholarshipJournalHomeCard extends ConsumerWidget {
                 Text(
                   '${snap.checkedCount} dari ${snap.totalCount} item selesai',
                   style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey[600]),
+                      ?.copyWith(color: AppColors.textSecondary),
                 ),
               ] else if (state.error != null)
                 Text('Gagal memuat jurnal beasiswa',
                     style: TextStyle(color: Colors.red[400], fontSize: 13))
               else
-                const Text('Memuat...', style: TextStyle(color: Colors.grey)),
+                const Text('Memuat...', style: TextStyle(color: AppColors.textMuted)),
             ],
           ),
         ),
@@ -750,7 +814,7 @@ class _CollegeJournalHomeCard extends ConsumerWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () => context.push('/jurnal'),
+      onTap: () => context.push('/jurnal?tab=College'),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(18),
@@ -787,13 +851,13 @@ class _CollegeJournalHomeCard extends ConsumerWidget {
                 Text(
                   '${snap.checkedCount} dari ${snap.totalCount} item selesai',
                   style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey[600]),
+                      ?.copyWith(color: AppColors.textSecondary),
                 ),
               ] else if (state.error != null)
                 Text('Gagal memuat jurnal college',
                     style: TextStyle(color: Colors.red[400], fontSize: 13))
               else
-                const Text('Memuat...', style: TextStyle(color: Colors.grey)),
+                const Text('Memuat...', style: TextStyle(color: AppColors.textMuted)),
             ],
           ),
         ),
@@ -853,14 +917,14 @@ class _JournalCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Icon(Icons.chevron_right,
-                      color: Colors.grey[400], size: 20),
+                      color: AppColors.textMuted, size: 20),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 subtitle,
                 style: theme.textTheme.bodySmall
-                    ?.copyWith(color: Colors.grey[600]),
+                    ?.copyWith(color: AppColors.textSecondary),
               ),
               if (isMultiJournal) ...[
                 const SizedBox(height: 6),
@@ -912,14 +976,63 @@ class _GaleriCard extends StatelessWidget {
         fit: BoxFit.cover,
         placeholder: (_, __) => Container(
           width: 140,
-          color: Colors.grey[200],
+          color: AppColors.divider,
           child: const Center(
               child: CircularProgressIndicator(strokeWidth: 2)),
         ),
         errorWidget: (_, __, ___) => Container(
           width: 140,
-          color: Colors.grey[200],
-          child: Icon(Icons.image, color: Colors.grey[400], size: 40),
+          color: AppColors.divider,
+          child: Icon(Icons.image, color: AppColors.textMuted, size: 40),
+        ),
+      ),
+    );
+  }
+}
+class _SquareJournalButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _SquareJournalButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          splashColor: Colors.white.withOpacity(0.2),
+          highlightColor: Colors.white.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 36),
+                const SizedBox(height: 12),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'core/providers/maintenance_provider.dart';
+import 'shared/widgets/maintenance_screen.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/models/user_model.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -218,7 +220,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
           ]),
           StatefulShellBranch(routes: [
-                GoRoute(path: '/jurnal', builder: (_, __) => const JournalRouterScreen()),
+                GoRoute(
+                  path: '/jurnal',
+                  builder: (_, state) => JournalRouterScreen(
+                    initialTab: state.uri.queryParameters['tab'],
+                  ),
+                ),
               ]),
               StatefulShellBranch(routes: [
                 GoRoute(path: '/laporan', builder: (_, __) => const LaporanScreen()),
@@ -290,6 +297,43 @@ class ScStudentApp extends ConsumerWidget {
       theme: buildAppTheme(),
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        // Maintenance mode intercept
+        final isMaintenance = ref.watch(maintenanceProvider);
+        if (isMaintenance) {
+          return const MaintenanceScreen();
+        }
+
+        // Wrap with error widget that catches RenderObject overflow during build,
+        // so the user sees a readable message instead of a blank screen.
+        ErrorWidget.builder = (FlutterErrorDetails details) {
+          return Container(
+            color: const Color(0xFFFEE2E2),
+            padding: const EdgeInsets.all(16),
+            alignment: Alignment.center,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 32),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Layout error: ${details.exceptionAsString()}',
+                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                  if (details.context != null)
+                    Text(
+                      'ctx: ${details.context}',
+                      style: const TextStyle(color: Colors.red, fontSize: 11),
+                    ),
+                ],
+              ),
+            ),
+          );
+        };
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }

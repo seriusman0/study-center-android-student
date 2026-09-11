@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/services/api_service.dart';
 import '../../home/models/home_model.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 // ---------------------------------------------------------------------------
 // Provider
@@ -111,7 +112,7 @@ class GaleriScreen extends ConsumerWidget {
         if (state.items.isEmpty) {
           return Center(
             child: Text('Belum ada foto kegiatan.',
-                style: TextStyle(color: Colors.grey[500])),
+                style: TextStyle(color: AppColors.textMuted)),
           );
         }
 
@@ -154,13 +155,13 @@ class _GaleriGridItem extends StatelessWidget {
               imageUrl: item.fotoUrl,
               fit: BoxFit.cover,
               placeholder: (_, __) => Container(
-                color: Colors.grey[200],
+                color: AppColors.divider,
                 child: const Center(
                     child: CircularProgressIndicator(strokeWidth: 2)),
               ),
               errorWidget: (_, __, ___) => Container(
-                color: Colors.grey[200],
-                child: Icon(Icons.image, size: 40, color: Colors.grey[400]),
+                color: AppColors.divider,
+                child: Icon(Icons.image, size: 40, color: AppColors.textMuted),
               ),
             ),
             // Gradient overlay for date label

@@ -5,6 +5,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/certificate_model.dart';
 import '../providers/certificates_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 String _fmtDate(DateTime d) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -102,7 +103,7 @@ class _TemplatesTab extends ConsumerWidget {
     final state = ref.watch(certTemplatesProvider);
     if (state.loading) return const Center(child: CircularProgressIndicator());
     if (state.error != null) return Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])));
-    if (state.templates.isEmpty) return const Center(child: Text('Belum ada template', style: TextStyle(color: Colors.grey)));
+    if (state.templates.isEmpty) return const Center(child: Text('Belum ada template', style: TextStyle(color: AppColors.textMuted)));
 
     return ListView.separated(
       itemCount: state.templates.length,
@@ -247,7 +248,7 @@ class _IssuedTab extends ConsumerWidget {
     final state = ref.watch(issuedCertificatesProvider);
     if (state.loading) return const Center(child: CircularProgressIndicator());
     if (state.error != null) return Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])));
-    if (state.issued.isEmpty) return const Center(child: Text('Belum ada sertifikat', style: TextStyle(color: Colors.grey)));
+    if (state.issued.isEmpty) return const Center(child: Text('Belum ada sertifikat', style: TextStyle(color: AppColors.textMuted)));
 
     return ListView.separated(
       itemCount: state.issued.length,

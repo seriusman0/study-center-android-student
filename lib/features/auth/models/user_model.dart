@@ -30,13 +30,14 @@ class UserModel {
   bool get isGuest => roles.contains('guest');
   bool get isScholarshipTeenager => roles.contains('scholarship_teenager');
   bool get isCollege => roles.contains('college');
+  bool get isPrajurit => roles.contains('prajurit');
 
   /// Roles that see the student-style bottom nav (Beranda/Jurnal/Laporan/Profil)
   /// with journal + laporan + galeri student endpoints.
-  bool get hasStudentDashboard => isStudent || isScholarshipTeenager;
+  bool get hasStudentDashboard => isStudent || isScholarshipTeenager || isCollege || isPrajurit;
 
   /// Roles that have access to journal API (/api/jurnal/*)
-  bool get hasJournalAccess => isStudent || isCollege || isScholarshipTeenager;
+  bool get hasJournalAccess => isStudent || isCollege || isScholarshipTeenager || isPrajurit;
 
   /// True if user has multiple roles
   bool get hasMultipleRoles => roles.length > 1;
@@ -53,6 +54,7 @@ class UserModel {
     if (isStudent) return 'student';
     if (isScholarshipTeenager) return 'scholarship_teenager';
     if (isCollege) return 'college';
+    if (isPrajurit) return 'prajurit';
     if (isGuest) return 'guest';
     return roles.isNotEmpty ? roles.first : 'guest';
   }

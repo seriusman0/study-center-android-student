@@ -86,6 +86,15 @@ class OfflineService {
   Database? _database;
   bool _initialized = false;
 
+  OfflineService();
+
+  /// Factory untuk test: inject database eksternal (in-memory/ffi).
+  /// Tidak dipakai di production code.
+  @visibleForTesting
+  OfflineService.withDatabase(Database db)
+      : _database = db,
+        _initialized = true;
+
   // ── Public API ───────────────────────────────────────────────────────────
 
   /// Enqueue an operation for later replay. Returns the operation's DB id.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/models/user_model.dart';
 import '../providers/admin_users_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 const _allRoles = ['admin', 'fulltimer', 'mentor', 'student', 'guest', 'scholarship_teenager', 'college'];
 const _roleLabels = {
@@ -86,7 +87,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                         child: Text('Gagal memuat: ${state.error}',
                             style: TextStyle(color: Colors.red[400])))
                     : state.users.isEmpty
-                        ? const Center(child: Text('Tidak ada pengguna', style: TextStyle(color: Colors.grey)))
+                        ? const Center(child: Text('Tidak ada pengguna', style: TextStyle(color: AppColors.textMuted)))
                         : RefreshIndicator(
                             onRefresh: () => ref.read(adminUsersProvider.notifier).load(),
                             child: ListView.builder(
@@ -154,6 +155,23 @@ class _UserTile extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Masuk sebagai user ini'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final ok = await ref.read(adminUsersProvider.notifier).impersonate(user.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(ok ? 'Berhasil masuk sebagai ${user.name}' : 'Gagal masuk')),
+                  );
+                  // Optionally navigate back to home, though the app listens to auth changes
+                  if (ok) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
+                }
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.admin_panel_settings_outlined),
               title: const Text('Ubah Role'),

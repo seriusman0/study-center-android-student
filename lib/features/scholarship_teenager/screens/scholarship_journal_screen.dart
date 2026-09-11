@@ -96,7 +96,7 @@ class _ScholarshipJournalScreenState
       }
       return const Center(
           child: Text('Gagal memuat. Tap refresh.',
-              style: TextStyle(color: Colors.grey)));
+              style: TextStyle(color: AppColors.textMuted)));
     }
 
     final snap = state.snapshot!;
@@ -295,7 +295,7 @@ class _SchFormWindowBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
               child: Text(
-                  'Form jurnal hanya bisa diisi pukul ${snap.config.formOpenTime.substring(0, 5)}–${snap.config.formCloseTime.substring(0, 5)}.',
+                  'Form jurnal hanya bisa diisi pukul ${snap.config.formOpenTime.length >= 5 ? snap.config.formOpenTime.substring(0, 5) : snap.config.formOpenTime.isEmpty ? "-" : snap.config.formOpenTime}–${snap.config.formCloseTime.length >= 5 ? snap.config.formCloseTime.substring(0, 5) : snap.config.formCloseTime.isEmpty ? "-" : snap.config.formCloseTime}.',
                   style: TextStyle(color: Colors.orange.shade800))),
         ]),
       );
@@ -332,8 +332,8 @@ class _SchBibleSection extends StatelessWidget {
       ),
     ];
 
-    final subtitle = (snap.bible.plText.isNotEmpty || snap.bible.pbText.isNotEmpty)
-        ? 'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText} / ${snap.bible.pbText}'
+    final subtitle = (snap.bible.plText?.isNotEmpty == true || snap.bible.pbText?.isNotEmpty == true)
+        ? 'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText ?? '-'} / ${snap.bible.pbText ?? '-'}'
         : 'Jadwal hari ke-${snap.bible.dayNo} belum diisi admin.';
 
     return Padding(

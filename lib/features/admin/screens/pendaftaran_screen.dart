@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/pendaftaran_model.dart';
 import '../providers/pendaftaran_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin: validasi pendaftaran siswa baru (pending → diterima/ditolak/perbaikan).
 /// List dengan filter status + search, tap ke detail, validasi via tombol aksi.
@@ -45,11 +46,11 @@ class _PendaftaranScreenState extends ConsumerState<PendaftaranScreen> {
             spacing: 6,
             children: ['semua', 'pending', 'diterima', 'ditolak', 'perbaikan']
                 .map((s) => ChoiceChip(
-                      label: Text(s.toUpperCase(), style: TextStyle(fontSize: 11, color: state.statusFilter == s ? Colors.white : Colors.grey[700])),
+                      label: Text(s.toUpperCase(), style: TextStyle(fontSize: 11, color: state.statusFilter == s ? Colors.white : AppColors.textSecondary)),
                       selected: state.statusFilter == s,
                       onSelected: (_) => ref.read(pendaftaranListProvider.notifier).load(status: s),
                       selectedColor: const Color(0xFF0F766E),
-                      backgroundColor: Colors.grey[100],
+                      backgroundColor: AppColors.divider,
                       visualDensity: VisualDensity.compact,
                     ))
                 .toList(),
@@ -61,7 +62,7 @@ class _PendaftaranScreenState extends ConsumerState<PendaftaranScreen> {
                 : state.error != null
                     ? Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])))
                     : state.items.isEmpty
-                        ? const Center(child: Text('Tidak ada pendaftaran', style: TextStyle(color: Colors.grey)))
+                        ? const Center(child: Text('Tidak ada pendaftaran', style: TextStyle(color: AppColors.textMuted)))
                         : ListView.separated(
                             itemCount: state.items.length,
                             separatorBuilder: (_, __) => const Divider(height: 1),
@@ -72,7 +73,7 @@ class _PendaftaranScreenState extends ConsumerState<PendaftaranScreen> {
                                 'diterima' => Colors.green,
                                 'ditolak' => Colors.red,
                                 'perbaikan' => Colors.orange,
-                                _ => Colors.grey,
+                                _ => AppColors.textMuted,
                               };
                               return ListTile(
                                 leading: CircleAvatar(
@@ -81,7 +82,7 @@ class _PendaftaranScreenState extends ConsumerState<PendaftaranScreen> {
                                 ),
                                 title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                                 subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Text('@${item.username}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                  Text('@${item.username}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
@@ -157,7 +158,7 @@ class _DetailView extends ConsumerWidget {
           if (item.avatar != null) CircleAvatar(backgroundImage: NetworkImage(item.avatar!), radius: 40),
           const SizedBox(height: 12),
           Text(item.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-          Text('@${item.username}', style: TextStyle(color: Colors.grey[600])),
+          Text('@${item.username}', style: TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 12),
           if (p != null) ...[
             _field('Tempat/Tanggal Lahir', '${p.birthPlace ?? '-'} / ${p.birthDate ?? '-'}'),
@@ -172,7 +173,7 @@ class _DetailView extends ConsumerWidget {
             _field('Mata Pelajaran', p.mataPelajaran.join(', ')),
             if (p.photo != null) ...[
               const SizedBox(height: 8),
-              Text('Foto', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text('Foto', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
               Image.network(p.photo!, width: 120, height: 120, fit: BoxFit.cover),
             ],
             if (p.catatanAdmin != null && p.catatanAdmin!.isNotEmpty)
@@ -184,7 +185,7 @@ class _DetailView extends ConsumerWidget {
             Text('Catatan: ${p!.catatanAdmin}', style: TextStyle(color: Colors.orange[700]),),
           const SizedBox(height: 20),
           if (status != 'diterima') ...[
-            Text('Validasi', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey[700])),
+            Text('Validasi', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
             const SizedBox(height: 8),
             Row(children: [
               Expanded(child: TextField(controller: catatanCtrl, decoration: const InputDecoration(labelText: 'Catatan admin', hintText: 'Opsional'), maxLines: 3)),
@@ -207,7 +208,7 @@ class _DetailView extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+        Text(label, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         Text(value, style: const TextStyle(fontSize: 14)),
       ]),
     );

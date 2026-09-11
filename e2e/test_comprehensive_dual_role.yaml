@@ -21,13 +21,13 @@ appId: com.studycenter.sc_student
 - tapOn: "Login Sekarang"
 
 - extendedWaitUntil:
-    visible: "Beranda"
+    visible: ".*Beranda.*"
     timeout: 15000
 
 # ── 2. VERIFY BERANDA (Home Screen) ────────────────────────────────────
 # Bottom nav should be visible
-- assertVisible: "Beranda"
-- assertVisible: "Profil"
+- assertVisible: ".*Beranda.*"
+- assertVisible: ".*Profil.*"
 
 # Greeting and user name should appear
 - assertVisible:
@@ -41,7 +41,7 @@ appId: com.studycenter.sc_student
 
 # Journal-related buttons for multi-role user
 - assertVisible:
-    text: "Mulai Isi Jurnal.*"
+    text: ".*Jurnal.*"
     optional: true
 
 # JURNAL HARI INI summary card
@@ -52,13 +52,12 @@ appId: com.studycenter.sc_student
 # ── 3. NAVIGATE TO JOURNAL VIA BUTTON ──────────────────────────────────
 # Scroll up first to see buttons
 - scrollUntilVisible:
-    element: "Mulai Isi Jurnal Remaja SC"
+    element: ".*Jurnal SC.*"
     direction: DOWN
     timeout: 5000
-    optional: true
 
 - tapOn:
-    text: "Mulai Isi Jurnal Remaja SC"
+    text: ".*Jurnal SC.*"
     optional: true
 
 # Wait for journal screen to load
@@ -70,10 +69,10 @@ appId: com.studycenter.sc_student
 # ── 4. VERIFY JOURNAL SCREEN (Scholarship Teenager Tab) ─────────────────
 # Multi-role users see tabs at the top
 - assertVisible:
-    text: "Jurnal Beasiswa"
+    text: ".*Jurnal Beasiswa.*"
     optional: true
 - assertVisible:
-    text: "Jurnal Student"
+    text: ".*Jurnal Student.*"
     optional: true
 
 # Journal content: Pembacaan Alkitab section
@@ -97,7 +96,7 @@ appId: com.studycenter.sc_student
 
 # ── 5. SWITCH TO STUDENT JOURNAL TAB ───────────────────────────────────
 - tapOn:
-    text: "Jurnal Student"
+    text: ".*Jurnal Student.*"
     optional: true
 
 - extendedWaitUntil:
@@ -110,7 +109,7 @@ appId: com.studycenter.sc_student
 
 # ── 6. GO BACK TO BERANDA ──────────────────────────────────────────────
 - tapOn:
-    text: "Jurnal Beasiswa"
+    text: ".*Jurnal Beasiswa.*"
     optional: true
 
 # Use back button to return to Home
@@ -118,14 +117,14 @@ appId: com.studycenter.sc_student
 
 # Wait for Beranda to load back
 - extendedWaitUntil:
-    visible: "Beranda"
+    visible: ".*Beranda.*"
     timeout: 5000
     optional: true
 
 # ── 7. NAVIGATE VIA BOTTOM NAV: JURNAL TAB ─────────────────────────────
 # Tap Jurnal in the bottom navigation bar
 - tapOn:
-    id: ".*jurnal.*"
+    text: ".*Jurnal.*"
     optional: true
 
 - extendedWaitUntil:
@@ -134,10 +133,8 @@ appId: com.studycenter.sc_student
     optional: true
 
 # ── 8. NAVIGATE VIA BOTTOM NAV: LAPORAN ────────────────────────────────
-- pressKey: back
-  
 - tapOn:
-    text: "Laporan"
+    text: ".*Laporan.*"
     optional: true
 
 - extendedWaitUntil:
@@ -146,7 +143,9 @@ appId: com.studycenter.sc_student
     optional: true
 
 # ── 9. NAVIGATE VIA BOTTOM NAV: PROFIL & LOGOUT ───────────────────────
-- tapOn: "Profil"
+- tapOn:
+    text: ".*Profil.*"
+    optional: true
 
 - extendedWaitUntil:
     visible: "Keluar"

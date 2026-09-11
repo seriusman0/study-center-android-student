@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/certificate_model.dart';
 import '../providers/nametags_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin: generate printable name tags. List eligible students with
 /// multi-select, tap Generate → server returns layout (size + selected
@@ -61,7 +62,7 @@ class _NameTagsScreenState extends ConsumerState<NameTagsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Wrap(spacing: 6, children: [
               ChoiceChip(label: const Text('Semua'), selected: state.selectedIds.isEmpty, onSelected: (_) => ref.read(nameTagsProvider.notifier).clearSelection(), visualDensity: VisualDensity.compact),
-              Text('${state.selectedIds.length} terpilih', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text('${state.selectedIds.length} terpilih', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
             ]),
           ),
           const SizedBox(height: 4),
@@ -71,7 +72,7 @@ class _NameTagsScreenState extends ConsumerState<NameTagsScreen> {
                 : state.error != null
                     ? Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])))
                     : state.students.isEmpty
-                        ? const Center(child: Text('Tidak ada siswa', style: TextStyle(color: Colors.grey)))
+                        ? const Center(child: Text('Tidak ada siswa', style: TextStyle(color: AppColors.textMuted)))
                         : ListView.builder(
                             itemCount: state.students.length,
                             itemBuilder: (context, i) {

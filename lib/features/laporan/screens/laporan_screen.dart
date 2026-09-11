@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/laporan_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 class LaporanScreen extends ConsumerStatefulWidget {
   const LaporanScreen({super.key});
@@ -73,7 +74,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         return RefreshIndicator(
           onRefresh: () => ref.read(laporanProvider.notifier).load(),
           child: ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               // Summary cards row
               Row(
@@ -99,7 +100,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
               if (matrix != null) ...[
                 Text(
                   '${matrix.from} s/d ${matrix.to}',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 12),
                 SingleChildScrollView(
@@ -107,7 +108,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
                   child: _MatrixTable(matrix.headers, matrix.rows),
                 ),
               ] else
-                const Text('Pilih rentang tanggal untuk melihat matriks.', style: TextStyle(color: Colors.grey)),
+                const Text('Pilih rentang tanggal untuk melihat matriks.', style: TextStyle(color: AppColors.textMuted)),
             ],
           ),
         );
@@ -132,7 +133,7 @@ class _StatCard extends StatelessWidget {
           children: [
             Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.primary)),
             const SizedBox(height: 4),
-            Text(label, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
+            Text(label, style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
           ],
         ),
       ),
@@ -151,7 +152,7 @@ class _MatrixTable extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Table(
-      border: TableBorder.all(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+      border: TableBorder.all(color: AppColors.border, borderRadius: BorderRadius.circular(8)),
       defaultColumnWidth: const IntrinsicColumnWidth(),
       children: [
         TableRow(
@@ -165,8 +166,8 @@ class _MatrixTable extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   child: Center(
                     child: isY
-                        ? const Icon(Icons.check, color: Colors.green, size: 16)
-                        : Text(cell, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                        ? const Icon(Icons.check, color: AppColors.success, size: 16)
+                        : Text(cell, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                   ),
                 );
               }).toList(),

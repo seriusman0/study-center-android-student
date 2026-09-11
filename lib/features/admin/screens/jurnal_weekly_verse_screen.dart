@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/jurnal_config_model.dart';
 import '../providers/jurnal_weekly_verse_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin screen: ayat hafalan mingguan (Weekly Verse). Filter tahun via
 /// ListWheelPicker, tambah/edit via dialog, hapus via konfirmasi.
@@ -74,7 +75,7 @@ class _JurnalWeeklyVerseScreenState extends ConsumerState<JurnalWeeklyVerseScree
           : state.error != null
               ? Center(child: Text('Gagal: ${state.error}', style: TextStyle(color: Colors.red[400])))
               : state.items.isEmpty
-                  ? const Center(child: Text('Belum ada ayat hafalan untuk tahun ini', style: TextStyle(color: Colors.grey)))
+                  ? const Center(child: Text('Belum ada ayat hafalan untuk tahun ini', style: TextStyle(color: AppColors.textMuted)))
                   : ListView.separated(
                       itemCount: state.items.length,
                       separatorBuilder: (_, __) => const Divider(height: 1),

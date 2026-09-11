@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/blog_moderation_provider.dart';
+import '../../../shared/theme/design_tokens.dart';
 
 /// Admin: moderate blog posts and comments across all branches.
 /// Tab 1 = semua blog (hapus), Tab 2 = semua komentar (hapus).
@@ -83,7 +84,7 @@ class _BlogsTab extends ConsumerWidget {
     if (state.loadingBlogs) return const Center(child: CircularProgressIndicator());
     if (state.blogsError != null)
       return Center(child: Text('Gagal: ${state.blogsError}', style: TextStyle(color: Colors.red[400])));
-    if (state.blogs.isEmpty) return const Center(child: Text('Tidak ada blog', style: TextStyle(color: Colors.grey)));
+    if (state.blogs.isEmpty) return const Center(child: Text('Tidak ada blog', style: TextStyle(color: AppColors.textMuted)));
 
     return RefreshIndicator(
       onRefresh: () => ref.read(blogModerationProvider.notifier).loadBlogs(),
@@ -96,8 +97,8 @@ class _BlogsTab extends ConsumerWidget {
             leading: const Icon(Icons.article, color: Color(0xFF0F766E)),
             title: Text(blog.title, style: const TextStyle(fontWeight: FontWeight.w600)),
             subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(blog.authorName ?? 'Admin', style: TextStyle(fontSize: 11, color: Colors.grey)),
-              if (blog.cabangNama != null) Text(blog.cabangNama!, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+              Text(blog.authorName ?? 'Admin', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              if (blog.cabangNama != null) Text(blog.cabangNama!, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
             ]),
             trailing: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red, size: 18),
@@ -139,7 +140,7 @@ class _CommentsTab extends ConsumerWidget {
     if (state.loadingComments) return const Center(child: CircularProgressIndicator());
     if (state.commentsError != null)
       return Center(child: Text('Gagal: ${state.commentsError}', style: TextStyle(color: Colors.red[400])));
-    if (state.comments.isEmpty) return const Center(child: Text('Tidak ada komentar', style: TextStyle(color: Colors.grey)));
+    if (state.comments.isEmpty) return const Center(child: Text('Tidak ada komentar', style: TextStyle(color: AppColors.textMuted)));
 
     return RefreshIndicator(
       onRefresh: () => ref.read(blogModerationProvider.notifier).loadComments(),
@@ -155,14 +156,14 @@ class _CommentsTab extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (comment.userName != null)
-                  Text('Oleh: ${comment.userName}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text('Oleh: ${comment.userName}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                 if (comment.blogTitle != null)
                   Text('Di: ${comment.blogTitle}',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                 if (comment.createdAt != null)
-                  Text(comment.createdAt!, style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                  Text(comment.createdAt!, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
               ],
             ),
             trailing: IconButton(

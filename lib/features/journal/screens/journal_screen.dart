@@ -18,6 +18,112 @@ class JournalScreen extends ConsumerStatefulWidget {
   ConsumerState<JournalScreen> createState() => _JournalScreenState();
 }
 
+/// Wraps a child with a try-catch so layout-time exceptions don't blank the
+/// whole screen. On error, displays a readable stack trace and a Retry
+/// button so the user can recover.
+class _JournalErrorBoundary extends StatefulWidget {
+  final Widget child;
+  const _JournalErrorBoundary({required this.child});
+
+  @override
+  State<_JournalErrorBoundary> createState() => _JournalErrorBoundaryState();
+}
+
+class _JournalErrorBoundaryState extends State<_JournalErrorBoundary> {
+  FlutterErrorDetails? _error;
+  void Function(FlutterErrorDetails)? _previousHandler;
+
+  @override
+  void initState() {
+    super.initState();
+    // Save the previous handler so we can restore it on dispose, instead of
+    // permanently overwriting FlutterError.onError for the whole app.
+    _previousHandler = FlutterError.onError;
+    FlutterError.onError = (details) {
+      // Always forward to the previous handler (typically main.dart's
+      // debugPrint-based logger) so the FULL stack trace is preserved in
+      // adb logcat even after we've captured it for the UI.
+      _previousHandler?.call(details);
+      // Defer state change to after the frame — synchronous setState() during
+      // a build phase would re-enter this same handler and re-trigger the
+      // MouseTracker assertion we're trying to recover from.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _error = details);
+        }
+      });
+    };
+  }
+
+  @override
+  void dispose() {
+    // Restore the previous handler so other widgets/screens aren't affected.
+    if (_previousHandler != null) {
+      FlutterError.onError = _previousHandler;
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_error != null) {
+      final e = _error!;
+      final stack = e.stack?.toString() ?? 'no stack';
+      return Container(
+        color: const Color(0xFFFEE2E2),
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            // stretch memastikan semua children (termasuk ElevatedButton)
+            // mendapat bounded width dari parent — tanpa ini Column.min
+            // memberikan unbounded width ke ElevatedButton sehingga crash
+            // "BoxConstraints forces an infinite width".
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Row(children: [
+                Icon(Icons.error_outline, color: Colors.red, size: 28),
+                SizedBox(width: 8),
+                Text('Jurnal Error',
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
+              ]),
+              const SizedBox(height: 8),
+              Text(e.exceptionAsString(),
+                  style: const TextStyle(color: Colors.red, fontSize: 13)),
+              const SizedBox(height: 8),
+              if (e.context != null)
+                Text('Context: ${e.context}',
+                    style: const TextStyle(
+                        color: Colors.red, fontSize: 12)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE0E0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(stack,
+                    style: const TextStyle(
+                        fontSize: 10, fontFamily: 'monospace')),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => setState(() => _error = null),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Coba lagi'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return widget.child;
+  }
+}
+
 class _JournalScreenState extends ConsumerState<JournalScreen> {
   @override
   void initState() {
@@ -65,7 +171,15 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             ),
         ],
       ),
-      body: _buildBody(context, state, theme),
+      body: _JournalErrorBoundary(
+        // Bungkus dengan SizedBox menggunakan MediaQuery.size untuk memastikan
+        // semua children (termasuk DropdownButtonFormField dan ElevatedButton
+        // di _HafalAyatSection) selalu mendapat bounded width constraint.
+        // Tanpa ini, saat JournalScreen pertama kali dirender dalam TabBarView
+        // atau page route animation, Scaffold body bisa mendapat w=Infinity
+        // → cascade crash "BoxConstraints forces an infinite width".
+        child: _buildBody(context, state, theme),
+      ),
     );
   }
 
@@ -99,7 +213,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Memuat jurnal…', style: TextStyle(color: Colors.grey)),
+              Text('Memuat jurnal…', style: TextStyle(color: AppColors.textMuted)),
             ],
           ),
         );
@@ -109,10 +223,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.inbox_outlined, size: 48, color: Colors.grey),
+            const Icon(Icons.inbox_outlined, size: 48, color: AppColors.textMuted),
             const SizedBox(height: 12),
             const Text('Belum ada data. Tap refresh.',
-                style: TextStyle(color: Colors.grey)),
+                style: TextStyle(color: AppColors.textMuted)),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => ref.read(journalProvider.notifier).load(),
@@ -346,11 +460,14 @@ class _LifeScheduleCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: AppColors.border),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // stretch so _HafalAyatSection (with DropdownButtonFormField + ElevatedButton)
+        // always receives bounded width constraints and never triggers
+        // BoxConstraints(w=Infinity) layout errors.
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Container(
               width: 28,
@@ -376,7 +493,7 @@ class _LifeScheduleCard extends StatelessWidget {
             Text(
               _kategoriLabel(entry.key),
               style: theme.textTheme.labelSmall?.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),
@@ -422,7 +539,7 @@ class _BibleReadingInline extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppColors.borderStrong),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -435,7 +552,7 @@ class _BibleReadingInline extends StatelessWidget {
               if (snap.bible.dayNo != null)
                 Text(
                   ' — Hari ke-${snap.bible.dayNo}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
             ],
           ),
@@ -630,15 +747,33 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
         ? (verseRef.length > 50 ? '${verseRef.substring(0, 47)}…' : verseRef)
         : null;
 
+    return LayoutBuilder(
+      builder: (ctx, constraints) {
+        // LayoutBuilder memastikan kita tahu lebar aktual saat ini.
+        // Jika constraint unbounded (terjadi saat page route animation
+        // atau TabBarView render pertama kali), fallback ke MediaQuery.
+        final safeWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : MediaQuery.of(ctx).size.width;
+        return SizedBox(
+          width: safeWidth,
+          child: _buildHafalAyatContent(ctx, hasInput, hasVerseRef, verseRef, verseSubtitle, verseChecked, hint, theme),
+        );
+      },
+    );
+  }
+
+  Widget _buildHafalAyatContent(BuildContext context, bool hasInput, bool hasVerseRef, String verseRef, String? verseSubtitle, bool verseChecked, String hint, ThemeData theme) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppColors.borderStrong),
         borderRadius: BorderRadius.circular(12),
       ),
+      // stretch so Dropdown/TextField/ElevatedButton always get bounded width
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Header ──────────────────────────────────────────────────────────
           const Text('Hafal Ayat',
@@ -673,7 +808,7 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
             hint.isNotEmpty
                 ? 'Dari porsi hari ini: $hint'
                 : 'Pilih satu ayat dari porsi bacaan hari ini.',
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
@@ -693,7 +828,6 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
             Expanded(
               child: Semantics(
                 identifier: 'pasalInput',
-                textField: true,
                 child: TextField(
                   controller: _pasal,
                   keyboardType: TextInputType.number,
@@ -707,7 +841,6 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
             Expanded(
               child: Semantics(
                 identifier: 'ayatInput',
-                textField: true,
                 child: TextField(
                   controller: _ayat,
                   keyboardType: TextInputType.number,
@@ -719,36 +852,57 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
             ),
           ]),
           const SizedBox(height: 8),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          // Gunakan struktur Row yang aman:
+          // - Label tersimpan: Expanded agar tidak overflow
+          // - Tombol: dibungkus Row di dalam Flexible agar tidak infinite width
+          // Catatan: JANGAN gunakan Row(spaceBetween) + Row.min(ElevatedButton)
+          // tanpa Flexible — menyebabkan BoxConstraints infinite width.
+          Row(children: [
+            // Sisi kiri: label tersimpan atau spacer
             if (_savedLabel.isNotEmpty)
-              Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.check_circle, size: 14, color: Colors.green),
-                const SizedBox(width: 4),
-                Text('Tersimpan: $_savedLabel',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.green[700], fontWeight: FontWeight.w500)),
-              ])
-            else
-              const SizedBox.shrink(),
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              if (hasInput)
-                TextButton.icon(
-                  onPressed: _clear,
-                  icon: const Icon(Icons.close, size: 14),
-                  label: const Text('Hapus'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.grey[600],
-                    visualDensity: VisualDensity.compact,
+              Expanded(
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.check_circle, size: 14, color: Colors.green),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text('Tersimpan: $_savedLabel',
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.success, fontWeight: FontWeight.w500)),
                   ),
-                ),
-              if (!hasInput || _savedLabel.isEmpty)
-                ElevatedButton(
-                  onPressed: hasInput ? _save : null,
-                  style: ElevatedButton.styleFrom(
-                      visualDensity: VisualDensity.compact),
-                  child: const Text('Simpan'),
-                ),
-            ]),
+                ]),
+              )
+            else
+              const Expanded(child: SizedBox.shrink()),
+            // Sisi kanan: tombol Hapus dan/atau Simpan — dibungkus Flexible
+            // supaya ElevatedButton selalu mendapat bounded width constraint.
+            Flexible(
+              fit: FlexFit.loose,
+              // OverflowBar menangani button layout secara proper,
+              // termasuk ketika mendapat constraint unbounded.
+              child: OverflowBar(
+                spacing: 8,
+                children: [
+                  if (hasInput)
+                    TextButton.icon(
+                      onPressed: _clear,
+                      icon: const Icon(Icons.close, size: 14),
+                      label: const Text('Hapus'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textSecondary,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  if (!hasInput || _savedLabel.isEmpty)
+                    ElevatedButton(
+                      onPressed: hasInput ? _save : null,
+                      style: ElevatedButton.styleFrom(
+                          visualDensity: VisualDensity.compact),
+                      child: const Text('Simpan'),
+                    ),
+                ],
+              ),
+            ),
           ]),
         ],
       ),
@@ -763,7 +917,7 @@ class _HafalAyatSectionState extends State<_HafalAyatSection> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: AppColors.borderStrong),
         ),
       );
 }
@@ -879,9 +1033,9 @@ class _PhotoCardState extends State<_PhotoCard> {
                   errorBuilder: (_, __, ___) => Container(
                     height: 200,
                     width: double.infinity,
-                    color: Colors.grey.shade200,
+                    color: AppColors.border,
                     child: const Icon(Icons.broken_image,
-                        color: Colors.grey, size: 48),
+                        color: AppColors.textMuted, size: 48),
                   ),
                 ),
               ),
