@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/models/user_model.dart';
@@ -82,28 +83,38 @@ class BottomNavShell extends StatelessWidget {
     required this.onTabTap,
   });
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: shell,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            top: BorderSide(color: AppColors.border, width: 1),
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.7),
+              border: const Border(
+                top: BorderSide(color: AppColors.border, width: 0.5),
+              ),
+            ),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              currentIndex: visibleIndex,
+              onTap: onTabTap,
+              items: tabs
+                  .map((t) => BottomNavigationBarItem(
+                        icon: Icon(t.icon),
+                        activeIcon: Icon(t.activeIcon),
+                        label: t.label,
+                      ))
+                  .toList(),
+            ),
           ),
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: visibleIndex,
-          onTap: onTabTap,
-          items: tabs
-              .map((t) => BottomNavigationBarItem(
-                    icon: Icon(t.icon),
-                    activeIcon: Icon(t.activeIcon),
-                    label: t.label,
-                  ))
-              .toList(),
         ),
       ),
     );

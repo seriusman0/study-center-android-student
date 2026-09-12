@@ -100,13 +100,17 @@ class _CollegeJournalScreenState extends ConsumerState<CollegeJournalScreen> {
         itemBuilder: (_, __) => const AppSkeletonTile(),
       );
     }
+    
+    final pembacaanItems = snap.lifeItemsByKategori['pembacaan'] ?? [];
+    final otherKategoriEntries = snap.lifeItemsByKategori.entries.where((e) => e.key != 'pembacaan');
+
     // ✅ Lazy builder: only renders visible items (jank-free scroll on long checklists)
     final items = <Widget>[
       _ProgressHeader(snap: snap, state: state, theme: Theme.of(context), notifier: notifier),
       const SizedBox(height: 12),
       _FormWindowBanner(snap: snap, state: state),
-      _BibleSection(snap: snap, notifier: notifier),
-      ...snap.lifeItemsByKategori.entries.map((entry) => _LifeSection(
+      _BibleSection(snap: snap, notifier: notifier, isToday: state.isToday, pembacaanItems: pembacaanItems),
+      ...otherKategoriEntries.map((entry) => _LifeSection(
           kategori: entry.key,
           items: entry.value,
           snap: snap,
@@ -232,37 +236,104 @@ class _FormWindowBanner extends StatelessWidget {
 class _BibleSection extends StatelessWidget {
   final CollegeJournalSnapshot snap;
   final CollegeJournalNotifier notifier;
+  final bool isToday;
+  final List<CollegeLifeItem> pembacaanItems;
 
-  const _BibleSection({required this.snap, required this.notifier});
+  const _BibleSection({
+    required this.snap, 
+    required this.notifier, 
+    required this.isToday,
+    required this.pembacaanItems,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final disabled = !snap.config.formActive;
+    final disabled = !snap.config.formActive && isToday;
 
-    final rows = <Widget>[
-      AppChecklistTile(
-        label: 'Perjanjian Lama',
-        sublabel: snap.bible.plText?.isNotEmpty == true ? snap.bible.plText : null,
-        checked: snap.bible.plChecked,
-        enabled: !disabled,
-        onChanged: (v) => notifier.checkBible('pl', v),
+    // Build the side-by-side Bible checkboxes matching the web PDF
+    final bibleRow = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.borderStrong),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: AppChecklistTile(
+              label: 'Perjanjian Lama',
+              sublabel: snap.bible.plText?.isNotEmpty == true ? snap.bible.plText : null,
+              checked: snap.bible.plChecked,
+              enabled: !disabled,
+              onChanged: (v) => notifier.checkBible('pl', v),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.borderStrong),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: AppChecklistTile(
+              label: 'Perjanjian Baru',
+              sublabel: snap.bible.pbText?.isNotEmpty == true ? snap.bible.pbText : null,
+              checked: snap.bible.pbChecked,
+              enabled: !disabled,
+              onChanged: (v) => notifier.checkBible('pb', v),
+            ),
+          ),
+        ],
       ),
-      AppChecklistTile(
-        label: 'Perjanjian Baru',
-        sublabel: snap.bible.pbText?.isNotEmpty == true ? snap.bible.pbText : null,
-        checked: snap.bible.pbChecked,
-        enabled: !disabled,
-        onChanged: (v) => notifier.checkBible('pb', v),
-      ),
+    );
+
+    final List<Widget> rows = [
+      bibleRow,
     ];
 
-    final title = 'Pembacaan Alkitab (Hari ke-${snap.bible.dayNo})';
+    for (final item in pembacaanItems) {
+      rows.add(_LifeSection.buildItemStatic(context, item, snap, notifier, disabled));
+    }
 
+    final subtitle = 'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText ?? ''} / ${snap.bible.pbText ?? ''}'.trim();
+    
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: AppSectionCard(
-        title: title,
-        rows: rows,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  const Text('1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textMuted)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Pembacaan Alkitab', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary)),
+                        if (subtitle.isNotEmpty && subtitle != '— /') ...[
+                          const SizedBox(height: 2),
+                          Text(subtitle, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (int i = 0; i < rows.length; i++) ...[
+              if (i > 0) const Divider(height: 1, color: AppColors.divider),
+              rows[i],
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -286,6 +357,7 @@ class _LifeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = _sectionTitle(kategori);
+    final numberStr = _sectionNumber(kategori);
     final disabled = !snap.config.formActive && isToday;
 
     final rows = <Widget>[
@@ -295,6 +367,7 @@ class _LifeSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: AppSectionCard(
+        headerLeading: Text(numberStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textMuted)),
         title: title,
         rows: rows,
       ),
@@ -302,6 +375,10 @@ class _LifeSection extends StatelessWidget {
   }
 
   Widget _buildItem(BuildContext context, CollegeLifeItem item, CollegeJournalSnapshot snap, CollegeJournalNotifier notifier, bool disabled) {
+    return buildItemStatic(context, item, snap, notifier, disabled);
+  }
+
+  static Widget buildItemStatic(BuildContext context, CollegeLifeItem item, CollegeJournalSnapshot snap, CollegeJournalNotifier notifier, bool disabled) {
     final studyLog = snap.studyLogs[item.id];
     final hasStudy = studyLog != null && studyLog.jamMulai.isNotEmpty && studyLog.jamSelesai.isNotEmpty;
 
@@ -314,9 +391,9 @@ class _LifeSection extends StatelessWidget {
           onChanged: (v) => notifier.checkLife(item.id, v),
         );
       case CollegeItemResponseType.boolean:
-        return AppChecklistTile(
+        return AppBooleanTile(
           label: item.label,
-          checked: item.checked,
+          value: item.checked,
           enabled: !disabled,
           onChanged: (v) => notifier.toggleBoolean(item.id, v),
         );
@@ -325,7 +402,7 @@ class _LifeSection extends StatelessWidget {
           item: item,
           snap: snap,
           isEnabled: !disabled,
-          onTap: () => _openTimeRangePicker(context, item, snap, notifier),
+          notifier: notifier,
         );
       case CollegeItemResponseType.unknown:
         return AppChecklistTile(
@@ -337,133 +414,177 @@ class _LifeSection extends StatelessWidget {
     }
   }
 
-  void _openTimeRangePicker(BuildContext context, CollegeLifeItem item, CollegeJournalSnapshot snap, CollegeJournalNotifier notifier) {
-    final existing = snap.studyLogs[item.id];
-    final startCtrl = TextEditingController(text: existing?.jamMulai ?? '');
-    final endCtrl = TextEditingController(text: existing?.jamSelesai ?? '');
-    final tipeCtrl = TextEditingController(text: existing?.tipe ?? 'mandiri');
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (ctx) => LayoutBuilder(
-        builder: (ctx, constraints) => SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-            child: Container(
-              width: constraints.maxWidth,
-              padding: const EdgeInsets.all(20),
-              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Text(item.label, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: _TimeField(label: 'Jam Mulai', controller: startCtrl)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _TimeField(label: 'Jam Selesai', controller: endCtrl)),
-                ]),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: tipeCtrl.text.isEmpty ? 'mandiri' : tipeCtrl.text,
-                  items: const [
-                    DropdownMenuItem(value: 'mandiri', child: Text('Mandiri')),
-                    DropdownMenuItem(value: 'kelompok', child: Text('Kelompok')),
-                  ],
-                  onChanged: (v) => tipeCtrl.text = v ?? 'mandiri',
-                  decoration: const InputDecoration(labelText: 'Tipe', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 20),
-                Row(children: [
-                  Expanded(child: TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal'))),
-                  const SizedBox(width: 12),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () async {
-                      final jm = startCtrl.text;
-                      final js = endCtrl.text;
-                      if (jm.isNotEmpty && js.isNotEmpty) {
-                        await notifier.saveStudyLog(item.id, jm, js, tipeCtrl.text);
-                        if (ctx.mounted) Navigator.pop(ctx);
-                      } else if (jm.isEmpty && js.isEmpty) {
-                        await notifier.saveStudyLog(item.id, '', '', tipeCtrl.text);
-                        if (ctx.mounted) Navigator.pop(ctx);
-                      }
-                    },
-                    child: const Text('Simpan'),
-                  )),
-                ]),
-                const SizedBox(height: 16),
-              ]),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  static String _sectionNumber(String k) => switch (k) {
+        'sidang' => '2',
+        'rohani' => '3',
+        _ => '',
+      };
 
   static String _sectionTitle(String k) => switch (k) {
         'pembacaan' => 'Item Pembacaan',
-        'sidang' => 'Sidang-Sidang Gereja',
-        'rohani' => 'Kegiatan Rohani',
+        'sidang' => 'Sidang-Sidang Gereja\nOpsional — bisa pilih lebih dari satu',
+        'rohani' => 'Rohani & Pelayanan',
         _ => k.toUpperCase(),
       };
-}
-
-class _TimeField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  const _TimeField({required this.label, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), hintText: 'HH:MM'),
-      onTap: () async {
-        final now = TimeOfDay.now();
-        final picked = await showTimePicker(context: context, initialTime: now);
-        if (picked != null) controller.text = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-      },
-    );
-  }
 }
 
 class _TimeRangeItem extends StatelessWidget {
   final CollegeLifeItem item;
   final CollegeJournalSnapshot snap;
   final bool isEnabled;
-  final VoidCallback onTap;
-  const _TimeRangeItem({required this.item, required this.snap, required this.isEnabled, required this.onTap});
+  final CollegeJournalNotifier notifier;
+
+  const _TimeRangeItem({
+    required this.item,
+    required this.snap,
+    required this.isEnabled,
+    required this.notifier,
+  });
 
   @override
   Widget build(BuildContext context) {
     final studyLog = snap.studyLogs[item.id];
-    final hasValue = studyLog != null && studyLog.jamMulai.isNotEmpty && studyLog.jamSelesai.isNotEmpty;
+    final jamMulai = studyLog?.jamMulai ?? '';
+    final jamSelesai = studyLog?.jamSelesai ?? '';
+    final tipe = studyLog?.tipe ?? 'mandiri';
 
-    return InkWell(
-      onTap: isEnabled ? onTap : null,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.borderStrong),
-          borderRadius: BorderRadius.circular(10),
-          color: !isEnabled ? AppColors.background : (hasValue ? Colors.teal.shade50 : null),
-        ),
-        child: Row(children: [
-          Icon(Icons.access_time, size: 18, color: isEnabled ? AppColors.primary : AppColors.textMuted),
-          const SizedBox(width: 8),
-          Expanded(child: Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             item.label,
-            style: TextStyle(color: isEnabled ? AppColors.textPrimary : AppColors.textMuted, fontWeight: FontWeight.w500),
-          )),
-          if (hasValue) ...[
-            Text('${studyLog.jamMulai}—${studyLog.jamSelesai}', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-            const SizedBox(width: 6),
-            Icon(Icons.chevron_right, size: 16, color: AppColors.textMuted),
-          ],
-        ]),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Di luar jam kuliah \u2014 mandiri atau kelompok',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTimeField(
+                  context,
+                  label: 'Mulai',
+                  value: jamMulai,
+                  onPicked: (v) => notifier.saveStudyLog(item.id, v, jamSelesai, tipe),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTimeField(
+                  context,
+                  label: 'Selesai',
+                  value: jamSelesai,
+                  onPicked: (v) => notifier.saveStudyLog(item.id, jamMulai, v, tipe),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Segmented control for Mandiri / Kelompok
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildSegmentButton(
+                    label: 'Mandiri',
+                    isSelected: tipe == 'mandiri',
+                    onTap: () => notifier.saveStudyLog(item.id, jamMulai, jamSelesai, 'mandiri'),
+                  ),
+                ),
+                Expanded(
+                  child: _buildSegmentButton(
+                    label: 'Kelompok',
+                    isSelected: tipe == 'kelompok',
+                    onTap: () => notifier.saveStudyLog(item.id, jamMulai, jamSelesai, 'kelompok'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildTimeField(BuildContext context, {required String label, required String value, required ValueChanged<String> onPicked}) {
+    return InkWell(
+      onTap: isEnabled
+          ? () async {
+              final initialTime = _parseTime(value);
+              final picked = await showTimePicker(context: context, initialTime: initialTime ?? TimeOfDay.now());
+              if (picked != null) {
+                onPicked('${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}');
+              }
+            }
+          : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.borderStrong),
+          borderRadius: BorderRadius.circular(8),
+          color: isEnabled ? null : AppColors.background,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+            const SizedBox(height: 2),
+            Text(
+              value.isNotEmpty ? value : '--:--',
+              style: TextStyle(
+                fontSize: 14,
+                color: value.isNotEmpty ? AppColors.textPrimary : AppColors.textMuted,
+                fontWeight: value.isNotEmpty ? FontWeight.w500 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSegmentButton({required String label, required bool isSelected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: isEnabled ? onTap : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: isSelected
+              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 1))]
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? AppColors.textPrimary : AppColors.textMuted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  TimeOfDay? _parseTime(String time) {
+    if (time.isEmpty || !time.contains(':')) return null;
+    final parts = time.split(':');
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h != null && m != null) return TimeOfDay(hour: h, minute: m);
+    return null;
   }
 }
 
@@ -483,7 +604,8 @@ class _PhotoCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: AppSectionCard(
-        title: 'Foto Belajar',
+        headerLeading: const Text('4', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textMuted)),
+        title: 'Foto Saat Belajar\n(opsional)',
         rows: [
           if (hasPhoto) ...[
             ClipRRect(

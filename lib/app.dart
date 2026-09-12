@@ -285,6 +285,15 @@ class _RoleAwareShell extends ConsumerWidget {
   }
 }
 
+class _BouncingScrollBehavior extends MaterialScrollBehavior {
+  const _BouncingScrollBehavior();
+  
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+  }
+}
+
 class ScStudentApp extends ConsumerWidget {
   const ScStudentApp({super.key});
 
@@ -296,6 +305,7 @@ class ScStudentApp extends ConsumerWidget {
       title: 'SC Student',
       theme: buildAppTheme(),
       routerConfig: router,
+      scrollBehavior: const _BouncingScrollBehavior(),
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         // Maintenance mode intercept

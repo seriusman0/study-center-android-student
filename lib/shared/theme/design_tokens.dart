@@ -51,10 +51,10 @@ class AppColors {
 // ─── Radius ──────────────────────────────────────────────────────────────────
 class AppRadius {
   AppRadius._();
-  static const double card = 12;
-  static const double button = 10;
-  static const double input = 12;
-  static const double chip = 16; // pill
+  static const double card = 16;
+  static const double button = 14;
+  static const double input = 14;
+  static const double chip = 20; // pill
 }
 
 // ─── Elevation ───────────────────────────────────────────────────────────────

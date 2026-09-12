@@ -18,32 +18,45 @@ ThemeData buildAppTheme() {
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: AppColors.background,
-    textTheme: GoogleFonts.interTextTheme(),
+    textTheme: GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(letterSpacing: -0.02, fontWeight: FontWeight.w700),
+      displayMedium: GoogleFonts.inter(letterSpacing: -0.02, fontWeight: FontWeight.w700),
+      displaySmall: GoogleFonts.inter(letterSpacing: -0.02, fontWeight: FontWeight.w600),
+      headlineMedium: GoogleFonts.inter(letterSpacing: -0.015, fontWeight: FontWeight.w600),
+      titleLarge: GoogleFonts.inter(letterSpacing: -0.01, fontWeight: FontWeight.w600),
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
   );
 
   return base.copyWith(
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.primary,
+    appBarTheme: AppBarTheme(
+      backgroundColor: AppColors.primary.withValues(alpha: 0.85),
       foregroundColor: Colors.white,
       elevation: 0,
       surfaceTintColor: Colors.transparent, // Prevents tint overlay on scroll
-      scrolledUnderElevation: 3,            // HIG: "Differentiate controls from content" - shadow on scroll
+      scrolledUnderElevation: 0,
       centerTitle: true,
-      titleTextStyle: TextStyle(
+      titleTextStyle: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: Colors.white,
+        letterSpacing: -0.5,
       ),
-      iconTheme: IconThemeData(color: Colors.white, size: 24),
+      iconTheme: const IconThemeData(color: Colors.white, size: 24),
     ),
     cardTheme: CardThemeData(
-      elevation: 2,                        // IMPROVED: was 0 - adds depth hierarchy
-      shadowColor: Colors.black.withValues(alpha: 0.08),
+      elevation: 8,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       color: AppColors.surface,
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
-        side: const BorderSide(color: AppColors.border, width: 1),
+        // No hard border on iOS, use subtle shadow
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(

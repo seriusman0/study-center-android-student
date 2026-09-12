@@ -279,6 +279,90 @@ class AppChecklistTile extends StatelessWidget {
   }
 }
 
+// ─── AppBooleanTile ──────────────────────────────────────────────────────────
+/// "Sudah / Belum" boolean toggle tile matching web design
+class AppBooleanTile extends StatelessWidget {
+  final String label;
+  final bool value;
+  final bool enabled;
+  final ValueChanged<bool>? onChanged;
+
+  const AppBooleanTile({
+    super.key,
+    required this.label,
+    required this.value,
+    this.enabled = true,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = !enabled;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: disabled ? AppColors.textMuted : AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          _ToggleButton(
+            label: 'Sudah',
+            isSelected: value == true,
+            enabled: enabled,
+            onTap: () => onChanged?.call(true),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          _ToggleButton(
+            label: 'Belum',
+            isSelected: value == false,
+            enabled: enabled,
+            onTap: () => onChanged?.call(false),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToggleButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _ToggleButton({
+    required this.label,
+    required this.isSelected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: enabled 
+            ? (isSelected ? AppColors.textPrimary : AppColors.textSecondary)
+            : AppColors.textMuted,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+}
 // ─── AppUploadBox ────────────────────────────────────────────────────────────
 /// Dashed-border tappable upload area.
 class AppUploadBox extends StatelessWidget {
