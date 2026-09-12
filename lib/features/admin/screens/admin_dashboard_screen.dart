@@ -272,6 +272,7 @@ class _AdminFeatureGrid extends StatelessWidget {
     ['Presensi Mentor', '/admin/mentor-presensi', Icons.assignment],
     ['Jurnal Offline', '/admin/jurnal-offline', Icons.offline_bolt],
     ['Jurnal Mahasiswa', '/admin/jurnal-college', Icons.school],
+    ['Jurnal Prajurit', '/admin/jurnal-prajurit', Icons.military_tech],
   ];
 
   @override

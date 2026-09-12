@@ -33,6 +33,7 @@ import 'features/admin/screens/jurnal_monitor_screen.dart';
 import 'features/admin/screens/jurnal_offline_screen.dart';
 import 'features/admin/screens/admin_notifications_screen.dart';
 import 'features/admin/screens/college_jurnal_screen.dart';
+import 'features/admin/screens/prajurit_jurnal_screen.dart';
 import 'features/college/screens/journal_router_screen.dart';
 import 'features/college/screens/college_review_screen.dart';
 import 'features/college/screens/college_review_detail_screen.dart';
@@ -207,9 +208,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/admin/jurnal-college',
-        parentNavigatorKey: _rootKey,
-        builder: (_, __) => const CollegeJurnalScreen(),
-      ),
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const CollegeJurnalScreen(),
+        ),
+        GoRoute(
+          path: '/admin/jurnal-prajurit',
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const PrajuritJurnalScreen(),
+        ),
 
       // ── Shell with bottom nav ────────────────────────────────────────────
       StatefulShellRoute.indexedStack(

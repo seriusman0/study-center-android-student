@@ -142,6 +142,11 @@ class ApiConstants {
   static const String adminJurnalCollegeBible     = '/admin/jurnal-college/bible';
   static const String adminJurnalCollegeItems     = '/admin/jurnal-college/items';
 
+  // Admin: Jurnal Prajurit
+  static const String adminJurnalPrajuritDashboard = '/admin/jurnal-prajurit/';
+  static const String adminJurnalPrajuritBible     = '/admin/jurnal-prajurit/bible';
+  static const String adminJurnalPrajuritItems     = '/admin/jurnal-prajurit/items';
+
   // ── College self-service (API, role:college) ─────────────────────────────
   static const String collegeJurnalToday   = '/college-jurnal/today';
   static const String collegeJurnalCheck   = '/college-jurnal/check';

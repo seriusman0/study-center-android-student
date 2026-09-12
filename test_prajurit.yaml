@@ -1,0 +1,25 @@
+﻿appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "Email"
+- inputText: "admin@studycenter.com"
+- tapOn:
+    id: "Password"
+- inputText: "password"
+- tapOn:
+    text: "Masuk"
+- extendedWaitUntil:
+    visible: ".*Tab 2 of 4.*"
+    timeout: 10000
+- tapOn: ".*Tab 2 of 4.*"
+- scrollUntilVisible:
+    element:
+      text: "Jurnal Prajurit"
+    direction: DOWN
+- tapOn: "Jurnal Prajurit"
+- extendedWaitUntil:
+    visible: "Error.*"
+    timeout: 10000
+- takeScreenshot: "prajurit_error"

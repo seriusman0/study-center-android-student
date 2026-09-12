@@ -17,10 +17,9 @@ appId: com.studycenter.sc_student
 - waitForAnimationToEnd:
     timeout: 8000
 - extendedWaitUntil:
-    visible: "Review"
-    timeout: 30000
-- tapOn: "Review"
+    visible: ".*Tab 3 of 4.*"
+    timeout: 20000
+- tapOn: ".*Tab 3 of 4.*"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: karuniaplus_review_screen
-
