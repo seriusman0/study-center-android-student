@@ -1,0 +1,26 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "email@contoh.com / username"
+- inputText: "karuniaplus"
+- tapOn: "Masukkan password"
+- inputText: "12345"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Login Sekarang"
+    direction: DOWN
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "Review"
+    timeout: 30000
+- tapOn: "Review"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: karuniaplus_review_screen
+

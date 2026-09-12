@@ -1,0 +1,20 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "email@contoh.com / username"
+- inputText: "admin@studycenter.com"
+- tapOn: "Masukkan password"
+- inputText: "password"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Login Sekarang"
+    direction: DOWN
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: admin_dashboard
+

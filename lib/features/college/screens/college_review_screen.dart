@@ -36,47 +36,48 @@ class _CollegeReviewScreenState extends ConsumerState<CollegeReviewScreen> {
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: () => ref.read(collegeReviewProvider.notifier).load(refresh: true)),
         ],
-        bottom: AppBar(
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
-          elevation: 0,
-          titleSpacing: 8,
-          title: TextField(
-            controller: _searchCtrl,
-            decoration: InputDecoration(
-              hintText: 'Cari nama / institusi ...',
-              hintStyle: const TextStyle(color: Color(0xFF6B7280)),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Container(
+            color: Theme.of(context).appBarTheme.backgroundColor,
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Cari nama / institusi ...',
+                hintStyle: const TextStyle(color: Color(0xFF6B7280)),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF00695C), width: 1.5),
+                ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF6B7280)),
+                suffixIcon: state.filterQ != null && state.filterQ!.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Color(0xFF6B7280)),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          ref.read(collegeReviewProvider.notifier).setFilters(q: '');
+                        },
+                      )
+                    : null,
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF00695C), width: 1.5),
-              ),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF6B7280)),
-              suffixIcon: state.filterQ != null && state.filterQ!.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, color: Color(0xFF6B7280)),
-                      onPressed: () {
-                        _searchCtrl.clear();
-                        ref.read(collegeReviewProvider.notifier).setFilters(q: '');
-                      },
-                    )
-                  : null,
+              style: const TextStyle(color: Color(0xFF0F172A)),
+              onSubmitted: (v) {
+                ref.read(collegeReviewProvider.notifier).setFilters(q: v);
+              },
             ),
-            style: const TextStyle(color: Color(0xFF0F172A)),
-            onSubmitted: (v) {
-              ref.read(collegeReviewProvider.notifier).setFilters(q: v);
-            },
           ),
         ),
       ),
@@ -108,10 +109,10 @@ class _CollegeReviewScreenState extends ConsumerState<CollegeReviewScreen> {
       return AppEmptyState(
         icon: Icons.fact_check_outlined,
         headline: 'Belum Ada Jurnal',
-        subtext: 'Jurnal yang kamu kirimkan akan muncul di halaman ini.',
-        ctaLabel: 'Isi Jurnal Sekarang',
-        ctaIcon: Icons.edit_note,
-        onCta: () => GoRouter.of(context).go('/jurnal'),
+        subtext: 'Tidak ada jurnal mahasiswa yang perlu direview saat ini.',
+        ctaLabel: 'Refresh',
+        ctaIcon: Icons.refresh,
+        onCta: () => ref.read(collegeReviewProvider.notifier).load(refresh: true),
       );
     }
 
@@ -182,7 +183,7 @@ class _JournalCard extends StatelessWidget {
               Expanded(child: Text(journal.studentName, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                 child: Text(journal.statusLabel, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600)),
               ),
             ]),
