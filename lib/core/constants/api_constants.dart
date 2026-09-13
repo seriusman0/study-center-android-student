@@ -146,6 +146,7 @@ class ApiConstants {
   static const String adminJurnalPrajuritDashboard = '/admin/jurnal-prajurit/';
   static const String adminJurnalPrajuritBible     = '/admin/jurnal-prajurit/bible';
   static const String adminJurnalPrajuritItems     = '/admin/jurnal-prajurit/items';
+  static String adminJurnalPrajuritItemDetail(int id) => '/admin/jurnal-prajurit/items/$id';
 
   // ── College self-service (API, role:college) ─────────────────────────────
   static const String collegeJurnalToday   = '/college-jurnal/today';

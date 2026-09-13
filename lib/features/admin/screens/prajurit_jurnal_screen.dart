@@ -161,40 +161,160 @@ class _BibleTab extends ConsumerWidget {
 
 // ── prajurit Items Tab ─────────────────────────────────────────────────────────
 
-class _ItemsTab extends ConsumerWidget {
+class _ItemsTab extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ItemsTab> createState() => _ItemsTabState();
+}
+
+class _ItemsTabState extends ConsumerState<_ItemsTab> {
+  void _showFormDialog({PrajuritItem? item}) {
+    final isEdit = item != null;
+    final nameCtrl = TextEditingController(text: item?.name ?? '');
+    final descCtrl = TextEditingController(text: item?.description ?? '');
+    bool isActive = item?.isActive ?? true;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateSB) {
+            return AlertDialog(
+              title: Text(isEdit ? 'Edit Item' : 'Tambah Item'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(labelText: 'Nama / Judul'),
+                    ),
+                    TextField(
+                      controller: descCtrl,
+                      decoration: const InputDecoration(labelText: 'Deskripsi'),
+                      maxLines: 3,
+                    ),
+                    SwitchListTile(
+                      title: const Text('Aktif'),
+                      value: isActive,
+                      onChanged: (v) => setStateSB(() => isActive = v),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                if (isEdit)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _showDeleteDialog(item.id);
+                    },
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    child: const Text('Hapus'),
+                  ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (nameCtrl.text.trim().isEmpty) return;
+                    Navigator.pop(ctx);
+                    if (isEdit) {
+                      ref.read(PrajuritItemsProvider.notifier).updateItem(
+                            item.id,
+                            nameCtrl.text.trim(),
+                            descCtrl.text.trim(),
+                            isActive,
+                          );
+                    } else {
+                      ref.read(PrajuritItemsProvider.notifier).addItem(
+                            nameCtrl.text.trim(),
+                            descCtrl.text.trim(),
+                            isActive,
+                          );
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showDeleteDialog(int id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Item?'),
+        content: const Text('Tindakan ini tidak dapat dibatalkan.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(PrajuritItemsProvider.notifier).deleteItem(id);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(PrajuritItemsProvider);
+    
+    Widget body;
     if (state.loading && state.items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      body = const Center(child: CircularProgressIndicator());
+    } else if (state.error != null && state.items.isEmpty) {
+      body = Center(child: Text('Error: ${state.error}'));
+    } else if (state.items.isEmpty) {
+      body = const Center(child: Text('Belum ada item kurikulum'));
+    } else {
+      body = RefreshIndicator(
+        onRefresh: () => ref.read(PrajuritItemsProvider.notifier).load(),
+        child: ListView.separated(
+          itemCount: state.items.length,
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemBuilder: (ctx, i) {
+            final item = state.items[i];
+            return ListTile(
+              leading: Icon(
+                item.isActive ? Icons.check_circle : Icons.circle_outlined,
+                color: item.isActive ? AppColors.success : AppColors.textMuted,
+              ),
+              title: Text(item.name),
+              subtitle: item.description != null
+                  ? Text(item.description!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12))
+                  : null,
+              trailing: IconButton(
+                icon: const Icon(Icons.edit, size: 20),
+                onPressed: () => _showFormDialog(item: item),
+              ),
+              onTap: () => _showFormDialog(item: item),
+            );
+          },
+        ),
+      );
     }
-    if (state.error != null && state.items.isEmpty) {
-      return Center(child: Text('Error: ${state.error}'));
-    }
-    if (state.items.isEmpty) {
-      return const Center(child: Text('Belum ada item kurikulum'));
-    }
-    return RefreshIndicator(
-      onRefresh: () => ref.read(PrajuritItemsProvider.notifier).load(),
-      child: ListView.separated(
-        itemCount: state.items.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (ctx, i) {
-          final item = state.items[i];
-          return ListTile(
-            leading: Icon(
-              item.isActive ? Icons.check_circle : Icons.circle_outlined,
-              color: item.isActive ? AppColors.success : AppColors.textMuted,
-            ),
-            title: Text(item.name),
-            subtitle: item.description != null
-                ? Text(item.description!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12))
-                : null,
-          );
-        },
+
+    return Scaffold(
+      body: body,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showFormDialog(),
+        child: const Icon(Icons.add),
       ),
     );
   }

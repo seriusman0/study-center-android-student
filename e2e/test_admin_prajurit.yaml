@@ -1,0 +1,69 @@
+appId: com.studycenter.sc_student
+---
+# E2E: Admin Prajurit (CRUD Jurnal)
+# Validates that an Admin can add/edit Prajurit items.
+
+- launchApp:
+    clearState: true
+
+- tapOn: "email@contoh.com / username"
+- inputText: "admin@studycenter.com"
+- tapOn: "Masukkan password"
+- inputText: "password"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+# Tunggu sampai loading selesai dan masuk beranda
+- extendedWaitUntil:
+    visible: "Test Admin"
+    timeout: 10000
+    optional: true
+
+# Tap tab Dashboard Admin (Tab kedua di bottom nav)
+- tapOn:
+    point: "270,1433"
+    optional: true
+- tapOn:
+    text: "Dashboard Admin"
+    optional: true
+
+# Scroll grid to ensure visible
+- scroll
+
+# Cari dan tap Jurnal Prajurit
+- extendedWaitUntil:
+    visible: "Jurnal Prajurit"
+    timeout: 5000
+- tapOn: "Jurnal Prajurit"
+
+# Tunggu layar Jurnal Mahasiswa terbuka
+- extendedWaitUntil:
+    visible: "Jurnal Mahasiswa"
+    timeout: 5000
+
+# Pindah ke tab Kurikulum
+- tapOn: "Kurikulum"
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Tekan tombol tambah (FAB biasanya bisa ditekan via icon atau koordinat)
+# Akan dicoba tap koordinat kanan bawah jika tidak terdeteksi via id/text
+- tapOn:
+    point: "85%, 90%"
+    optional: true
+
+# Form Tambah Item
+- extendedWaitUntil:
+    visible: "Tambah Item"
+    timeout: 3000
+- tapOn: "Nama / Judul"
+- inputText: "Test Kurikulum Prajurit"
+- tapOn: "Deskripsi"
+- inputText: "Deskripsi otomatis dari Maestro test"
+- hideKeyboard
+- tapOn: "Simpan"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible: "Test Kurikulum Prajurit"

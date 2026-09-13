@@ -30,6 +30,18 @@ class PrajuritJurnalRepository {
     List raw = data is Map ? (data['data'] ?? []) : data as List;
     return raw.map((e) => PrajuritItem.fromJson(e as Map<String, dynamic>)).toList();
   }
+
+  Future<void> createPrajuritItem(Map<String, dynamic> data) async {
+    await _dio.post(ApiConstants.adminJurnalPrajuritItems, data: data);
+  }
+
+  Future<void> updatePrajuritItem(int id, Map<String, dynamic> data) async {
+    await _dio.put(ApiConstants.adminJurnalPrajuritItemDetail(id), data: data);
+  }
+
+  Future<void> deletePrajuritItem(int id) async {
+    await _dio.delete(ApiConstants.adminJurnalPrajuritItemDetail(id));
+  }
 }
 
 final PrajuritJurnalRepoProvider = Provider(
@@ -113,6 +125,29 @@ class PrajuritItemsNotifier extends Notifier<PrajuritItemsState> {
     } catch (e) {
       state = PrajuritItemsState(error: extractErrorMessage(e));
     }
+  }
+
+  Future<void> addItem(String name, String? description, bool isActive) async {
+    await ref.read(PrajuritJurnalRepoProvider).createPrajuritItem({
+      'name': name,
+      'description': description,
+      'is_active': isActive,
+    });
+    await load();
+  }
+
+  Future<void> updateItem(int id, String name, String? description, bool isActive) async {
+    await ref.read(PrajuritJurnalRepoProvider).updatePrajuritItem(id, {
+      'name': name,
+      'description': description,
+      'is_active': isActive,
+    });
+    await load();
+  }
+
+  Future<void> deleteItem(int id) async {
+    await ref.read(PrajuritJurnalRepoProvider).deletePrajuritItem(id);
+    await load();
   }
 }
 
