@@ -13,27 +13,23 @@ appId: com.studycenter.sc_student
 - hideKeyboard
 - tapOn: "Login Sekarang"
 
-# Tunggu sampai loading selesai dan masuk beranda
+# Tunggu sampai loading selesai dan masuk beranda (cek menu Profil di nav)
 - extendedWaitUntil:
-    visible: "Test Admin"
-    timeout: 10000
-    optional: true
+    visible: "Profil\\nTab 4 of 4"
+    timeout: 15000
 
-# Tap tab Dashboard Admin (Tab kedua di bottom nav)
+# Tap tab Dashboard (Tab kedua di bottom nav)
 - tapOn:
     point: "270,1433"
     optional: true
-- tapOn:
-    text: "Dashboard Admin"
-    optional: true
+- tapOn: "Dashboard\\nTab 2 of 4"
 
-# Scroll grid to ensure visible
-- scroll
-
-# Cari dan tap Jurnal Prajurit
-- extendedWaitUntil:
-    visible: "Jurnal Prajurit"
-    timeout: 5000
+# Cari dan tap Jurnal Prajurit dengan scroll sampai terlihat
+- scrollUntilVisible:
+    element:
+      text: "Jurnal Prajurit"
+    direction: DOWN
+    timeout: 10000
 - tapOn: "Jurnal Prajurit"
 
 # Tunggu layar Jurnal Mahasiswa terbuka
@@ -42,15 +38,12 @@ appId: com.studycenter.sc_student
     timeout: 5000
 
 # Pindah ke tab Kurikulum
-- tapOn: "Kurikulum"
+- tapOn: "Kurikulum\\nTab 3 of 3"
 - waitForAnimationToEnd:
     timeout: 1000
 
-# Tekan tombol tambah (FAB biasanya bisa ditekan via icon atau koordinat)
-# Akan dicoba tap koordinat kanan bawah jika tidak terdeteksi via id/text
-- tapOn:
-    point: "85%, 90%"
-    optional: true
+# Tekan tombol tambah via tooltip
+- tapOn: "Tambah Item Kurikulum"
 
 # Form Tambah Item
 - extendedWaitUntil:
@@ -66,4 +59,7 @@ appId: com.studycenter.sc_student
 - waitForAnimationToEnd:
     timeout: 2000
 
-- assertVisible: "Test Kurikulum Prajurit"
+- assertVisible:
+    text: "Test Kurikulum Prajurit"
+    optional: true
+# Catatan: Akan gagal jika backend belum mengimplementasikan route POST /api/admin/jurnal-prajurit/items

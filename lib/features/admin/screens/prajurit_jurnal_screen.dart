@@ -312,9 +312,13 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
 
     return Scaffold(
       body: body,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showFormDialog(),
-        child: const Icon(Icons.add),
+      floatingActionButton: Semantics(
+        label: 'Tambah Item Kurikulum',
+        child: FloatingActionButton(
+          tooltip: 'Tambah Item Kurikulum',
+          onPressed: () => _showFormDialog(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
