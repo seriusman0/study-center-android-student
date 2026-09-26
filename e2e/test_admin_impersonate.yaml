@@ -1,0 +1,34 @@
+appId: com.nanoproject.studycenter.student
+---
+- clearState
+- launchApp
+- tapOn: 'Lewati'
+- extendedWaitUntil:
+    visible: 'Email/Username'
+    timeout: 5000
+
+- tapOn: 'Email/Username'
+- inputText: 'admin@studycenter.com'
+- tapOn: 'Password'
+- inputText: 'password'
+- tapOn: 'Masuk'
+- extendedWaitUntil:
+    visible: 'Dashboard Admin'
+    timeout: 10000
+
+- scroll
+- tapOn: 'Manajemen Pengguna'
+- extendedWaitUntil:
+    visible: 'Manajemen Pengguna'
+    timeout: 5000
+
+- tapOn: 'more_vert'
+- extendedWaitUntil:
+    visible: 'Masuk sebagai user ini'
+    timeout: 5000
+- tapOn: 'Masuk sebagai user ini'
+
+- extendedWaitUntil:
+    visible: 'Berhasil masuk sebagai'
+    timeout: 5000
+

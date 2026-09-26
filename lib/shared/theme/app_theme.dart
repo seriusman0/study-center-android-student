@@ -1,0 +1,155 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'design_tokens.dart';
+
+export 'design_tokens.dart';
+
+/// Builds the app-wide Material 3 theme using design tokens.
+/// Primary is teal, danger is red, soft slate surfaces.
+ThemeData buildAppTheme() {
+  final base = ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      primary: AppColors.primary,
+      secondary: AppColors.primaryLight,
+      surface: AppColors.surface,
+      error: AppColors.danger,
+      brightness: Brightness.light,
+    ),
+    scaffoldBackgroundColor: AppColors.background,
+    textTheme: GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(letterSpacing: -0.02, fontWeight: FontWeight.w700),
+      displayMedium: GoogleFonts.inter(letterSpacing: -0.02, fontWeight: FontWeight.w700),
+      displaySmall: GoogleFonts.inter(letterSpacing: -0.02, fontWeight: FontWeight.w600),
+      headlineMedium: GoogleFonts.inter(letterSpacing: -0.015, fontWeight: FontWeight.w600),
+      titleLarge: GoogleFonts.inter(letterSpacing: -0.01, fontWeight: FontWeight.w600),
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+      },
+    ),
+  );
+
+  return base.copyWith(
+    appBarTheme: AppBarTheme(
+      backgroundColor: AppColors.primary.withValues(alpha: 0.85),
+      foregroundColor: Colors.white,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent, // Prevents tint overlay on scroll
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+      titleTextStyle: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+        letterSpacing: -0.5,
+      ),
+      iconTheme: const IconThemeData(color: Colors.white, size: 24),
+    ),
+    cardTheme: CardThemeData(
+      elevation: 8,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
+      color: AppColors.surface,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        // No hard border on iOS, use subtle shadow
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.background,
+      hintStyle: const TextStyle(color: AppColors.textMuted),
+      labelStyle: const TextStyle(color: AppColors.textSecondary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.borderStrong),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.borderStrong),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.danger),
+      ),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.button)),
+        elevation: 0,
+        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.button)),
+        side: const BorderSide(color: AppColors.borderStrong, width: 1),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+      ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      side: const BorderSide(color: AppColors.borderStrong, width: 1.5),
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return AppColors.primary;
+        return Colors.transparent;
+      }),
+      checkColor: WidgetStateProperty.all(Colors.white),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.divider,
+      thickness: 1,
+      space: 1,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.textMuted,
+      elevation: 0,                            // IMPROVED: 0 - let the nav bar sit flush with no shadow (cards are elevated now)
+      type: BottomNavigationBarType.fixed,
+      showUnselectedLabels: true,
+      selectedLabelStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,         // IMPROVED: was default - adds hierarchy
+        height: 1.2,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w400,         // IMPROVED: lighter weight for inactive tabs
+        height: 1.2,
+      ),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: AppColors.primary,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: AppColors.textPrimary,
+      contentTextStyle: const TextStyle(color: Colors.white),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.button)),
+    ),
+  );
+}

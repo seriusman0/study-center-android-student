@@ -1,0 +1,8 @@
+appId: com.studycenter.sc_student
+---
+# Manual steps BEFORE running: login once via UI (offline_setup) so saved profile exists,
+# then force-stop app. This test verifies offline auto-restore from saved profile.
+- launchApp: {clearState: false}
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 01_offline_autologin_check

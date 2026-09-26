@@ -1,0 +1,10 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible: "Data belum tersimpan di memori lokal."
+    timeout: 10000
+
+- takeScreenshot: "jurnal_offline_error"

@@ -1,0 +1,26 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+
+# Login first
+- tapOn: "Alamat Email"
+- inputText: "testuser@example.com"
+- tapOn: "Kata Sandi"
+- inputText: "password"
+- tapOn: "Masuk"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+# Go to Jurnal while online to cache today's data
+- tapOn:
+    id: "nav_jurnal"
+- extendedWaitUntil:
+    visible: "Jurnal Harian"
+    timeout: 10000
+
+# Wait for cache
+- evalScript: ${sleep(3000)}
+
+# Now go offline and open a new day!

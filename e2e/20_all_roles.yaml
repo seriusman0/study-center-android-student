@@ -1,0 +1,158 @@
+appId: com.studycenter.sc_student
+---
+# Quick role rotation test: login 7 roles sequentially, take screenshot each.
+# Each role: clearState → login → wait home → screenshot → next.
+
+# ── 1. ADMIN ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_admin@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Admin"
+    timeout: 15000
+- takeScreenshot: "role_01_admin"
+
+# ── 2. FULLTIMER ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_fulltimer@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Fulltimer"
+    timeout: 15000
+- takeScreenshot: "role_02_fulltimer"
+
+# ── 3. MENTOR ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_mentor@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Mentor"
+    timeout: 15000
+- takeScreenshot: "role_03_mentor"
+
+# ── 4. STUDENT ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_student@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Student"
+    timeout: 15000
+- takeScreenshot: "role_04_student"
+
+# ── 5. GUEST ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_guest@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Guest"
+    timeout: 15000
+- takeScreenshot: "role_05_guest"
+
+# ── 6. SCHOLARSHIP_TEENAGER ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_scholarship_teenager@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Scholarship_teenager"
+    timeout: 15000
+- takeScreenshot: "role_06_scholarship"
+
+# ── 7. COLLEGE ──
+- launchApp:
+    clearState: true
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_college@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test College"
+    timeout: 15000
+- takeScreenshot: "role_07_college"

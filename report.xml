@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="R9RT4079YQL" tests="1" failures="0" time="82.0">
+    <testcase id="Audit E2E - usertest" name="Audit E2E - usertest" classname="Audit E2E - usertest" file="e2e\test_audit_usertest.yaml" time="82.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

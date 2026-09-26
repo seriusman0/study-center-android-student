@@ -1,0 +1,24 @@
+appId: com.studycenter.sc_student
+---
+- launchApp
+- waitForAnimationToEnd: {timeout: 4000}
+# Use key-based tap for reliability (Flutter TextField keys: emailField, passwordField)
+- tapOn:
+    element: {
+      with: {
+        key: "emailField"
+      }
+    }
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn:
+    element: {
+      with: {
+        key: "passwordField"
+      }
+    }
+- eraseText
+- inputText: "password123"
+- tapOn: 'Login Sekarang'
+- waitForAnimationToEnd: {timeout: 15000}
+- takeScreenshot: login_result

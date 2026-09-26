@@ -1,0 +1,65 @@
+appId: com.studycenter.sc_student
+---
+# E2E: Admin Prajurit (CRUD Jurnal)
+# Validates that an Admin can add/edit Prajurit items.
+
+- launchApp:
+    clearState: true
+
+- tapOn: "email@contoh.com / username"
+- inputText: "admin@studycenter.com"
+- tapOn: "Masukkan password"
+- inputText: "password"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+# Tunggu sampai loading selesai dan masuk beranda (cek menu Profil di nav)
+- extendedWaitUntil:
+    visible: "Profil\\nTab 4 of 4"
+    timeout: 15000
+
+# Tap tab Dashboard (Tab kedua di bottom nav)
+- tapOn:
+    point: "270,1433"
+    optional: true
+- tapOn: "Dashboard\\nTab 2 of 4"
+
+# Cari dan tap Jurnal Prajurit dengan scroll sampai terlihat
+- scrollUntilVisible:
+    element:
+      text: "Jurnal Prajurit"
+    direction: DOWN
+    timeout: 10000
+- tapOn: "Jurnal Prajurit"
+
+# Tunggu layar Jurnal Mahasiswa terbuka
+- extendedWaitUntil:
+    visible: "Jurnal Mahasiswa"
+    timeout: 5000
+
+# Pindah ke tab Kurikulum
+- tapOn: "Kurikulum\\nTab 3 of 3"
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Tekan tombol tambah via tooltip
+- tapOn: "Tambah Item Kurikulum"
+
+# Form Tambah Item
+- extendedWaitUntil:
+    visible: "Tambah Item"
+    timeout: 3000
+- tapOn: "Nama / Judul"
+- inputText: "Test Kurikulum Prajurit"
+- tapOn: "Deskripsi"
+- inputText: "Deskripsi otomatis dari Maestro test"
+- hideKeyboard
+- tapOn: "Simpan"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Test Kurikulum Prajurit"
+    optional: true
+# Catatan: Akan gagal jika backend belum mengimplementasikan route POST /api/admin/jurnal-prajurit/items

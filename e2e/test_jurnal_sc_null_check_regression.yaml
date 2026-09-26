@@ -1,0 +1,70 @@
+appId: com.studycenter.sc_student
+---
+# Regression test: verifikasi fix 'null check' crash saat login + buka Jurnal SC.
+# Skenario: login testuser, dari Beranda tap tile 'Jurnal SC', masuk tab Student,
+# cek Hafal Ayat section (yang paling rentan terhadap BoxConstraints unbound).
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "testuser"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "12345"
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible:
+      text: "Beranda\nTab 1 of 4"
+    timeout: 15000
+
+- takeScreenshot: "regression_01_beranda"
+
+# ---- Tap Jurnal SC tile (path yang sebelumnya crash) ----
+- tapOn:
+    point: "527,965"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: "regression_02_after_tap_jurnal_sc"
+
+# ---- Validasi utama: HARUS tidak ada red error screen ----
+- assertNotVisible: "Unhandled Exception"
+- assertNotVisible: "BoxConstraints forces an infinite width"
+- assertNotVisible: "Null check operator used on a null value"
+
+# ---- Validasi: tab Jurnal Student aktif & konten tampil ----
+# (Tab teks accessibility adalah "Jurnal Student\nTab X of Y" atau hanya teks biasa,
+# jadi gunakan teks konten yang lebih reliable: "Jurnal Harian" dari AppBar
+# dan label item jurnal.)
+- assertVisible: "Jurnal Harian"
+- assertVisible: "Perjanjian Lama"
+- assertVisible: "Perjanjian Baru"
+
+- takeScreenshot: "regression_03_jurnal_student_loaded"
+
+# ---- Scroll ke Hafal Ayat & interaksi (area paling rawan crash) ----
+- scrollUntilVisible:
+    element: "Hafal Ayat"
+    direction: DOWN
+- waitForAnimationToEnd
+
+- takeScreenshot: "regression_04_hafal_ayat_visible"
+
+# Validasi tambahan: Hafal Ayat section tampil tanpa error
+- assertNotVisible: "Unhandled Exception"
+- assertNotVisible: "Error:"
+- assertVisible: "Pilih Kitab"
+
+- takeScreenshot: "regression_05_passed"
+
+# Final: pastikan tidak ada error setelah semua navigasi — tab Beasiswa→Student
+# sudah ter-handle oleh flow utama, di sini cukup re-check tidak ada error.
+- assertNotVisible: "Unhandled Exception"
+- assertNotVisible: "Error:"
+- assertVisible: "Pilih Kitab"

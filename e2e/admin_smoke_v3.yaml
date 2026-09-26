@@ -1,0 +1,36 @@
+appId: com.studycenter.sc_student
+---
+# Quick smoke test: Dashboard bell icon + Jurnal College + Notifications screen
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Test Admin"
+- takeScreenshot: 01_home_beranda
+
+# Navigate to Dashboard
+- tapOn:
+    point: "270,1433"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 02_dashboard_with_bell
+
+# Tap bell icon (top-right AppBar, approx x=680, y=98)
+- tapOn:
+    point: "680,98"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 03_notifications_screen
+
+# Go back, tap Jurnal Mahasiswa card
+- back
+- waitForAnimationToEnd:
+    timeout: 2000
+# Jurnal Mahasiswa is the last card in grid (12th card, bottom row)
+# Dashboard tab, scroll down to see all cards
+- swipe:
+    start: "360,800"
+    end: "360,300"
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 04_dashboard_scrolled

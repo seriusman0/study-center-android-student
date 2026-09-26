@@ -1,0 +1,7 @@
+appId: com.studycenter.sc_student
+---
+# Offline → reconnect sync verification flow
+- launchApp: {clearState: false}
+# Expect: auto-restored from saved profile. Jika di login screen, pilih saved profile.
+- waitForAnimationToEnd: {timeout: 5000}
+- takeScreenshot: 01_state_after_launch

@@ -1,0 +1,14 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "Beranda"
+- tapOn: "SC Student"
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd: 3000
+- extendedWaitUntil:
+    visible: "Jelita"
+    timeout: 45000

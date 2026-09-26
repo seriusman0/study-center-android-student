@@ -1,0 +1,62 @@
+appId: com.studycenter.sc_student
+---
+# Flow 07: Blog — view list and detail
+# Covers: GET /api/blogs, GET /api/blogs/{slug}
+#
+# Blog list is shown on the Home (Beranda) screen under "Artikel Terbaru".
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "password123"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ---- Navigate to Beranda tab ----
+- tapOn:
+    point: "90,1433"
+- waitForAnimationToEnd
+
+- takeScreenshot: "07_beranda_home"
+
+# ---- Test: Blog list visible on home screen ----
+- scrollUntilVisible:
+    element: "Artikel Terbaru"
+    direction: DOWN
+
+- assertVisible: "Artikel Terbaru"
+- takeScreenshot: "07_blog_list_section"
+
+- takeScreenshot: "07_blog_list_content"
+
+# ---- Test: Pull to refresh home screen ----
+- swipe:
+    direction: DOWN
+    duration: 300
+
+- extendedWaitUntil:
+    visible:
+      text: "Beranda\\nTab 1 of 4"
+    timeout: 5000
+
+- scrollUntilVisible:
+    element: "Artikel Terbaru"
+    direction: DOWN
+
+- assertVisible: "Artikel Terbaru"
+- takeScreenshot: "07_blog_after_refresh"

@@ -1,0 +1,3 @@
+Running on R9RT4079YQL
+ > Flow Audit E2E - usertest
+Launch app "com.studycenter.sc_student" with clear state...

@@ -1,0 +1,68 @@
+appId: com.studycenter.sc_student
+---
+# Flow 06: Galeri — view photo gallery from student's cabang
+# Covers: GET /api/galeri
+#
+# The gallery is displayed on the Home (Beranda) screen under "Galeri Kegiatan"
+# as a horizontal scrollable list of photo cards.
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "password123"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ---- Ensure we are on Beranda tab ----
+- tapOn:
+    point: "90,1433"
+- waitForAnimationToEnd
+
+# ---- Scroll to gallery section ----
+- scrollUntilVisible:
+    element: "Galeri Kegiatan"
+    direction: DOWN
+
+- assertVisible: "Galeri Kegiatan"
+- takeScreenshot: "06_galeri_section_visible"
+
+- takeScreenshot: "06_galeri_content"
+
+# ---- Test: Scroll horizontally through gallery photos ----
+- swipe:
+    direction: LEFT
+    duration: 300
+
+- takeScreenshot: "06_galeri_scrolled_right"
+
+# ---- Test: Pull to refresh home screen ----
+- swipe:
+    direction: DOWN
+    duration: 300
+
+- extendedWaitUntil:
+    visible:
+      text: "Beranda\\nTab 1 of 4"
+    timeout: 5000
+
+- scrollUntilVisible:
+    element: "Galeri Kegiatan"
+    direction: DOWN
+
+- assertVisible: "Galeri Kegiatan"
+- takeScreenshot: "06_galeri_after_refresh"

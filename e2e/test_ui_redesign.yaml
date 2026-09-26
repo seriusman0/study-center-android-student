@@ -1,0 +1,25 @@
+appId: com.studycenter.sc_student
+---
+- launchApp: {clearState: true}
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "jelita.efni@example.com"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "12345"
+- tapOn: 'SC Student'
+- tapOn: 'Login Sekarang'
+- waitForAnimationToEnd:
+    timeout: 12000
+- takeScreenshot: 01_home_redesign
+- tapOn: ".*Profil.*"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 02_profile_redesign
+- tapOn: ".*Jurnal.*"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 03_journal_redesign

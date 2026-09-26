@@ -1,0 +1,35 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "karuniaplus"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "12345"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Login Sekarang"
+    direction: DOWN
+- tapOn: 'Login Sekarang'
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    notVisible: "Login Sekarang"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "Jurnal College"
+    timeout: 20000
+- tapOn: 'Jurnal College'
+- extendedWaitUntil:
+    visible: "Jurnal Harian"
+    timeout: 20000
+- takeScreenshot: karuniaplus_jurnal_top
+- scroll
+- takeScreenshot: karuniaplus_jurnal_mid
+- scroll
+- takeScreenshot: karuniaplus_jurnal_bot

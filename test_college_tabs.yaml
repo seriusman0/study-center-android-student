@@ -1,0 +1,15 @@
+appId: com.studycenter.sc_student
+---
+- launchApp
+- tapOn: "Jurnal"
+- waitForAnimationToEnd: 
+    timeout: 2000
+- takeScreenshot: "college_jurnal"
+- tapOn: "Review"
+- waitForAnimationToEnd: 
+    timeout: 2000
+- takeScreenshot: "college_review"
+- tapOn: "Profil"
+- waitForAnimationToEnd: 
+    timeout: 2000
+- takeScreenshot: "college_profil"

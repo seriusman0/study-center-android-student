@@ -1,0 +1,77 @@
+appId: com.studycenter.sc_student
+name: "Audit E2E - usertest"
+---
+- launchApp:
+    clearState: true
+
+# Login
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "testuser"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "12345"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Login Sekarang"
+    direction: DOWN
+- tapOn: "Login Sekarang"
+
+# Verify Home
+- extendedWaitUntil:
+    visible: "Mulai Isi Jurnal Remaja SC"
+    timeout: 20000
+- takeScreenshot: "audit_01_home"
+
+# Navigate to Jurnal
+- tapOn:
+    point: "270,1433"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    point: "540,90"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Perjanjian Lama"
+    timeout: 15000
+- tapOn: "Perjanjian Lama"
+- tapOn: "Perjanjian Baru"
+- takeScreenshot: "audit_02_jurnal_pl_pb"
+
+# Hafal Ayat & Life Item
+- scrollUntilVisible:
+    element: "Hafal Ayat"
+    direction: DOWN
+- scrollUntilVisible:
+    element: "Mengawali hari dengan berdoa"
+    direction: DOWN
+- tapOn: "Mengawali hari dengan berdoa"
+- takeScreenshot: "audit_03_jurnal_life"
+
+# Check Laporan
+- tapOn:
+    point: "450,1433"
+- extendedWaitUntil:
+    visible: "Matriks Harian"
+    timeout: 15000
+- takeScreenshot: "audit_04_laporan"
+
+# Navigate to Profil
+- tapOn:
+    point: "630,1433"
+- extendedWaitUntil:
+    visible: "Keluar"
+    timeout: 10000
+- tapOn: "Keluar"
+- extendedWaitUntil:
+    visible: "Batal"
+    timeout: 5000
+- tapOn: "Keluar"
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 10000
+- takeScreenshot: "audit_05_logout"

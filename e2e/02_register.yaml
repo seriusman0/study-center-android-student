@@ -1,0 +1,51 @@
+appId: com.studycenter.sc_student
+---
+# Flow 02: Registration flow
+# Covers: POST /api/auth/register
+#
+# The student app uses a login-first entry point.
+# If a registration screen is added, tap "Daftar" from the login screen.
+# This flow validates the login screen as the app entry point and tests
+# the registration screen if the "Daftar" link is present.
+
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- assertVisible: "Selamat datang kembali"
+- assertVisible: "Email"
+- assertVisible: "Password"
+
+- takeScreenshot: "02_register_login_screen"
+
+# ---- Test: Registration screen (if "Daftar" link exists on login screen) ----
+- tapOn: "Daftar"
+- waitForAnimationToEnd
+
+- assertVisible: "Daftar Akun"
+- assertVisible: "Email"
+- assertVisible: "Password"
+
+- takeScreenshot: "02_register_screen"
+
+- tapOn: "Nama"
+- inputText: "Test User Baru"
+
+- tapOn: "Email"
+- inputText: "testbaru@studycenter.test"
+
+- tapOn: "Password"
+- inputText: "password123"
+
+- tapOn: "Konfirmasi Password"
+- inputText: "password123"
+
+- hideKeyboard
+
+- tapOn: "Daftar"
+
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 8000
+
+- takeScreenshot: "02_register_success"

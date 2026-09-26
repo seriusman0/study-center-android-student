@@ -1,0 +1,3 @@
+appId: com.studycenter.sc_student
+---
+- tapOn: ".*Jurnal SC.*"

@@ -1,0 +1,64 @@
+appId: com.studycenter.sc_student
+---
+# Flow 08: Profile — view profile, verify user info, navigate away and back
+# Covers: GET /api/me (loaded at login)
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "password123"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ---- Navigate to Profil tab ----
+- tapOn:
+    point: "630,1433"
+- waitForAnimationToEnd
+
+- assertVisible: "Profil"
+- takeScreenshot: "08_profile_screen"
+
+# ---- Test: Profile info is displayed ----
+- assertVisible: "Username"
+- assertVisible: "Email"
+- assertVisible: "Cabang"
+
+- takeScreenshot: "08_profile_info_cards"
+
+# ---- Test: Keluar (logout) button is visible ----
+- scrollUntilVisible:
+    element: "Keluar"
+    direction: DOWN
+
+- assertVisible: "Keluar"
+- takeScreenshot: "08_profile_logout_button"
+
+# ---- Test: Navigate away and come back ----
+- tapOn:
+    point: "90,1433"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Beranda\\nTab 1 of 4"
+
+- tapOn:
+    point: "630,1433"
+- waitForAnimationToEnd
+- assertVisible: "Profil"
+- assertVisible: "Username"
+
+- takeScreenshot: "08_profile_return"

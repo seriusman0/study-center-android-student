@@ -1,0 +1,38 @@
+appId: com.studycenter.sc_student
+---
+# Flow 14: Role-aware navigation — scholarship_teenager sees minimal tabs.
+
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_scholarship_teenager@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Scholarship_teenager"
+    timeout: 15000
+- takeScreenshot: "14_scholarship_home"
+
+- assertVisible: "Beranda"
+- assertVisible: "Profil"
+
+- takeScreenshot: "14_scholarship_bottom_nav"
+
+- tapOn:
+    point: "630,1433"
+- waitForAnimationToEnd
+- assertVisible: "Keluar"
+- takeScreenshot: "14_scholarship_profil_tab"

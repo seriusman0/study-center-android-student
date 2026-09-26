@@ -1,0 +1,41 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Masuk"
+    timeout: 15000
+- tapOn: "email@contoh.com / username"
+- inputText: "admin@studycenter.com"
+- tapOn: "Masukkan password"
+- inputText: "password"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Login Sekarang"
+    direction: DOWN
+- tapOn: "Login Sekarang"
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible: ".*Tab 2 of 4.*"
+    timeout: 20000
+- tapOn: ".*Tab 2 of 4.*"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: admin_dashboard
+- scrollUntilVisible:
+    element: "Jurnal Mahasiswa"
+    direction: DOWN
+- tapOn: "Jurnal Mahasiswa"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: admin_jurnal_mahasiswa
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Moderasi Blog"
+    direction: DOWN
+- tapOn: "Moderasi Blog"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: admin_moderasi_blog
+

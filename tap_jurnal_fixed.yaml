@@ -1,0 +1,7 @@
+﻿appId: com.studycenter.sc_student
+---
+- launchApp:
+    appId: com.studycenter.sc_student
+- tapOn:
+    text: '.*Jurnal.*'
+- assertVisible: '.*Jurnal.*'

@@ -1,0 +1,9 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd: 
+    timeout: 3000
+- assertVisible: "Aplikasi Sedang Maintenance"
+- assertVisible: "Coba Lagi"
+- takeScreenshot: "maintenance_mode_ui"

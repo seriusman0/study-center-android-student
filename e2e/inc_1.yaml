@@ -1,0 +1,4 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true

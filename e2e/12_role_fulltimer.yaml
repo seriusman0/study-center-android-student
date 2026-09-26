@@ -1,0 +1,42 @@
+appId: com.studycenter.sc_student
+---
+# Flow 12: Role-aware navigation — fulltimer sees minimal tabs (Beranda +
+# Profil only, no dedicated tools tab yet — Fase 3 not built).
+
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "test_fulltimer@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- waitForAnimationToEnd:
+    timeout: 500
+- inputText: "Test12345"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Fulltimer"
+    timeout: 15000
+- takeScreenshot: "12_fulltimer_home"
+
+- assertVisible: "Beranda"
+- assertVisible: "Profil"
+
+- takeScreenshot: "12_fulltimer_bottom_nav"
+
+# ---- Verify fulltimer can write blog (role:admin,fulltimer,mentor,student) ----
+- assertVisible: "Tulis"
+
+- tapOn:
+    point: "630,1433"
+- waitForAnimationToEnd
+- assertVisible: "Keluar"
+- takeScreenshot: "12_fulltimer_profil_tab"

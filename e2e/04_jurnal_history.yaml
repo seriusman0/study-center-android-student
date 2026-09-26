@@ -1,0 +1,65 @@
+appId: com.studycenter.sc_student
+---
+# Flow 04: Jurnal history — view history via Laporan matrix
+# Covers: GET /api/jurnal/history?from=X&to=Y (consumed by Laporan screen)
+#
+# The Android app does not have a standalone history screen.
+# History data is visualised as the Matriks Harian on the Laporan tab.
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "password123"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ---- Navigate to Laporan (which uses history data for the matrix) ----
+- tapOn:
+    point: "450,1433"
+- waitForAnimationToEnd
+
+- assertVisible: "Laporan Aktivitas"
+
+# Wait for summary to load
+- extendedWaitUntil:
+    visible: "Progres"
+    timeout: 5000
+
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "04_laporan_shows_history_matrix"
+
+# ---- The Matriks Harian section is rendered from history data ----
+- scrollUntilVisible:
+    element: "Matriks Harian"
+    direction: DOWN
+
+- assertVisible: "Matriks Harian"
+- takeScreenshot: "04_jurnal_history_matrix_visible"
+
+# ---- Test: Pull-to-refresh reloads history ----
+- swipe:
+    direction: DOWN
+    duration: 300
+
+- extendedWaitUntil:
+    visible: "Progres"
+    timeout: 5000
+
+- takeScreenshot: "04_history_after_refresh"

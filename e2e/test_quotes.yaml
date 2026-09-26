@@ -1,0 +1,8 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: Masuk
+- tapOn: "email@contoh.com / username"
+- inputText: test_college@studycenter.test

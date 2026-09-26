@@ -1,0 +1,5 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: false
+- assertVisible: "Anda sedang offline. Aplikasi menggunakan mode luring."

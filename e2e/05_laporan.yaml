@@ -1,0 +1,83 @@
+appId: com.studycenter.sc_student
+---
+# Flow 05: Laporan — view summary report and matrix
+# Covers: GET /api/laporan/my, GET /api/laporan/my/matrix
+
+- launchApp:
+    clearState: true
+
+# ---- Login ----
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- eraseText
+- inputText: "test@studycenter.test"
+- tapOn: "Masukkan password"
+- eraseText
+- inputText: "password123"
+- hideKeyboard
+- tapOn: "Login Sekarang"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Test Student"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ---- Navigate to Laporan tab ----
+- tapOn:
+    point: "450,1433"
+- waitForAnimationToEnd
+
+- assertVisible: "Laporan Aktivitas"
+- takeScreenshot: "05_laporan_loading"
+
+# ---- Verify summary cards are visible ----
+- extendedWaitUntil:
+    visible: "Progres"
+    timeout: 5000
+
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "05_laporan_summary_cards"
+
+# ---- Verify Matriks Harian section ----
+- scrollUntilVisible:
+    element: "Matriks Harian"
+    direction: DOWN
+
+- assertVisible: "Matriks Harian"
+- takeScreenshot: "05_laporan_matrix_visible"
+
+# ---- Matrix column headers ----
+- scrollUntilVisible:
+    element: "PL"
+    direction: DOWN
+
+- assertVisible: "PL"
+- assertVisible: "PB"
+
+- takeScreenshot: "05_laporan_matrix_headers"
+
+# ---- Test: Pull-to-refresh ----
+- swipe:
+    direction: DOWN
+    duration: 300
+
+- extendedWaitUntil:
+    visible: "Progres"
+    timeout: 5000
+
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "05_laporan_after_refresh"
+
+# ---- Final state ----
+- assertVisible: "Progres"
+- assertVisible: "Streak"
+- assertVisible: "Selesai"
+
+- takeScreenshot: "05_laporan_final"
