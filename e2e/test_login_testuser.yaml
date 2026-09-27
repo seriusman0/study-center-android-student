@@ -4,9 +4,12 @@ appId: com.studycenter.sc_student
     clearState: true
 
 - assertVisible: "Masuk"
-- tapOn: "email@contoh.com / username"
+- tapOn:
+    id: "emailField"
 - inputText: "testuser"
 - pressKey: Enter
+- tapOn:
+    id: "passwordField"
 - inputText: "12345"
 - pressKey: Back
 

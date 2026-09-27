@@ -1,0 +1,23 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: false
+
+- tapOn:
+    id: "chatFAB"
+- assertVisible: "Semua Pesan"
+- tapOn:
+    id: "com.studycenter.sc_student:id/chat_item_0"
+    optional: true
+
+# Note: We can't actually disable network from Maestro directly on the host using airplane mode easily without ADB permissions or root in some cases,
+# but we can try to send a message.
+- tapOn: "Ketik pesan..."
+- inputText: "Pesan offline test"
+- tapOn:
+    id: "com.studycenter.sc_student:id/send_button" # if we have an ID, or just tap icon
+# Actually flutter doesn't expose standard Android IDs unless Semantics is set. We can tap on Send Icon.
+- tapOn:
+    point: 90%, 90% # Just a guess if we don't know the exact send button
+
+- assertVisible: "Pesan offline test"

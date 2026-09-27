@@ -1,0 +1,10 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: false
+
+- assertVisible: "Tinggalkan Email Anda"
+- tapOn: "Email Anda"
+- inputText: "test@example.com"
+- tapOn: "Simpan"
+- assertVisible: "Email berhasil disimpan. Terima kasih!"

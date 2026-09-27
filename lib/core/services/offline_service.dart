@@ -11,7 +11,9 @@ enum OfflineOpKind {
   // College-specific operations
   collegeCheck, collegeStudyLog, collegeFoto,
   // Scholarship teenager-specific operations
-  scholarshipCheck, scholarshipFoto
+  scholarshipCheck, scholarshipFoto,
+  // Chat operation
+  sendChatMessage
 }
 
 /// One queued mutation waiting to be sent to the server.

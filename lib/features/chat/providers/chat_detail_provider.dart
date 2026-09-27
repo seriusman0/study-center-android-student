@@ -5,6 +5,7 @@ import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import '../models/chat_models.dart';
 import '../repositories/chat_repository.dart';
 import '../services/chat_socket_service.dart';
+import '../../../core/services/connectivity_service.dart';
 
 class ChatDetailState {
   final bool loading;
@@ -49,10 +50,21 @@ class ChatDetailState {
 class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   final ChatRepository _repo;
   final ChatSocketService _socket;
+  final Ref _ref;
   final int convId;
+  ProviderSubscription? _connSub;
 
-  ChatDetailNotifier(this._repo, this._socket, this.convId) : super(const ChatDetailState()) {
+  ChatDetailNotifier(this._repo, this._socket, this._ref, this.convId) : super(const ChatDetailState()) {
     _init();
+    
+    // Listen to network changes
+    _connSub = _ref.listen<AsyncValue<bool>>(connectivityProvider, (_, next) {
+      final online = next.value ?? false;
+      if (online) {
+        // When back online, reload to get real IDs and clean up pending messages
+        loadInitial();
+      }
+    });
   }
 
   Future<void> _init() async {
@@ -69,6 +81,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   @override
   void dispose() {
     _socket.unsubscribeConversation(convId);
+    _connSub?.close();
     super.dispose();
   }
 
@@ -170,6 +183,7 @@ final chatDetailProvider = StateNotifierProvider.family<ChatDetailNotifier, Chat
   return ChatDetailNotifier(
     ref.read(chatRepositoryProvider),
     ref.read(chatSocketServiceProvider),
+    ref,
     convId,
   );
 });

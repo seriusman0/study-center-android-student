@@ -128,12 +128,27 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                               if (msg.body != null && msg.body!.isNotEmpty)
                                 Text(msg.body!),
                               const SizedBox(height: 4),
-                              Text(
-                                _formatMessageTime(msg.createdAt),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: isMe ? Colors.teal.shade800 : Colors.grey.shade600,
-                                ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _formatMessageTime(msg.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isMe ? Colors.teal.shade800 : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  if (isMe) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      msg.status == 'pending' ? Icons.access_time : Icons.done_all,
+                                      size: 12,
+                                      color: msg.status == 'pending' 
+                                          ? Colors.teal.shade800.withOpacity(0.5) 
+                                          : Colors.teal.shade800,
+                                    ),
+                                  ],
+                                ],
                               ),
                             ],
                           ),

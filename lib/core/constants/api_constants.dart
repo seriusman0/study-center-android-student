@@ -171,4 +171,8 @@ class ApiConstants {
   static String chatMessageDelete(int msgId) => '/chat/messages/$msgId';
   static String chatMarkRead(int convId) => '/chat/conversations/$convId/read';
   static const String chatUnreadCount = '/chat/unread-count';
+
+  // Email collection
+  static const String collectEmail = '/user-email/collect';
+  static const String checkEmailStatus = '/user-email/status';
 }

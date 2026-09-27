@@ -14,6 +14,12 @@ class UserDto {
         name: j['name']?.toString() ?? '',
         avatar: j['avatar']?.toString(),
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'avatar': avatar,
+      };
 }
 
 class ReplyToDto {
@@ -32,6 +38,12 @@ class ReplyToDto {
         body: j['body']?.toString(),
         userId: j['user_id'] as int,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'body': body,
+        'user_id': userId,
+      };
 }
 
 class MessageDto {
@@ -50,6 +62,7 @@ class MessageDto {
   final String? deletedAt;
   final String createdAt;
   final UserDto? user;
+  final String status;
 
   const MessageDto({
     required this.id,
@@ -67,6 +80,7 @@ class MessageDto {
     this.deletedAt,
     required this.createdAt,
     this.user,
+    this.status = 'sent',
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> j) => MessageDto(
@@ -85,7 +99,27 @@ class MessageDto {
         deletedAt: j['deleted_at']?.toString(),
         createdAt: j['created_at']?.toString() ?? '',
         user: j['user'] != null ? UserDto.fromJson(Map<String, dynamic>.from(j['user'] as Map)) : null,
+        status: j['status']?.toString() ?? 'sent',
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'conversation_id': conversationId,
+        'user_id': userId,
+        'reply_to_id': replyToId,
+        'type': type,
+        'body': body,
+        'attachment_url': attachmentUrl,
+        'attachment_name': attachmentName,
+        'attachment_mime': attachmentMime,
+        'attachment_size': attachmentSize,
+        'thumbnail_url': thumbnailUrl,
+        'reply_to': replyTo?.toJson(),
+        'deleted_at': deletedAt,
+        'created_at': createdAt,
+        'user': user?.toJson(),
+        'status': status,
+      };
 }
 
 class ConversationDto {
@@ -126,4 +160,16 @@ class ConversationDto {
                 .toList() ??
             [],
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'type': type,
+        'name': name,
+        'avatar': avatar,
+        'display_name': displayName,
+        'unread_count': unreadCount,
+        'last_message_at': lastMessageAt,
+        'last_message': lastMessage?.toJson(),
+        'participants': participants.map((e) => e.toJson()).toList(),
+      };
 }
