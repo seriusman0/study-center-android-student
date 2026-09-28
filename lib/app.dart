@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'core/services/app_update_service.dart';
 import 'core/providers/maintenance_provider.dart';
 import 'shared/widgets/maintenance_screen.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -36,6 +37,8 @@ import 'features/admin/screens/college_jurnal_screen.dart';
 import 'features/admin/screens/prajurit_jurnal_screen.dart';
 import 'features/college/screens/journal_router_screen.dart';
 import 'features/college/screens/college_review_screen.dart';
+import 'features/chat/screens/chat_list_screen.dart';
+import 'features/chat/screens/chat_detail_screen.dart';
 import 'features/college/screens/college_review_detail_screen.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/widgets/bottom_nav_shell.dart';
@@ -58,11 +61,14 @@ const _allTabPaths = [
   '/admin/users',     // 6 — admin
   '/profil',          // 7 — everyone
   '/college/review',  // 8 — college
+  '/chat',            // 9 — everyone
 ];
 
 bool _canAccessTab(UserModel? user, String path) {
-  if (user == null) return path == '/home' || path == '/profil';
+  if (user == null) return path == '/home' || path == '/profil' || path == '/chat';
   switch (path) {
+    case '/chat':
+      return true;
     case '/jurnal':
     case '/laporan':
       // College + scholarship_teenager also need journal access.
@@ -130,6 +136,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/galeri',
         parentNavigatorKey: _rootKey,
         builder: (_, __) => const GaleriScreen(),
+      ),
+      GoRoute(
+        path: '/chat',
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const ChatListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            parentNavigatorKey: _rootKey,
+            builder: (ctx, state) => ChatDetailScreen(
+              conversationId: int.parse(state.pathParameters['id']!),
+              title: state.extra as String? ?? 'Chat',
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: '/journal/history',
@@ -320,6 +341,9 @@ class ScStudentApp extends ConsumerWidget {
           return const MaintenanceScreen();
         }
 
+        final updateState = ref.watch(appUpdateProvider);
+        final hasUpdate = updateState.updateAvailable;
+
         // Wrap with error widget that catches RenderObject overflow during build,
         // so the user sees a readable message instead of a blank screen.
         ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -348,7 +372,55 @@ class ScStudentApp extends ConsumerWidget {
             ),
           );
         };
-        return child ?? const SizedBox.shrink();
+
+        return Stack(
+          children: [
+            child ?? const SizedBox.shrink(),
+            if (hasUpdate)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Material(
+                  color: Colors.blue.shade800,
+                  elevation: 8,
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.system_update, color: Colors.white),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Versi baru aplikasi tersedia! Harap perbarui.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.blue.shade800,
+                            ),
+                            onPressed: () {
+                              ref.read(appUpdateProvider.notifier).installUpdate();
+                            },
+                            child: const Text('Perbarui'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
       },
     );
   }

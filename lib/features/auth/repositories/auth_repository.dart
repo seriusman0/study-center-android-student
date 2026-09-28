@@ -113,6 +113,22 @@ class AuthRepository {
     final data = response.data as Map<String, dynamic>;
     return UserModel.fromJson(data['user'] ?? data);
   }
+
+  Future<Map<String, dynamic>> checkEmailStatus() async {
+    try {
+      final response = await _dio.get(ApiConstants.checkEmailStatus);
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      return {'has_submitted': false, 'is_invited': false};
+    }
+  }
+
+  Future<void> submitEmail(String email, String phone) async {
+    await _dio.post(
+      ApiConstants.collectEmail,
+      data: {'email': email, 'phone': phone},
+    );
+  }
 }
 
 final authRepositoryProvider = Provider((ref) => AuthRepository(

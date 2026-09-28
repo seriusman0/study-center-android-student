@@ -43,7 +43,7 @@ class AuthNotifier extends Notifier<AuthState> {
     _lastPassword = password;
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String email, String password, {bool saveProfile = true}) async {
     state = state.copyWith(loading: true, error: null);
     try {
       final user = await ref.read(authRepositoryProvider).login(email, password);
@@ -53,7 +53,7 @@ class AuthNotifier extends Notifier<AuthState> {
       // Persist token + profile so restoreSession() can recover the session
       // on next launch (critical for offline behaviour).
       final token = await ref.read(storageServiceProvider).getToken();
-      if (token != null) {
+      if (token != null && saveProfile) {
         await ref.read(storageServiceProvider).saveProfile(SavedProfile(
           userId: user.id,
           name: user.name,

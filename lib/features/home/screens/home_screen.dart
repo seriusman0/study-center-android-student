@@ -15,6 +15,8 @@ import '../../../shared/widgets/update_banner.dart';
 import '../models/home_model.dart';
 import '../providers/home_provider.dart';
 
+import '../../auth/widgets/email_collection_dialog.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -28,6 +30,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     Future.microtask(() {
       final user = ref.read(authProvider).user;
+      
+      if (user != null) {
+        EmailCollectionDialog.checkAndShow(context, ref, user.id);
+      }
       // /jurnal/* (student journal) is role:student-gated on the backend —
       // calling it for a scholarship_teenager-only account just 403s, so
       // gate strictly on isStudent, not the broader hasStudentDashboard

@@ -18,6 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passCtrl = TextEditingController();
   bool _obscure = true;
   bool _showManualLogin = false;
+  bool _saveLoginInfo = true;
 
   @override
   void initState() {
@@ -46,6 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref.read(authProvider.notifier).login(
           _emailCtrl.text.trim(),
           _passCtrl.text,
+          saveProfile: _saveLoginInfo,
         );
     if (mounted && ref.read(authProvider).isAuthenticated) {
       context.go('/home');
@@ -112,6 +114,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       passCtrl: _passCtrl,
                       obscure: _obscure,
                       onToggleObscure: _toggleObscure,
+                      saveLoginInfo: _saveLoginInfo,
+                      onToggleSaveLoginInfo: (val) => setState(() => _saveLoginInfo = val ?? true),
                       onSubmit: _submit,
                       showBackToProfiles: profiles.isNotEmpty,
                       onBackToProfiles: () {
@@ -126,6 +130,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     passCtrl: _passCtrl,
                     obscure: _obscure,
                     onToggleObscure: _toggleObscure,
+                    saveLoginInfo: _saveLoginInfo,
+                    onToggleSaveLoginInfo: (val) => setState(() => _saveLoginInfo = val ?? true),
                     onSubmit: _submit,
                     showBackToProfiles: false,
                     onBackToProfiles: () {},
@@ -401,6 +407,8 @@ class _LoginFormCard extends ConsumerWidget {
     required this.passCtrl,
     required this.obscure,
     required this.onToggleObscure,
+    required this.saveLoginInfo,
+    required this.onToggleSaveLoginInfo,
     required this.onSubmit,
     required this.showBackToProfiles,
     required this.onBackToProfiles,
@@ -410,6 +418,8 @@ class _LoginFormCard extends ConsumerWidget {
   final TextEditingController passCtrl;
   final bool obscure;
   final VoidCallback onToggleObscure;
+  final bool saveLoginInfo;
+  final ValueChanged<bool?> onToggleSaveLoginInfo;
   final VoidCallback onSubmit;
   final bool showBackToProfiles;
   final VoidCallback onBackToProfiles;
@@ -482,7 +492,7 @@ class _LoginFormCard extends ConsumerWidget {
               obscureText: obscure,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
-                hintText: 'Masukkan password',
+                hintText: '••••••••',
                 suffixIcon: IconButton(
                   icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
                   onPressed: onToggleObscure,
@@ -491,6 +501,22 @@ class _LoginFormCard extends ConsumerWidget {
               onSubmitted: (_) => onSubmit(),
             ),
           ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              SizedBox(
+                height: 24,
+                width: 24,
+                child: Checkbox(
+                  value: saveLoginInfo,
+                  onChanged: onToggleSaveLoginInfo,
+                  activeColor: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text('Simpan info login', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+            ],
+          ),
           const SizedBox(height: 24),
           Semantics(
             identifier: 'loginBtn',
@@ -498,14 +524,14 @@ class _LoginFormCard extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: state.loading ? null : onSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF97316),
+                backgroundColor: AppColors.primary, // Changed from Color(0xFFF97316) to match web bg-sc-teal-600
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: state.loading
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Login Sekarang', style: TextStyle(fontWeight: FontWeight.w600)),
+                  : const Text('Masuk', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ),
           const SizedBox(height: 24),

@@ -162,4 +162,17 @@ class ApiConstants {
   static const String scholarshipJurnalCheck   = '/scholarship-teenager-jurnal/check';
   static const String scholarshipJurnalHistory = '/scholarship-teenager-jurnal/history';
   static const String scholarshipJurnalFoto    = '/scholarship-teenager-jurnal/foto';
+
+  // Chat
+  static const String chatConversations = '/chat/conversations';
+  static String chatMessages(int convId) => '/chat/conversations/$convId/messages';
+  static String chatPrivate(int userId) => '/chat/private/$userId';
+  static const String chatGroup = '/chat/group';
+  static String chatMessageDelete(int msgId) => '/chat/messages/$msgId';
+  static String chatMarkRead(int convId) => '/chat/conversations/$convId/read';
+  static const String chatUnreadCount = '/chat/unread-count';
+
+  // Email collection
+  static const String collectEmail = '/user-email/collect';
+  static const String checkEmailStatus = '/user-email/status';
 }

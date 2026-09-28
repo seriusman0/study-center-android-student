@@ -100,4 +100,15 @@ class StorageService {
     await _storage.write(
         key: _profilesKey, value: jsonEncode(profiles.map((p) => p.toJson()).toList()));
   }
+
+  // ── Email collection ──────────────────────────────────────────────────
+
+  Future<bool> hasCollectedEmail(int userId) async {
+    final val = await _storage.read(key: 'email_collected_$userId');
+    return val == 'true';
+  }
+
+  Future<void> setCollectedEmail(int userId) async {
+    await _storage.write(key: 'email_collected_$userId', value: 'true');
+  }
 }

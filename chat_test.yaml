@@ -1,0 +1,69 @@
+appId: com.studycenter.sc_student
+---
+- clearState
+- launchApp:
+    clearState: true
+
+# Login as admin
+- tapOn:
+    id: "emailField"
+- inputText: "admin@studycenter.com"
+- hideKeyboard
+- tapOn:
+    id: "passwordField"
+- inputText: "password"
+- hideKeyboard
+- tapOn:
+    id: "loginBtn"
+
+# Wait for Dashboard or Pengguna tab (admin dashboard)
+- extendedWaitUntil:
+    visible: "Pengguna.*"
+    timeout: 10000
+
+# Go to Users tab (Pengguna)
+- tapOn: ".*Tab 3 of 4.*"
+
+# Wait for users to load
+- extendedWaitUntil:
+    visible: "Ellen Elsya Halawa.*"
+    timeout: 10000
+
+# Tap the user to open the bottom sheet
+- tapOn: "Ellen Elsya Halawa.*"
+
+# Tap "Kirim Pesan (Chat)"
+- tapOn: "Kirim Pesan (Chat)"
+
+# Wait for Chat screen to open
+- extendedWaitUntil:
+    visible: "Ketik pesan..."
+    timeout: 10000
+
+# Send a message
+- tapOn: "Ketik pesan..."
+- inputText: "Halo testuser, ini pesan dari admin Maestro!"
+- hideKeyboard
+- tapOn: "Kirim Pesan"
+
+# Wait for message to appear
+- extendedWaitUntil:
+    visible: "Halo testuser, ini pesan dari admin Maestro!"
+    timeout: 10000
+
+# Go back
+- back
+
+# Tap Chat FAB
+- tapOn:
+    id: "chatFAB"
+
+# Wait for chat list
+- extendedWaitUntil:
+    visible: "Ellen Elsya Halawa.*"
+    timeout: 10000
+
+- assertVisible:
+    text: "Ellen Elsya Halawa"
+    ignoreCase: true
+- assertVisible: "Halo.*"

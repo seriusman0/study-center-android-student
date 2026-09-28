@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Network status stream powered by connectivity_plus.
-final connectivityProvider = StreamProvider<bool>((ref) {
-  return ConnectivityService().onConnectivityChanged;
+final connectivityProvider = StreamProvider<bool>((ref) async* {
+  final svc = ConnectivityService();
+  yield await svc.check();
+  yield* svc.onConnectivityChanged;
 });
 
 /// Watches WiFi/cellular and emits `true` when connected, `false` when not.
@@ -14,37 +16,32 @@ class ConnectivityService {
 
   /// Single-subscription stream: use a broadcast wrapper if multiple listeners needed.
   Stream<bool> get onConnectivityChanged {
-    return _inner.onConnectivityChanged.asyncMap((result) async {
-      // connectivity_plus v5: onConnectivityChanged emits a single ConnectivityResult.
-      // Treat wifi/cellular/ethernet as online; none/vpn/bluetooth as offline.
-      final hasConnection = _isOnline(result);
-      debugPrint('[Connectivity] ${hasConnection ? "ONLINE" : "OFFLINE"} — $result');
+    return _inner.onConnectivityChanged.asyncMap((results) async {
+      final hasConnection = _isOnline(results);
+      debugPrint('[Connectivity] ${hasConnection ? "ONLINE" : "OFFLINE"} — $results');
       return hasConnection;
     });
   }
 
   /// One-shot check — use for polling or before starting a sync.
   Future<bool> check() async {
-    final result = await _inner.checkConnectivity();
-    return _isOnline(result);
+    final results = await _inner.checkConnectivity();
+    return _isOnline(results);
   }
 
-  bool _isOnline(ConnectivityResult r) {
-    switch (r) {
-      case ConnectivityResult.wifi:
-      case ConnectivityResult.ethernet:
-      case ConnectivityResult.mobile:
-      case ConnectivityResult.vpn:
-        return true;
-      case ConnectivityResult.none:
-      case ConnectivityResult.bluetooth:
-      case ConnectivityResult.other:
-        return false;
+  bool _isOnline(List<ConnectivityResult> rs) {
+    if (rs.isEmpty || rs.contains(ConnectivityResult.none)) {
+      return false;
     }
+    return rs.any((r) => 
+        r == ConnectivityResult.wifi || 
+        r == ConnectivityResult.ethernet || 
+        r == ConnectivityResult.mobile || 
+        r == ConnectivityResult.vpn ||
+        r == ConnectivityResult.satellite);
   }
 
-  /// Expose _isOnline untuk unit test (white-box testing).
   @visibleForTesting
-  bool isOnlinePublic(ConnectivityResult r) => _isOnline(r);
+  bool isOnlinePublic(List<ConnectivityResult> r) => _isOnline(r);
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/services/offline_service.dart';
 import '../../../core/services/connectivity_service.dart';
+import '../../../core/services/api_service.dart';
 import '../models/college_journal_model.dart';
 import '../models/college_profile_model.dart';
 import '../repositories/college_repository.dart';
@@ -132,7 +133,7 @@ class CollegeJournalNotifier extends Notifier<CollegeJournalState> {
     } catch (e) {
       debugPrint('[CollegeJournal] load() error: $e');
       state = state.copyWith(
-        error: e.toString(),
+        error: extractErrorMessage(e),
         loading: false,
         isOnline: false,
         selectedDate: target,

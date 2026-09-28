@@ -1,0 +1,29 @@
+appId: com.studycenter.sc_student
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "Masuk"
+- tapOn: "email@contoh.com / username"
+- inputText: "testuser"
+- pressKey: Enter
+- inputText: "12345"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Masuk"
+    direction: DOWN
+- tapOn:
+    id: "loginBtn"
+
+- extendedWaitUntil:
+    visible: "Test User Edited"
+    timeout: 15000
+
+- tapOn:
+    point: 62%, 90%
+
+- extendedWaitUntil:
+    visible: "Laporan Jurnal"
+    timeout: 15000
+
+- takeScreenshot: "test_laporan_success"

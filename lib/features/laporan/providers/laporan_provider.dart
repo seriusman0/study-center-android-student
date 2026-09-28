@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/laporan_model.dart';
 import '../repositories/laporan_repository.dart';
+import '../../../core/services/api_service.dart';
 
 class LaporanState {
   final LaporanSummary? summary;
@@ -30,7 +31,7 @@ class LaporanNotifier extends Notifier<LaporanState> {
       final matrix  = await ref.read(laporanRepositoryProvider).matrix(from: from, to: to);
       state = state.copyWith(summary: summary, matrix: matrix, loading: false);
     } catch (e) {
-      state = LaporanState(error: e.toString());
+      state = LaporanState(error: extractErrorMessage(e));
     }
   }
 }

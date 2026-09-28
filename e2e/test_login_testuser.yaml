@@ -4,17 +4,22 @@ appId: com.studycenter.sc_student
     clearState: true
 
 - assertVisible: "Masuk"
-- tapOn: "email@contoh.com / username"
+- tapOn:
+    id: "emailField"
 - inputText: "testuser"
-
-- tapOn: "Masukkan password"
+- pressKey: Enter
+- tapOn:
+    id: "passwordField"
 - inputText: "12345"
 - pressKey: Back
 
+- assertVisible: "Simpan info login"
+
 - scrollUntilVisible:
-    element: "Login Sekarang"
+    element: "Masuk"
     direction: DOWN
-- tapOn: "Login Sekarang"
+- tapOn:
+    id: "loginBtn" # Let's use ID just in case there are multiple "Masuk" texts on screen (e.g., the title)
 
 - extendedWaitUntil:
     visible: "Beranda.*|Jurnal|Profil"

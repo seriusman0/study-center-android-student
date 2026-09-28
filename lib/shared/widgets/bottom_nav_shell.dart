@@ -1,8 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/models/user_model.dart';
 import '../theme/app_theme.dart';
+import '../../core/services/connectivity_service.dart';
+import '../../features/chat/providers/chat_list_provider.dart';
 
 /// Describes one tab of the bottom nav — icon/label plus the branch route
 /// path it maps to. Built dynamically per role so each role only sees tabs
@@ -69,7 +72,7 @@ const _collegeTabs = [
   NavTab(path: '/profil', icon: Icons.person_outline, activeIcon: Icons.person, label: 'Profil'),
 ];
 
-class BottomNavShell extends StatelessWidget {
+class BottomNavShell extends ConsumerWidget {
   final StatefulNavigationShell shell;
   final List<NavTab> tabs;
   final int visibleIndex;
@@ -83,13 +86,48 @@ class BottomNavShell extends StatelessWidget {
     required this.onTabTap,
   });
 
-
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOnline = ref.watch(connectivityProvider).valueOrNull ?? true;
+    final isOffline = !isOnline;
+
     return Scaffold(
       extendBody: true,
-      body: shell,
+      body: Column(
+        children: [
+          if (isOffline)
+            Container(
+              width: double.infinity,
+              color: Colors.red.shade600,
+              padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 4, bottom: 4),
+              child: const Text(
+                'Anda sedang offline. Aplikasi menggunakan mode luring.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          Expanded(child: shell),
+        ],
+      ),
+      floatingActionButton: Consumer(builder: (context, ref, child) {
+        final unreadCount = ref.watch(chatListProvider).unreadCount;
+        return Semantics(
+          identifier: 'chatFAB',
+          button: true,
+          label: 'Chat',
+          child: FloatingActionButton(
+            onPressed: () => context.push('/chat'),
+            backgroundColor: AppColors.primary,
+            child: unreadCount > 0
+                ? Badge(
+                    label: Text('$unreadCount'),
+                    child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+                  )
+                : const Icon(Icons.chat_bubble_outline, color: Colors.white),
+          ),
+        );
+      }),
       bottomNavigationBar: ClipRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),

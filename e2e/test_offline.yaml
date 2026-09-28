@@ -1,9 +1,5 @@
 appId: com.studycenter.sc_student
 ---
-- launchApp: {clearState: true}
-- extendedWaitUntil:
-    visible: "Masuk"
-    timeout: 15000
-- tapOn: "email@contoh.com / username"
-- eraseText
-- inputText: "jelita.efni@example.com"
+- launchApp:
+    clearState: false
+- assertVisible: "Anda sedang offline. Aplikasi menggunakan mode luring."

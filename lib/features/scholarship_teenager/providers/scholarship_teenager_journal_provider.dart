@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/services/offline_service.dart';
 import '../../../core/services/connectivity_service.dart';
+import '../../../core/services/api_service.dart';
 import '../../../core/providers/journal_sync_signal.dart';
 import '../../college/models/college_journal_model.dart';
 import '../repositories/scholarship_teenager_journal_repository.dart';
@@ -108,7 +109,7 @@ class ScholarshipTeenagerJournalNotifier
     } catch (e) {
       debugPrint('[ScholarshipJournal] load() error: $e');
       state = state.copyWith(
-        error: e.toString(),
+        error: extractErrorMessage(e),
         loading: false,
         isOnline: false,
         selectedDate: target,

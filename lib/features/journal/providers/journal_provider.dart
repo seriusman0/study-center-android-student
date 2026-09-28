@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/services/offline_service.dart';
 import '../../../core/services/connectivity_service.dart';
+import '../../../core/services/api_service.dart';
 import '../models/journal_model.dart';
 import '../repositories/journal_repository.dart';
 import '../../../core/providers/journal_sync_signal.dart';
@@ -96,7 +97,7 @@ class JournalNotifier extends Notifier<JournalState> {
       _refreshPendingCount();
     } catch (e) {
       debugPrint('[Journal] load() error: $e');
-      state = JournalState(error: e.toString(), selectedDate: target);
+      state = JournalState(error: extractErrorMessage(e), selectedDate: target);
     }
   }
 

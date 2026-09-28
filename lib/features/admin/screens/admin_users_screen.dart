@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/models/user_model.dart';
 import '../providers/admin_users_provider.dart';
 import '../../../shared/theme/design_tokens.dart';
+import '../../chat/repositories/chat_repository.dart';
+import 'package:go_router/go_router.dart';
 
 const _allRoles = ['admin', 'fulltimer', 'mentor', 'student', 'guest', 'scholarship_teenager', 'college'];
 const _roleLabels = {
@@ -168,6 +170,24 @@ class _UserTile extends ConsumerWidget {
                   // Optionally navigate back to home, though the app listens to auth changes
                   if (ok) {
                     Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat_bubble_outline),
+              title: const Text('Kirim Pesan (Chat)'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                try {
+                  final chatRepo = ref.read(chatRepositoryProvider);
+                  final convId = await chatRepo.startPrivateChat(user.id);
+                  if (context.mounted) {
+                    context.push('/chat/$convId', extra: user.name);
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal memulai chat: $e')));
                   }
                 }
               },
