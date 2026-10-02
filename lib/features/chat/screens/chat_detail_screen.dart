@@ -164,6 +164,15 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 Expanded(
                   child: TextField(
                     controller: _textController,
+                    onTap: () {
+                      if (_scrollController.hasClients) {
+                        _scrollController.animateTo(
+                          0.0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    },
                     decoration: const InputDecoration(
                       hintText: 'Ketik pesan...',
                       border: OutlineInputBorder(),
@@ -190,6 +199,13 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                       if (text.isNotEmpty) {
                         ref.read(chatDetailProvider(widget.conversationId).notifier).sendTextMessage(text);
                         _textController.clear();
+                        if (_scrollController.hasClients) {
+                          _scrollController.animateTo(
+                            0.0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        }
                       }
                     },
                   ),

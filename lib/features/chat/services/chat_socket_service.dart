@@ -96,6 +96,11 @@ class ChatSocketService {
       debugPrint('[Pusher] Event MessageSent');
       onEvent(event);
     });
+    
+    _currentChannel!.bind('App\\Events\\MessageSent').listen((event) {
+      debugPrint('[Pusher] Event App\\Events\\MessageSent');
+      onEvent(event);
+    });
 
     _currentChannel!.bind('client-typing').listen((event) {
       debugPrint('[Pusher] Event client-typing');
