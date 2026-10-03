@@ -1,0 +1,115 @@
+
+// Authenticated
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/auth/logout', [GuestAuthController::class, 'logout']);
+    Route::post('/auth/refresh', [GuestAuthController::class, 'refresh']);
+    Route::get('/me', [GuestAuthController::class, 'me']);
+
+    // Profile
+    Route::put('/profile', [ProfileController::class, 'update']);
+
+    // CV
+    Route::get('/cv', [CvController::class, 'show']);
+    Route::put('/cv', [CvController::class, 'update']);
+
+    // Blog (internal staff can write)
+    Route::middleware('role:admin,fulltimer,mentor,student')->group(function () {
+        Route::post('/blogs/upload-image', [BlogController::class, 'uploadImage']);
+        Route::post('/blogs', [BlogController::class, 'store']);
+        Route::put('/blogs/{blog}', [BlogController::class, 'update']);
+        Route::delete('/blogs/{blog}', [BlogController::class, 'destroy']);
+    });
+
+    // Comments
+    Route::post('/blogs/{blog}/comments', [CommentController::class, 'store'])
+        ->middleware('throttle:20,1');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+
+    // Jurnal (student)
+    Route::middleware('role:student,college,scholarship_teenager')->prefix('jurnal')->group(function () {
+        Route::get ('/today',   [\App\Http\Controllers\Api\JurnalApiController::class, 'today']);
+        Route::post('/check',   [\App\Http\Controllers\Api\JurnalApiController::class, 'check']);
+        Route::get ('/history', [\App\Http\Controllers\Api\JurnalApiController::class, 'history']);
+        Route::post('/foto',    [\App\Http\Controllers\Api\JurnalApiController::class, 'uploadFoto']);
+        Route::delete('/foto',  [\App\Http\Controllers\Api\JurnalApiController::class, 'deleteFoto']);
+    });
+
+    // Galeri (student)
+    Route::middleware('role:student,scholarship_teenager')->get('/galeri', [\App\Http\Controllers\Api\GaleriController::class, 'index']);
+
+    // Laporan (student)
+    Route::middleware('role:student,scholarship_teenager')->prefix('laporan')->group(function () {
+        Route::get('/my',        [\App\Http\Controllers\Api\LaporanStudentController::class, 'summary']);
+        Route::get('/my/matrix', [\App\Http\Controllers\Api\LaporanStudentController::class, 'matrix']);
+    });
+
+    // Kelas master
+    Route::middleware('role:admin,mentor')->group(function () {
+        Route::get   ('/kelas-master',         [\App\Http\Controllers\Api\KelasMasterController::class, 'index']);
+        Route::post  ('/kelas-master',         [\App\Http\Controllers\Api\KelasMasterController::class, 'store']);
+        Route::put   ('/kelas-master/{kelas}', [\App\Http\Controllers\Api\KelasMasterController::class, 'update']);
+        Route::delete('/kelas-master/{kelas}', [\App\Http\Controllers\Api\KelasMasterController::class, 'destroy']);
+    });
+
+    // Mentor presensi
+    Route::middleware('role:admin,mentor')->prefix('mentor-presensi')->group(function () {
+        Route::get   ('/',                 [\App\Http\Controllers\Api\MentorPresensiController::class, 'index']);
+        Route::post  ('/',                 [\App\Http\Controllers\Api\MentorPresensiController::class, 'store']);
+        Route::get   ('/{mentorPresensi}', [\App\Http\Controllers\Api\MentorPresensiController::class, 'show']);
+        Route::put   ('/{mentorPresensi}', [\App\Http\Controllers\Api\MentorPresensiController::class, 'update']);
+        Route::delete('/{mentorPresensi}', [\App\Http\Controllers\Api\MentorPresensiController::class, 'destroy']);
+    });
+
+    // Presensi siswa
+    Route::middleware('role:admin,mentor')->prefix('presensi')->group(function () {
+        Route::get   ('/students/search', [\App\Http\Controllers\Api\PresensiController::class, 'searchStudents']);
+        Route::get   ('/',                [\App\Http\Controllers\Api\PresensiController::class, 'index']);
+        Route::post  ('/',                [\App\Http\Controllers\Api\PresensiController::class, 'store']);
+        Route::get   ('/{presensi}',      [\App\Http\Controllers\Api\PresensiController::class, 'show']);
+        Route::put   ('/{presensi}',      [\App\Http\Controllers\Api\PresensiController::class, 'update']);
+        Route::delete('/{presensi}',      [\App\Http\Controllers\Api\PresensiController::class, 'destroy']);
+    });
+
+    // Admin only
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'stats']);
+
+        // Mata Pelajaran
+        Route::get   ('/mata-pelajaran',                             [\App\Http\Controllers\Api\Admin\MataPelajaranApiController::class, 'index']);
+        Route::post  ('/mata-pelajaran',                             [\App\Http\Controllers\Api\Admin\MataPelajaranApiController::class, 'store']);
+--
+            Route::get('/history/{userId}', [\App\Http\Controllers\Api\Admin\PrajuritOfflineApiController::class, 'history']);
+        });
+
+        // Cross-role jurnal monitoring (student + college + scholarship_teenager)
+        Route::prefix('jurnal-monitor')->group(function () {
+            Route::get('summary',                    [\App\Http\Controllers\Api\Admin\JurnalMonitorController::class, 'summary']);
+            Route::get('{role}',                      [\App\Http\Controllers\Api\Admin\JurnalMonitorController::class, 'index']);
+            Route::get('{role}/{targetUser}',         [\App\Http\Controllers\Api\Admin\JurnalMonitorController::class, 'show']);
+            Route::get('{role}/{targetUser}/export',  [\App\Http\Controllers\Api\Admin\JurnalMonitorController::class, 'export']);
+        });
+
+        // Name tags
+        Route::get ('/nametags',          [\App\Http\Controllers\Api\Admin\NameTagController::class, 'index']);
+        Route::post('/nametags/generate', [\App\Http\Controllers\Api\Admin\NameTagController::class, 'generate']);
+
+        // Mentor presensi admin reports
+        Route::get('/mentor-presensi',                 [\App\Http\Controllers\Api\Admin\MentorPresensiAdminController::class, 'index']);
+        Route::get('/mentor-presensi/reports',         [\App\Http\Controllers\Api\Admin\MentorPresensiAdminController::class, 'reports']);
+        Route::get('/mentor-presensi/export/excel',    [\App\Http\Controllers\Api\Admin\MentorPresensiAdminController::class, 'exportExcel']);
+        Route::get('/mentor-presensi/export/pdf',      [\App\Http\Controllers\Api\Admin\MentorPresensiAdminController::class, 'exportPdf']);
+
+        // Blogs & comments moderation
+        Route::get   ('/blogs',                [BlogController::class, 'index']);
+        Route::delete('/blogs/{blog}',         [BlogController::class, 'destroy']);
+        Route::get   ('/comments',             fn() => \App\Models\Comment::with('user:id,name,username', 'blog:id,title,slug')->latest()->paginate(20));
+        Route::delete('/comments/{comment}',   [CommentController::class, 'destroy']);
+
+        // Admin notifications
+        Route::get  ('/admin-notifications',                [\App\Http\Controllers\Api\Admin\AdminNotificationController::class, 'index']);
+        Route::post('/admin-notifications/{notif}/mark-read',  [\App\Http\Controllers\Api\Admin\AdminNotificationController::class, 'markRead']);
+    });
+});
+
+// ── Android App Version Check (public, no auth) ─────────────────────────
+Route::get("/app/version", function () {

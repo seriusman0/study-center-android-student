@@ -29,15 +29,15 @@ class Presensi {
     final kelasMaster = json['kelas_master'] as Map?;
     final studentsRaw = json['students'] as List?;
     return Presensi(
-      id: (json['id'] as num).toInt(),
-      kelasId: (json['kelas_id'] as num?)?.toInt() ?? 0,
+      id: _parseInt(json['id']),
+      kelasId: _parseInt(json['kelas_id']),
       kelasNama: kelasMaster?['nama'] as String? ?? json['kelas'] as String?,
       tanggal: json['tanggal'] as String? ?? '',
       jamMulai: _trimTime(json['jam_mulai']),
       jamSelesai: _trimTime(json['jam_selesai']),
       materi: json['materi'] as String? ?? '',
       foto: json['foto'] as String?,
-      studentsCount: (json['students_count'] as num?)?.toInt(),
+      studentsCount: _parseIntNullable(json['students_count']),
       students: studentsRaw
               ?.map((s) => PresensiStudent.fromJson(s as Map<String, dynamic>))
               .toList() ??
@@ -65,7 +65,7 @@ class PresensiStudent {
   factory PresensiStudent.fromJson(Map<String, dynamic> json) {
     final pivot = json['pivot'] as Map?;
     return PresensiStudent(
-      id: (json['id'] as num).toInt(),
+      id: _parseInt(json['id']),
       name: json['name'] as String? ?? '',
       status: pivot?['status'] as String? ?? 'hadir',
     );
@@ -88,9 +88,25 @@ class StudentSearchResult {
   });
 
   factory StudentSearchResult.fromJson(Map<String, dynamic> json) => StudentSearchResult(
-        id: (json['id'] as num).toInt(),
+        id: _parseInt(json['id']),
         name: json['name'] as String? ?? '',
         kelas: json['kelas'] as String?,
         cabang: json['cabang'] as String?,
       );
+}
+
+int _parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
+int? _parseIntNullable(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

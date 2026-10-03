@@ -1,0 +1,25 @@
+OUT:
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[HY000]: General error: 1364 Field 'created_by' doesn't have a default value (Connection: mysql, Host: mysql, Port: 3306, Database: study_center_nias, SQL: insert into `conversations` (`type`, `updated_at`, `created_at`) values (private, 2026-10-02 19:18:09, 2026-10-02 19:18:09))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:841
+    837▕             $exceptionType = ($isUniqueConstraintError = $this->isUniqueConstraintError($e))
+    838▕                 ? UniqueConstraintViolationException::class
+    839▕                 : QueryException::class;
+    840▕ 
+  ➜ 841▕             $exception = new $exceptionType(
+    842▕                 $this->getNameWithReadWriteType(),
+    843▕                 $query,
+    844▕                 $this->prepareBindings($bindings),
+    845▕                 $e,
+
+      [2m+17 vendor frames [22m
+
+  18  setup_chat_test.php:17
+      Illuminate\Database\Eloquent\Model::__callStatic("create")
+
+
+ERR:

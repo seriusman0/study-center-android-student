@@ -1,0 +1,4 @@
+use App\Http\Controllers\Chat\MessageController;
+    Route::post('/conversations/{conversation}/messages', [MessageController::class, 'send'])->name('send');
+    Route::delete('/messages/{message}',                  [MessageController::class, 'destroy'])->name('message.destroy');
+    Route::post('/conversations/{conversation}/read',     [MessageController::class, 'markRead'])->name('read');

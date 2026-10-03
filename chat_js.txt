@@ -1,0 +1,385 @@
+/**
+ * chat.js — Alpine.js component untuk halaman /chat
+ * Fix: input textarea responsif, search user, UX mobile/PC
+ */
+export function chatApp(config) {
+    return {
+        // ── State ──────────────────────────────────────────────────────────
+        activeConvId:      config.activeConvId ?? null,
+        conversations:     config.conversations ?? [],
+        users:             config.users ?? [],
+        messages:          [],
+        inputText:         '',
+        replyTo:           null,
+        isTyping:          {},
+        isLoading:         false,
+        attachmentFile:    null,
+        attachmentPreview: null,
+        showNewChat:       false,
+        showNewGroup:      false,
+        groupName:         '',
+        selectedUserIds:   [],
+        userSearch:        '',          // ← search user
+        currentUserId:     config.userId,
+        currentUserName:   config.userName,
+        _echoChannel:      null,
+        _typingClear:      null,
+        _typingTimeout:    null,
+        isSending:         false,
+        showMobileSidebar: true,        // ← mobile nav
+
+        // ── Computed ───────────────────────────────────────────────────────
+        get filteredUsers() {
+            const q = this.userSearch.trim().toLowerCase();
+            if (!q) return this.users;
+            return this.users.filter(u => u.name.toLowerCase().includes(q));
+        },
+
+        get typingNames() {
+            return Object.values(this.isTyping).join(', ');
+        },
+
+        get activeConv() {
+            return this.conversations.find(c => c.id === this.activeConvId) ?? null;
+        },
+
+        get totalUnread() {
+            return this.conversations.reduce((s, c) => s + (c.unread_count ?? 0), 0);
+        },
+
+        // ── Init ───────────────────────────────────────────────────────────
+        init() {
+            if (this.activeConvId) this.openConversation(this.activeConvId);
+        },
+
+        // ── Buka conversation ─────────────────────────────────────────────
+        async openConversation(convId) {
+            this.activeConvId         = convId;
+            this.messages             = [];
+            this.isLoading            = true;
+            this.replyTo              = null;
+            this.showNewChat          = false;
+            this.showNewGroup         = false;
+            this.showMobileSidebar    = false; // pindah ke area chat di mobile
+
+            if (this._echoChannel) {
+                try { this._echoChannel.unsubscribe?.(); } catch (_) {}
+                this._echoChannel = null;
+            }
+
+            try {
+                const res  = await fetch(`/chat/conversations/${convId}/messages`, {
+                    headers: { 'Accept': 'application/json' },
+                });
+                const data = await res.json();
+                this.messages = (data.data ?? []).reverse();
+            } catch (e) {
+                console.error('Load messages failed:', e);
+            } finally {
+                this.isLoading = false;
+            }
+
+            this.$nextTick(() => {
+                this.scrollToBottom();
+                this.$refs.messageInput?.focus();
+            });
+
+            if (window.Echo) {
+                this._echoChannel = window.Echo.private(`conversation.${convId}`)
+                    .listen('.MessageSent', (e) => {
+                        if (e.user_id !== this.currentUserId) {
+                            this.messages.push(e);
+                            this.$nextTick(() => this.scrollToBottom());
+                            this.markRead(convId);
+                        }
+                        this.updateConvPreview(e, convId);
+                    })
+                    .listen('.MessageRead', () => {})
+                    .listenForWhisper('typing', (e) => {
+                        if (e.user_id !== this.currentUserId) {
+                            this.isTyping[e.user_id] = e.name;
+                        }
+                        clearTimeout(this._typingClear);
+                        this._typingClear = setTimeout(() => { this.isTyping = {}; }, 2500);
+                    });
+            }
+
+            this.markRead(convId);
+        },
+
+        // ── Kirim pesan ────────────────────────────────────────────────────
+        async sendMessage() {
+            const hasText = this.inputText.trim().length > 0;
+            const hasFile = !!this.attachmentFile;
+            if ((!hasText && !hasFile) || this.isSending) return;
+
+            this.isSending = true;
+
+            const form = new FormData();
+            if (hasFile) {
+                const isImage = this.attachmentFile.type.startsWith('image/');
+                form.append('type', isImage ? 'image' : 'file');
+                form.append('attachment', this.attachmentFile);
+                if (hasText) form.append('body', this.inputText.trim());
+            } else {
+                form.append('type', 'text');
+                form.append('body', this.inputText.trim());
+            }
+            if (this.replyTo) form.append('reply_to_id', this.replyTo.id);
+
+            // Optimistic
+            const tempMsg = {
+                id:              'tmp_' + Date.now(),
+                conversation_id: this.activeConvId,
+                user_id:         this.currentUserId,
+                user_name:       this.currentUserName,
+                type:            hasFile ? (this.attachmentFile.type.startsWith('image/') ? 'image' : 'file') : 'text',
+                body:            this.inputText.trim() || null,
+                attachment_url:  this.attachmentPreview || null,
+                attachment_name: this.attachmentFile?.name ?? null,
+                attachment_size: this.attachmentFile?.size ?? null,
+                thumbnail_url:   this.attachmentPreview || null,
+                reply_to:        this.replyTo ? { ...this.replyTo } : null,
+                deleted_at:      null,
+                created_at:      new Date().toISOString(),
+                _sending:        true,
+            };
+            this.messages.push(tempMsg);
+            this.$nextTick(() => this.scrollToBottom());
+
+            const savedText = this.inputText;
+            this.inputText  = '';
+            this.replyTo    = null;
+            this.clearAttachment();
+
+            try {
+                const res = await fetch(`/chat/conversations/${this.activeConvId}/messages`, {
+                    method:  'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
+                        'Accept':       'application/json',
+                    },
+                    body: form,
+                });
+
+                if (res.ok) {
+                    const { message } = await res.json();
+                    const idx = this.messages.findIndex(m => m.id === tempMsg.id);
+                    if (idx !== -1) this.messages.splice(idx, 1, message);
+                    this.updateConvPreview(message, this.activeConvId);
+                } else {
+                    this.messages = this.messages.filter(m => m.id !== tempMsg.id);
+                    this.inputText = savedText;
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.error ?? 'Gagal mengirim pesan.');
+                }
+            } catch (e) {
+                this.messages = this.messages.filter(m => m.id !== tempMsg.id);
+                this.inputText = savedText;
+            } finally {
+                this.isSending = false;
+                this.$nextTick(() => this.$refs.messageInput?.focus());
+            }
+        },
+
+        // Enter kirim, Shift+Enter newline
+        onInputKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                this.sendMessage();
+            }
+        },
+
+        // ── File ───────────────────────────────────────────────────────────
+        handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            this.attachmentFile = file;
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => { this.attachmentPreview = e.target.result; };
+                reader.readAsDataURL(file);
+            } else {
+                this.attachmentPreview = null;
+            }
+            event.target.value = '';
+        },
+
+        clearAttachment() {
+            this.attachmentFile    = null;
+            this.attachmentPreview = null;
+        },
+
+        // ── Typing indicator ───────────────────────────────────────────────
+        onTyping() {
+            if (!this._echoChannel) return;
+            clearTimeout(this._typingTimeout);
+            this._typingTimeout = setTimeout(() => {
+                this._echoChannel.whisper('typing', {
+                    user_id: this.currentUserId,
+                    name:    this.currentUserName,
+                });
+            }, 300);
+        },
+
+        // ── Reply ──────────────────────────────────────────────────────────
+        setReply(msg) {
+            this.replyTo = msg;
+            this.$nextTick(() => this.$refs.messageInput?.focus());
+        },
+        cancelReply() { this.replyTo = null; },
+
+        // ── Hapus pesan ────────────────────────────────────────────────────
+        async deleteMessage(msgId) {
+            if (!confirm('Hapus pesan ini?')) return;
+            try {
+                await fetch(`/chat/messages/${msgId}`, {
+                    method:  'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
+                        'Accept':       'application/json',
+                    },
+                });
+                const idx = this.messages.findIndex(m => m.id === msgId);
+                if (idx !== -1) this.messages[idx] = { ...this.messages[idx], deleted_at: new Date().toISOString() };
+            } catch (e) { console.error(e); }
+        },
+
+        // ── Mark read ─────────────────────────────────────────────────────
+        async markRead(convId) {
+            try {
+                await fetch(`/chat/conversations/${convId}/read`, {
+                    method:  'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '' },
+                });
+                const conv = this.conversations.find(c => c.id === convId);
+                if (conv) conv.unread_count = 0;
+            } catch (_) {}
+        },
+
+        // ── Start private chat ─────────────────────────────────────────────
+        async startPrivateWith(userId) {
+            try {
+                const res  = await fetch(`/chat/private/${userId}`, {
+                    method:  'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
+                        'Accept':       'application/json',
+                    },
+                });
+                const data = await res.json();
+                this.showNewChat  = false;
+                this.userSearch   = '';
+
+                const exists = this.conversations.find(c => c.id === data.conversation_id);
+                if (!exists) {
+                    // Tambah sementara ke list sambil reload
+                    const targetUser = this.users.find(u => u.id === userId);
+                    this.conversations.unshift({
+                        id:           data.conversation_id,
+                        type:         'private',
+                        display_name: targetUser?.name ?? 'User',
+                        unread_count: 0,
+                        last_message: null,
+                    });
+                }
+                await this.openConversation(data.conversation_id);
+            } catch (e) { console.error(e); }
+        },
+
+        // ── Create group ───────────────────────────────────────────────────
+        async createGroup() {
+            if (!this.groupName.trim() || this.selectedUserIds.length === 0) {
+                alert('Isi nama group dan pilih minimal 1 anggota.');
+                return;
+            }
+            try {
+                const res  = await fetch('/chat/group', {
+                    method:  'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
+                        'Accept':       'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: this.groupName.trim(), user_ids: this.selectedUserIds }),
+                });
+                const data = await res.json();
+                this.showNewGroup    = false;
+                this.groupName       = '';
+                this.selectedUserIds = [];
+                this.userSearch      = '';
+                this.conversations.unshift({
+                    id:           data.conversation_id,
+                    type:         'group',
+                    display_name: this.groupName || 'Group',
+                    name:         this.groupName,
+                    unread_count: 0,
+                    last_message: null,
+                });
+                await this.openConversation(data.conversation_id);
+            } catch (e) { console.error(e); }
+        },
+
+        toggleUser(userId) {
+            const idx = this.selectedUserIds.indexOf(userId);
+            if (idx === -1) this.selectedUserIds.push(userId);
+            else this.selectedUserIds.splice(idx, 1);
+        },
+
+        // ── Helpers ────────────────────────────────────────────────────────
+        updateConvPreview(message, convId) {
+            const conv = this.conversations.find(c => c.id == convId);
+            if (conv) {
+                conv.last_message    = message;
+                conv.last_message_at = message.created_at;
+                this.conversations   = [conv, ...this.conversations.filter(c => c.id != convId)];
+            }
+        },
+
+        scrollToBottom() {
+            const el = this.$refs.messageList;
+            setTimeout(() => { if (el) { el.scrollTop = el.scrollHeight; } }, 100);
+        },
+
+        formatTime(iso) {
+            if (!iso) return '';
+            const dt  = new Date(iso);
+            const now = new Date();
+            const sameDay =
+                dt.getDate()    === now.getDate() &&
+                dt.getMonth()   === now.getMonth() &&
+                dt.getFullYear()=== now.getFullYear();
+            return sameDay
+                ? dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                : dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+        },
+
+        formatSize(bytes) {
+            if (!bytes) return '';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        },
+
+        convName(conv) {
+            return conv?.display_name ?? conv?.name ?? 'Chat';
+        },
+
+        convInitial(conv) {
+            return (this.convName(conv)[0] ?? 'U').toUpperCase();
+        },
+
+        lastMsgPreview(conv) {
+            const m = conv?.last_message;
+            if (!m) return '';
+            if (m.type === 'image') return '📷 Foto';
+            if (m.type === 'file')  return '📎 ' + (m.attachment_name ?? 'File');
+            return m.body?.substring(0, 40) ?? '';
+        },
+
+        backToList() {
+            this.activeConvId      = null;
+            this.showMobileSidebar = true;
+        },
+    };
+}

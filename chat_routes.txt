@@ -1,0 +1,18 @@
+routes/channels.php:10:// Chat: hanya peserta conversation yang boleh subscribe
+routes/api.php:313:// ── Chat API (untuk Android) ──────────────────────────────────────────────
+routes/api.php:315:Route::middleware('auth:sanctum')->prefix('chat')->name('api.chat.')->group(function () {
+routes/api.php:339:    Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\Chat\ConversationController::class, 'messages'])->name('messages');
+routes/api.php:342:    Route::post('/private/{userId}', [\App\Http\Controllers\Chat\ConversationController::class, 'startPrivate'])->name('private');
+routes/api.php:345:    Route::post('/group', [\App\Http\Controllers\Chat\ConversationController::class, 'createGroup'])->name('group.create');
+routes/api.php:348:    Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Chat\MessageController::class, 'send'])->name('send');
+routes/api.php:351:    Route::delete('/messages/{message}', [\App\Http\Controllers\Chat\MessageController::class, 'destroy'])->name('message.destroy');
+routes/api.php:354:    Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Chat\MessageController::class, 'markRead'])->name('read');
+routes/web.php:514:// ── Chat ─────────────────────────────────────────────────────────────────
+routes/web.php:515:use App\Http\Controllers\Chat\ChatController;
+routes/web.php:516:use App\Http\Controllers\Chat\ConversationController;
+routes/web.php:517:use App\Http\Controllers\Chat\MessageController;
+routes/web.php:519:Route::middleware(['auth'])->prefix('chat')->name('chat.')->group(function () {
+routes/web.php:520:    Route::get('/', [ChatController::class, 'index'])->name('index');
+routes/web.php:533:// Chat unread count (untuk floating button badge)
+routes/web.php:534:Route::middleware(['auth'])->get('/chat/unread-count', function () {
+routes/web.php:540:})->name('chat.unread-count');

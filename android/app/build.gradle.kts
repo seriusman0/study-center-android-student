@@ -54,7 +54,9 @@ android {
     }
 
     buildTypes {
-        release {
+                release {
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = if (hasReleaseSigning) {
                 signingConfigs.getByName("release")
             } else {
@@ -72,3 +74,4 @@ android {
 flutter {
     source = "../.."
 }
+

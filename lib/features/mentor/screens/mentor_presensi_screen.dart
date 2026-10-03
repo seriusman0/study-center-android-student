@@ -1,3 +1,4 @@
+import 'mentor_own_presensi_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -34,12 +35,26 @@ class _MentorPresensiScreenState extends ConsumerState<MentorPresensiScreen> {
     final state = ref.watch(presensiProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Presensi Siswa')),
-      floatingActionButton: FloatingActionButton.extended(
+      appBar: AppBar(
+        title: const Text('Presensi Siswa'),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              // using normal navigator to avoid adding GoRouter route right now, 
+              // or better yet we add it to GoRouter. Let's add it to GoRouter.
+              // Wait, simpler to just use Navigator.push for this sub-screen!
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const MentorOwnPresensiScreen()));
+            },
+            icon: const Icon(Icons.person, color: Colors.white),
+            label: const Text('Kehadiran Anda', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+      floatingActionButton: Padding(padding: const EdgeInsets.only(bottom: 70.0), child: FloatingActionButton.extended(
         onPressed: () => _openCreateSession(context),
         icon: const Icon(Icons.add),
         label: const Text('Presensi Baru'),
-      ),
+      )),
       body: RefreshIndicator(
         onRefresh: () => ref.read(presensiProvider.notifier).load(),
         child: state.loading && state.items.isEmpty
@@ -68,6 +83,12 @@ class _MentorPresensiScreenState extends ConsumerState<MentorPresensiScreen> {
                             '${p.studentsCount != null ? ' • ${p.studentsCount} siswa' : ''}',
                           ),
                           isThreeLine: p.materi.isNotEmpty,
+
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _openCreateSession(context, initial: p),
+                            ),
+
                           onTap: () => _showDetail(context, p),
                         ),
                       );
@@ -132,11 +153,11 @@ class _MentorPresensiScreenState extends ConsumerState<MentorPresensiScreen> {
     );
   }
 
-  void _openCreateSession(BuildContext context) {
+  void _openCreateSession(BuildContext context, {Presensi? initial}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => const _CreatePresensiSheet(),
+      builder: (ctx) => _CreatePresensiSheet(initial: initial),
     );
   }
 }
@@ -174,12 +195,15 @@ class _StatusChip extends StatelessWidget {
 
 /// New attendance session: pick kelas, date/time, materi, then search &
 /// select students with a per-student status (defaults hadir).
+
 class _CreatePresensiSheet extends ConsumerStatefulWidget {
-  const _CreatePresensiSheet();
+  final Presensi? initial;
+  const _CreatePresensiSheet({this.initial});
 
   @override
   ConsumerState<_CreatePresensiSheet> createState() => _CreatePresensiSheetState();
 }
+
 
 class _CreatePresensiSheetState extends ConsumerState<_CreatePresensiSheet> {
   KelasMaster? _selectedKelas;
@@ -192,8 +216,43 @@ class _CreatePresensiSheetState extends ConsumerState<_CreatePresensiSheet> {
   final Map<int, String> _statusByStudent = {};
   bool _saving = false;
 
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initial != null) {
+      final kState = ref.read(kelasMasterProvider);
+      try {
+        _selectedKelas = kState.items.firstWhere((k) => k.id == widget.initial!.kelasId);
+      } catch (_) {}
+      
+      try {
+        _tanggal = DateTime.parse(widget.initial!.tanggal);
+      } catch (_) {}
+      
+      try {
+        final p = widget.initial!.jamMulai.split(':');
+        _jamMulai = TimeOfDay(hour: int.parse(p[0]), minute: int.parse(p[1]));
+      } catch (_) {}
+      
+      try {
+        final p = widget.initial!.jamSelesai.split(':');
+        _jamSelesai = TimeOfDay(hour: int.parse(p[0]), minute: int.parse(p[1]));
+      } catch (_) {}
+      
+      _materiCtrl.text = widget.initial!.materi;
+      
+      // Populate students
+        for (final s in widget.initial!.students) {
+          _selected[s.id] = StudentSearchResult(id: s.id, name: s.name);
+          _statusByStudent[s.id] = s.status;
+        }
+      }
+  }
+
   @override
   void dispose() {
+
     _materiCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
@@ -370,16 +429,33 @@ class _CreatePresensiSheetState extends ConsumerState<_CreatePresensiSheet> {
     }
 
     setState(() => _saving = true);
-    final ok = await ref.read(presensiProvider.notifier).create(
-          mentorId: user.id,
-          kelasId: _selectedKelas!.id,
-          tanggal: DateFormat('yyyy-MM-dd').format(_tanggal),
-          jamMulai: _fmtTime(_jamMulai),
-          jamSelesai: _fmtTime(_jamSelesai),
-          materi: _materiCtrl.text.trim(),
-          studentIds: _selected.keys.toList(),
-          studentStatus: _statusByStudent,
-        );
+    bool ok = false;
+    
+    if (widget.initial != null) {
+      ok = await ref.read(presensiProvider.notifier).updateItem(
+        widget.initial!.id,
+        mentorId: user.id,
+        kelasId: _selectedKelas!.id,
+        tanggal: DateFormat('yyyy-MM-dd').format(_tanggal),
+        jamMulai: _fmtTime(_jamMulai),
+        jamSelesai: _fmtTime(_jamSelesai),
+        materi: _materiCtrl.text.trim(),
+        studentIds: _selected.keys.toList(),
+        studentStatus: _statusByStudent,
+      );
+    } else {
+      ok = await ref.read(presensiProvider.notifier).create(
+        mentorId: user.id,
+        kelasId: _selectedKelas!.id,
+        tanggal: DateFormat('yyyy-MM-dd').format(_tanggal),
+        jamMulai: _fmtTime(_jamMulai),
+        jamSelesai: _fmtTime(_jamSelesai),
+        materi: _materiCtrl.text.trim(),
+        studentIds: _selected.keys.toList(),
+        studentStatus: _statusByStudent,
+      );
+    }
+    
     if (!mounted) return;
     setState(() => _saving = false);
     if (ok) {
@@ -390,3 +466,5 @@ class _CreatePresensiSheetState extends ConsumerState<_CreatePresensiSheet> {
     }
   }
 }
+
+

@@ -199,6 +199,17 @@ class ChatRepository {
     return res.statusCode == 200;
   }
 
+  
+  Future<List<UserDto>> getChatUsers() async {
+    final res = await _dio.get(ApiConstants.chatUsers);
+    final data = res.data as Map<String, dynamic>;
+    final list = data['data'] as List? ?? [];
+    return list
+        .where((e) => e is Map)
+        .map((e) => UserDto.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
   Future<int> getUnreadCount() async {
     final res = await _dio.get(ApiConstants.chatUnreadCount);
     final data = res.data as Map<String, dynamic>;

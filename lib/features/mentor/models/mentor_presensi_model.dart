@@ -24,13 +24,13 @@ class MentorPresensi {
   factory MentorPresensi.fromJson(Map<String, dynamic> json) {
     final kelas = json['kelas'] as Map?;
     return MentorPresensi(
-      id: (json['id'] as num).toInt(),
-      kelasId: (json['kelas_id'] as num?)?.toInt() ?? 0,
+      id: _parseInt(json['id']),
+      kelasId: _parseInt(json['kelas_id']),
       kelasNama: kelas?['nama'] as String?,
       tanggal: json['tanggal'] as String? ?? '',
       jamDatang: _trimTime(json['jam_datang']),
       jamPulang: _trimTime(json['jam_pulang']),
-      jumlahMurid: (json['jumlah_murid'] as num?)?.toInt() ?? 0,
+      jumlahMurid: _parseInt(json['jumlah_murid']),
       catatan: json['catatan'] as String?,
     );
   }
@@ -40,4 +40,12 @@ class MentorPresensi {
     // Backend may return "08:00:00" (H:i:s) — UI only needs H:i.
     return s.length >= 5 ? s.substring(0, 5) : s;
   }
+}
+
+int _parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
 }

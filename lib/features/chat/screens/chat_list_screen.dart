@@ -58,6 +58,15 @@ class ChatListScreen extends ConsumerWidget {
                           );
                         },
                       ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.push('/chat/users');
+        },
+        backgroundColor: Colors.teal,
+        child: const Icon(Icons.chat, color: Colors.white),
+      ),
     );
   }
 }
+

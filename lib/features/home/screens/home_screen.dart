@@ -1,3 +1,4 @@
+import '../../mentor/providers/mentor_dashboard_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +16,7 @@ import '../../../shared/widgets/update_banner.dart';
 import '../models/home_model.dart';
 import '../providers/home_provider.dart';
 
-import '../../auth/widgets/email_collection_dialog.dart';
+// import '../../auth/widgets/email_collection_dialog.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -32,7 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final user = ref.read(authProvider).user;
       
       if (user != null) {
-        EmailCollectionDialog.checkAndShow(context, ref, user.id);
+        // EmailCollectionDialog.checkAndShow(context, ref, user.id);
       }
       // /jurnal/* (student journal) is role:student-gated on the backend —
       // calling it for a scholarship_teenager-only account just 403s, so
@@ -104,7 +105,10 @@ class _NonStudentHome extends ConsumerWidget {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () => ref.read(homeProvider.notifier).load(user.cabangSlug, forceRefresh: true),
+        onRefresh: () async {
+          ref.read(homeProvider.notifier).load(user.cabangSlug, forceRefresh: true);
+          if (user.isMentor) ref.read(mentorDashboardProvider.notifier).load();
+        },
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
@@ -132,9 +136,16 @@ class _NonStudentHome extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            // --- Journal card (college + student roles) ---
-            _JournalCard(user: user, theme: theme),
-            const SizedBox(height: 24),
+            
+            if (user.isMentor) ...[
+              _MentorStatsCircle(),
+              const SizedBox(height: 24),
+              _MentorDashboardGrid(user: user),
+            ] else ...[
+              _JournalCard(user: user, theme: theme),
+              const SizedBox(height: 24),
+            ],
+
             Row(
               children: [
                 Icon(Icons.article, color: theme.colorScheme.primary, size: 20),
@@ -1041,6 +1052,206 @@ class _SquareJournalButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+
+
+class _MentorDashboardGrid extends StatelessWidget {
+  final UserModel user;
+  const _MentorDashboardGrid({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!user.isMentor) return const SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.dashboard_customize_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+            const SizedBox(width: 8),
+            Text('Menu Mentor',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.85, // Makes the boxes slightly wider than tall
+          children: [
+            _buildGridItem(
+              context, 
+              icon: Icons.person_add_alt_1,
+              title: 'Laporan Kehadiran Anda',
+              subtitle: 'Isi kehadiran mentor',
+              route: '/mentor/presensi-diri',
+              color: Colors.blue,
+            ),
+            _buildGridItem(
+              context, 
+              icon: Icons.how_to_reg,
+              title: 'Presensi Siswa',
+              subtitle: 'Absen kehadiran siswa',
+              route: '/mentor/presensi',
+              color: Colors.teal,
+            ),
+            _buildGridItem(
+              context, 
+              icon: Icons.school,
+              title: 'Kelas Master',
+              subtitle: 'Kelola kelas Anda',
+              route: '/mentor/kelas',
+              color: Colors.orange,
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildGridItem(BuildContext context, {
+    required IconData icon, 
+    required String title, 
+    required String subtitle, 
+    required String route, 
+    required Color color,
+  }) {
+    return Material(
+      color: color.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () => context.push(route),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+class _MentorStatsCircle extends ConsumerWidget {
+  const _MentorStatsCircle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(mentorDashboardProvider);
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    
+    return Column(
+      children: [
+        Text(
+          'Rekap Bulan Ini',
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Container(
+            width: 170,
+            height: 170,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [primary.withOpacity(0.9), primary.withOpacity(0.7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                )
+              ]
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (state.loading && state.stats.totalKelas == 0)
+                  const CircularProgressIndicator(color: Colors.white)
+                else ...[
+                  Text(
+                    '${state.stats.totalKelas}',
+                    style: const TextStyle(
+                      fontSize: 48, 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.white,
+                      height: 1.0,
+                    ),
+                  ),
+                  const Text(
+                    'Kelas',
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${state.stats.totalMurid} Murid Diajar',
+                      style: const TextStyle(
+                        fontSize: 11, 
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ]
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -25,10 +25,10 @@ class _MentorKelasScreenState extends ConsumerState<MentorKelasScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Kelas Master')),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Padding(padding: const EdgeInsets.only(bottom: 70.0), child: FloatingActionButton(
         onPressed: () => _showEditSheet(context),
         child: const Icon(Icons.add),
-      ),
+      )),
       body: RefreshIndicator(
         onRefresh: () => ref.read(kelasMasterProvider.notifier).load(),
         child: state.loading && state.items.isEmpty
@@ -190,3 +190,4 @@ class _MentorKelasScreenState extends ConsumerState<MentorKelasScreen> {
     );
   }
 }
+

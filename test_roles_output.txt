@@ -1,0 +1,22 @@
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo for mysql failed: Temporary failure in name resolution (Connection: mysql, Host: mysql, Port: 3306, Database: study_center_nias, SQL: select * from `users` where (`email` like %test% or `username` like %test%) and `users`.`deleted_at` is null limit 1)
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:841
+    837▕             $exceptionType = ($isUniqueConstraintError = $this->isUniqueConstraintError($e))
+    838▕                 ? UniqueConstraintViolationException::class
+    839▕                 : QueryException::class;
+    840▕ 
+  ➜ 841▕             $exception = new $exceptionType(
+    842▕                 $this->getNameWithReadWriteType(),
+    843▕                 $query,
+    844▕                 $this->prepareBindings($bindings),
+    845▕                 $e,
+
+      [2m+21 vendor frames [22m
+
+  22  test_roles.php:8
+      Illuminate\Database\Eloquent\Builder::first()
+

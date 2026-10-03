@@ -21,8 +21,10 @@ class EmailCollectionDialog extends ConsumerStatefulWidget {
   @override
   ConsumerState<EmailCollectionDialog> createState() => _EmailCollectionDialogState();
 
+
   static Future<void> checkAndShow(BuildContext context, WidgetRef ref, int userId) async {
     final storage = ref.read(storageServiceProvider);
+    if (await storage.hasDismissedRating(userId)) return;
     
     // Check local cache first, but we should also check the server 
     // to be completely sure.
@@ -139,13 +141,18 @@ class _EmailCollectionDialogState extends ConsumerState<EmailCollectionDialog> {
               ],
             ),
           ),
+          
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                ref.read(storageServiceProvider).setDismissedRating(widget.userId);
+                Navigator.of(context).pop();
+              },
               child: const Text('Nanti', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
               onPressed: () {
+                ref.read(storageServiceProvider).setDismissedRating(widget.userId);
                 Navigator.of(context).pop();
                 _openPlayStore();
               },
@@ -156,6 +163,7 @@ class _EmailCollectionDialogState extends ConsumerState<EmailCollectionDialog> {
               child: const Text('Buka Play Store'),
             ),
           ],
+
         );
       } else {
         // WAITING FOR INVITE MODAL
@@ -172,9 +180,13 @@ class _EmailCollectionDialogState extends ConsumerState<EmailCollectionDialog> {
               ],
             ),
           ),
+          
           actions: [
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                ref.read(storageServiceProvider).setDismissedRating(widget.userId);
+                Navigator.of(context).pop();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -182,6 +194,7 @@ class _EmailCollectionDialogState extends ConsumerState<EmailCollectionDialog> {
               child: const Text('Tutup'),
             ),
           ],
+
         );
       }
     }
@@ -243,3 +256,4 @@ class _EmailCollectionDialogState extends ConsumerState<EmailCollectionDialog> {
     );
   }
 }
+

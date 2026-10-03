@@ -164,6 +164,7 @@ class ApiConstants {
   static const String scholarshipJurnalFoto    = '/scholarship-teenager-jurnal/foto';
 
   // Chat
+  static const String chatUsers = '/chat/users';
   static const String chatConversations = '/chat/conversations';
   static String chatMessages(int convId) => '/chat/conversations/$convId/messages';
   static String chatPrivate(int userId) => '/chat/private/$userId';

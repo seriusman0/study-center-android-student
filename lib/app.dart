@@ -18,6 +18,7 @@ import 'features/blog/screens/blog_create_screen.dart';
 import 'features/galeri/screens/galeri_screen.dart';
 import 'features/mentor/screens/mentor_kelas_screen.dart';
 import 'features/mentor/screens/mentor_presensi_screen.dart';
+import 'features/mentor/screens/mentor_own_presensi_screen.dart';
 import 'features/admin/screens/admin_dashboard_screen.dart';
 import 'features/admin/screens/admin_users_screen.dart';
 import 'features/admin/screens/jurnal_life_items_screen.dart';
@@ -38,6 +39,7 @@ import 'features/admin/screens/prajurit_jurnal_screen.dart';
 import 'features/college/screens/journal_router_screen.dart';
 import 'features/college/screens/college_review_screen.dart';
 import 'features/chat/screens/chat_list_screen.dart';
+import 'features/chat/screens/chat_users_screen.dart';
 import 'features/chat/screens/chat_detail_screen.dart';
 import 'features/college/screens/college_review_detail_screen.dart';
 import 'shared/theme/app_theme.dart';
@@ -121,6 +123,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ── Full-screen routes (above the shell) ────────────────────────────
+
+        GoRoute(
+          path: '/mentor/presensi-diri',
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const MentorOwnPresensiScreen(),
+        ),
       GoRoute(
         path: '/blog/create',
         parentNavigatorKey: _rootKey,
@@ -143,7 +151,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const ChatListScreen(),
         routes: [
           GoRoute(
-            path: ':id',
+            path: 'users',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) => const ChatUsersScreen(),
+            ),
+            GoRoute(
+              path: ':id',
             parentNavigatorKey: _rootKey,
             builder: (ctx, state) => ChatDetailScreen(
               conversationId: int.parse(state.pathParameters['id']!),

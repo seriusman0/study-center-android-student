@@ -59,6 +59,38 @@ class PresensiRepository {
     return Presensi.fromJson((res.data as Map)['data'] as Map<String, dynamic>);
   }
 
+  
+  Future<Presensi> update({
+    required int id,
+    required int mentorId,
+    required int kelasId,
+    required String tanggal,
+    required String jamMulai,
+    required String jamSelesai,
+    required String materi,
+    required List<int> studentIds,
+    required Map<int, String> studentStatus,
+    List<int>? fotoBytes,
+    String? fotoFilename,
+  }) async {
+    final formData = FormData.fromMap({
+      '_method': 'PUT', // Laravel spoofing for multipart PUT
+      'mentor_id': mentorId,
+      'kelas_id': kelasId,
+      'tanggal': tanggal,
+      'jam_mulai': jamMulai,
+      'jam_selesai': jamSelesai,
+      'materi': materi,
+      for (var i = 0; i < studentIds.length; i++) 'student_ids[$i]': studentIds[i],
+      for (final e in studentStatus.entries) 'student_status[${e.key}]': e.value,
+      if (fotoBytes != null)
+        'foto': MultipartFile.fromBytes(fotoBytes, filename: fotoFilename ?? 'foto.jpg'),
+    });
+    // For FormData with PUT in Laravel, it's safer to use POST and spoof with _method=PUT
+    final res = await _dio.post(ApiConstants.presensiDetail(id), data: formData);
+    return Presensi.fromJson((res.data as Map)['data'] as Map<String, dynamic>);
+  }
+
   Future<void> delete(int id) async {
     await _dio.delete(ApiConstants.presensiDetail(id));
   }

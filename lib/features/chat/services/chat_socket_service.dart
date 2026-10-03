@@ -9,7 +9,7 @@ class ChatSocketConfig {
   static const appKey = 'scnias_reverb_key_2026';
   static const host = 'studycenter.nanoprojectdevindonesia.com';
   static const port = 443;
-  static const authUrl = 'https://studycenter.nanoprojectdevindonesia.com/broadcasting/auth';
+  static const authUrl = 'https://studycenter.nanoprojectdevindonesia.com/api/broadcasting/auth';
 }
 
 class ChatSocketService {

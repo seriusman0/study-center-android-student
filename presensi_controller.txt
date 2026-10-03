@@ -1,0 +1,21 @@
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $q = Presensi::with(['mentor:id,name', 'cabang:id,nama', 'kelasMaster:id,nama'])
+            ->withCount('students')->latest('tanggal');
+
+        if (! $user->isAdmin()) $q->where('mentor_id', $user->id);
+        if ($request->filled('cabang_id')) $q->where('cabang_id', $request->cabang_id);
+        if ($request->filled('from'))      $q->whereDate('tanggal', '>=', $request->from);
+        if ($request->filled('to'))        $q->whereDate('tanggal', '<=', $request->to);
+
+        $page = $q->paginate(20);
+        return response()->json([
+            'data' => $page->items(),
+            'meta' => [
+                'current_page' => $page->currentPage(),
+                'last_page'    => $page->lastPage(),
+                'per_page'     => $page->perPage(),
+                'total'        => $page->total(),
+            ],
+        ]);

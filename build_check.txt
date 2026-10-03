@@ -1,0 +1,18 @@
+total 16
+drwxr-xr-x 3 serius www-data 4096 Oct  2 19:50 .
+drwxr-xr-x 8 serius www-data 4096 Sep 27 06:44 ..
+drwxrwxr-x 2 serius serius   4096 Oct  2 19:50 assets
+-rw-rw-r-- 1 serius serius    274 Oct  2 19:50 manifest.json
+{
+  "resources/css/app.css": {
+    "file": "assets/app-NqtkgYZk.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DU0U4_H9.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}

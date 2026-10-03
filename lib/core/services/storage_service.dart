@@ -111,4 +111,13 @@ class StorageService {
   Future<void> setCollectedEmail(int userId) async {
     await _storage.write(key: 'email_collected_$userId', value: 'true');
   }
+
+  Future<bool> hasDismissedRating(int userId) async {
+    final val = await _storage.read(key: 'rating_dismissed_$userId');
+    return val == 'true';
+  }
+
+  Future<void> setDismissedRating(int userId) async {
+    await _storage.write(key: 'rating_dismissed_$userId', value: 'true');
+  }
 }

@@ -1,0 +1,11 @@
+                this.$refs.messageInput?.focus();
+            });
+
+            if (window.Echo) {
+                this._echoChannel = window.Echo.private(`conversation.${convId}`)
+                    .listen('.MessageSent', (e) => {
+                        const exists = this.messages.some(m => m.id === e.id);
+                        const hasOptimistic = this.messages.some(m => m._sending && m.body === e.body);
+                        if (!exists && (e.user_id !== this.currentUserId || !hasOptimistic)) {
+                            this.messages.push(e);
+                            this.$nextTick(() => this.scrollToBottom());

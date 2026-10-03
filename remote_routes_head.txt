@@ -1,0 +1,50 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\PublicJurnalController;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\BlogWebController;
+use App\Http\Controllers\Web\CabangWebController;
+use App\Http\Controllers\Web\AuthWebController;
+use App\Http\Controllers\Web\ProfileWebController;
+use App\Http\Controllers\Web\CvWebController;
+use App\Http\Controllers\Web\CommentWebController;
+use App\Http\Controllers\Web\Admin\AdminController;
+use App\Http\Controllers\Web\Admin\LeaderboardController;
+use App\Http\Controllers\Web\Admin\JurnalPhotoScanController;
+use App\Http\Controllers\Web\Admin\AdminJurnalHubController;
+use App\Http\Controllers\Web\Admin\MataPelajaranController;
+use App\Http\Controllers\Web\Admin\RoleAdminController;
+use App\Http\Controllers\Web\Admin\PermissionAdminController;
+use App\Http\Controllers\Web\Admin\NameTagController;
+use App\Http\Controllers\Web\PresensiController;
+use App\Http\Controllers\Web\JurnalController;
+use App\Http\Controllers\Web\Admin\JurnalBibleScheduleController;
+use App\Http\Controllers\Web\Admin\JurnalWeeklyVerseController;
+use App\Http\Controllers\Web\Admin\JurnalLifeItemController;
+use App\Http\Controllers\Web\Admin\JurnalReportController;
+use App\Http\Controllers\Web\Admin\JurnalBulkController;
+use App\Http\Controllers\Web\Admin\JurnalOfflineTemplateController;
+use App\Http\Controllers\Web\Admin\KelasMasterController;
+use App\Http\Controllers\Web\MentorPresensiController;
+use App\Http\Controllers\Web\Admin\MentorPresensiAdminController;
+use App\Http\Controllers\Web\Admin\CertificateTemplateController;
+use App\Http\Controllers\Web\Admin\IssuedCertificateController;
+use App\Http\Controllers\Web\Admin\PendaftaranAdminController;
+use App\Http\Controllers\Web\PendaftaranController;
+use App\Http\Controllers\Web\BerandaController;
+use App\Http\Controllers\Web\Admin\AnnouncementController;
+use App\Http\Controllers\Web\AnnouncementDismissController;
+
+// Public pages
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Public Jurnal API for Scanner
+Route::post('/public-jurnal/scan', [PublicJurnalController::class, 'scan'])->name('public-jurnal.scan');
+Route::post('/public-jurnal/save', [PublicJurnalController::class, 'save'])->name('public-jurnal.save');
+
+Route::get('/blog', [BlogWebController::class, 'index'])->name('blog.index');
+Route::get('/cabang', [CabangWebController::class, 'index'])->name('cabang.index');
+Route::get('/cabang/{slug}', [CabangWebController::class, 'show'])->name('cabang.show');
+
+// Student registration (public)

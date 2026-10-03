@@ -1,0 +1,40 @@
+// ── Chat API (untuk Android) ──────────────────────────────────────────────
+// Menggunakan controller yang sama dengan web, return JSON
+Route::middleware('auth:sanctum')->prefix('chat')->name('api.chat.')->group(function () {
+    // GET conversations list
+    Route::get('/conversations', function () {
+        $userId = auth()->id();
+        $conversations = \App\Models\Conversation::whereHas(
+            'participants', fn($q) => $q->where('user_id', $userId)
+        )
+        ->with(['participants:id,name', 'lastMessage.user:id,name'])
+        ->orderByDesc('last_message_at')
+        ->get()
+        ->map(function ($conv) use ($userId) {
+--
+    Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\Chat\ConversationController::class, 'messages'])->name('messages');
+
+    // POST start private
+    Route::post('/private/{userId}', [\App\Http\Controllers\Chat\ConversationController::class, 'startPrivate'])->name('private');
+
+    // POST create group
+    Route::post('/group', [\App\Http\Controllers\Chat\ConversationController::class, 'createGroup'])->name('group.create');
+
+    // POST send message
+    Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Chat\MessageController::class, 'send'])->name('send');
+
+    // DELETE message
+    Route::delete('/messages/{message}', [\App\Http\Controllers\Chat\MessageController::class, 'destroy'])->name('message.destroy');
+
+    // POST mark read
+    Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Chat\MessageController::class, 'markRead'])->name('read');
+
+    // GET unread total
+    Route::get('/unread-count', function () {
+        $userId = auth()->id();
+        $count  = \App\Models\Conversation::whereHas(
+            'participants', fn($q) => $q->where('user_id', $userId)
+        )->get()->sum(fn($c) => $c->unreadCount($userId));
+        return response()->json(['count' => $count]);
+    })->name('unread');
+});

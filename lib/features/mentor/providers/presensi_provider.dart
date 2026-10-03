@@ -65,6 +65,42 @@ class PresensiNotifier extends Notifier<PresensiState> {
     }
   }
 
+  
+  Future<bool> updateItem(int id, {
+    required int mentorId,
+    required int kelasId,
+    required String tanggal,
+    required String jamMulai,
+    required String jamSelesai,
+    required String materi,
+    required List<int> studentIds,
+    required Map<int, String> studentStatus,
+    List<int>? fotoBytes,
+    String? fotoFilename,
+  }) async {
+    try {
+      await ref.read(presensiRepositoryProvider).update(
+            id: id,
+            mentorId: mentorId,
+            kelasId: kelasId,
+            tanggal: tanggal,
+            jamMulai: jamMulai,
+            jamSelesai: jamSelesai,
+            materi: materi,
+            studentIds: studentIds,
+            studentStatus: studentStatus,
+            fotoBytes: fotoBytes,
+            fotoFilename: fotoFilename,
+          );
+      await load();
+      return true;
+    } catch (e) {
+      debugPrint('[Presensi] update() error: $e');
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
+
   Future<bool> delete(int id) async {
     try {
       await ref.read(presensiRepositoryProvider).delete(id);
