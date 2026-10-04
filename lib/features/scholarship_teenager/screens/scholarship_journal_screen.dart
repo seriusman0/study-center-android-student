@@ -126,7 +126,6 @@ class _ScholarshipJournalScreenState
       _SchProgressHeader(snap: snap, state: state, notifier: notifier),
       const SizedBox(height: 12),
       _SchFormWindowBanner(snap: snap, state: state),
-      _SchBibleSection(snap: snap, notifier: notifier),
       ...snap.lifeItemsByKategori.entries.map((entry) => _SchLifeSection(
             kategori: entry.key,
             items: entry.value,
@@ -304,58 +303,6 @@ class _SchFormWindowBanner extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Bible section (PL/PB checkboxes)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SchBibleSection extends StatelessWidget {
-  final CollegeJournalSnapshot snap;
-  final ScholarshipTeenagerJournalNotifier notifier;
-  const _SchBibleSection({required this.snap, required this.notifier});
-
-  @override
-  Widget build(BuildContext context) {
-    final disabled = !snap.config.formActive;
-
-    final rows = <Widget>[
-      AppChecklistTile(
-        label: 'Perjanjian Lama',
-        checked: snap.bible.plChecked,
-        enabled: !disabled,
-        onChanged: (v) => notifier.checkBible('pl', v),
-      ),
-      AppChecklistTile(
-        label: 'Perjanjian Baru',
-        checked: snap.bible.pbChecked,
-        enabled: !disabled,
-        onChanged: (v) => notifier.checkBible('pb', v),
-      ),
-    ];
-
-    final subtitle = (snap.bible.plText?.isNotEmpty == true || snap.bible.pbText?.isNotEmpty == true)
-        ? 'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText ?? '-'} / ${snap.bible.pbText ?? '-'}'
-        : 'Jadwal hari ke-${snap.bible.dayNo} belum diisi admin.';
-
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-          padding:
-              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
-          child: Text(subtitle,
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.textSecondary)),
-        ),
-        AppSectionCard(title: 'Pembacaan Alkitab', rows: rows),
-      ]),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Life items per-kategori (check/boolean only — no time_range)
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _SchLifeSection extends StatelessWidget {
   final String kategori;
   final List<CollegeLifeItem> items;
@@ -375,13 +322,41 @@ class _SchLifeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final disabled = !snap.config.formActive && isToday;
 
+    final isAllahOrPembacaan = kategori == 'allah' || kategori == 'pembacaan' || kategori == 'kerohanian';
+
     final rows = <Widget>[
+      if (isAllahOrPembacaan) ...[
+        AppChecklistTile(
+          label: 'Perjanjian Lama',
+          checked: snap.bible.plChecked,
+          enabled: !disabled,
+          onChanged: (v) => notifier.checkBible('pl', v),
+        ),
+        AppChecklistTile(
+          label: 'Perjanjian Baru',
+          checked: snap.bible.pbChecked,
+          enabled: !disabled,
+          onChanged: (v) => notifier.checkBible('pb', v),
+        ),
+      ],
       for (final item in items) _buildItem(item, disabled),
     ];
 
+    final subtitle = (snap.bible.plText?.isNotEmpty == true || snap.bible.pbText?.isNotEmpty == true)
+        ? 'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText ?? '-'} / ${snap.bible.pbText ?? '-'}'
+        : 'Jadwal hari ke-${snap.bible.dayNo} belum diisi admin.';
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: AppSectionCard(title: _sectionTitle(kategori), rows: rows),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (isAllahOrPembacaan)
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+            child: Text(subtitle,
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+          ),
+        AppSectionCard(title: _sectionTitle(kategori), rows: rows),
+      ]),
     );
   }
 
@@ -396,9 +371,14 @@ class _SchLifeSection extends StatelessWidget {
   }
 
   static String _sectionTitle(String k) => switch (k) {
+        'allah' => 'Allah',
+        'kerohanian' => 'Kerohanian',
+        'pendidikan' => 'Pendidikan',
+        'karakter' => 'Karakter',
         'pembacaan' => 'Item Pembacaan',
         'sidang' => 'Sidang-Sidang Gereja',
         'rohani' => 'Kegiatan Rohani & Pelayanan',
+        'prajurit' => 'Karakter Prajurit',
         _ => k.toUpperCase(),
       };
 }

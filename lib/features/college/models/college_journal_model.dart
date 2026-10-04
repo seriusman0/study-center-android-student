@@ -258,8 +258,8 @@ class CollegeJournalSnapshot {
     for (final item in lifeItems) {
       map.putIfAbsent(item.kategori, () => []).add(item);
     }
-    // Fixed order: pembacaan, sidang, rohani
-    const order = ['pembacaan', 'sidang', 'rohani'];
+    // Fixed order as per guide
+    const order = ['allah', 'kerohanian', 'pendidikan', 'karakter', 'pembacaan', 'sidang', 'rohani', 'prajurit'];
     final ordered = <String, List<CollegeLifeItem>>{};
     for (final k in order) {
       if (map.containsKey(k)) ordered[k] = map[k]!;
@@ -272,10 +272,15 @@ class CollegeJournalSnapshot {
 
   static String kategoriDisplayName(String k) {
     switch (k) {
-      case 'pembacaan': return 'PEMBACAAN';
-      case 'sidang':    return 'SIDANG-SIDANG GEREJA';
-      case 'rohani':    return 'KEGIATAN ROHANI';
-      default:          return k.toUpperCase();
+      case 'allah':      return 'ALLAH';
+      case 'kerohanian': return 'KEROHANIAN';
+      case 'pendidikan': return 'PENDIDIKAN';
+      case 'karakter':   return 'KARAKTER';
+      case 'pembacaan':  return 'PEMBACAAN';
+      case 'sidang':     return 'SIDANG-SIDANG GEREJA';
+      case 'rohani':     return 'KEGIATAN ROHANI & PELAYANAN';
+      case 'prajurit':   return 'KARAKTER PRAJURIT';
+      default:           return k.toUpperCase();
     }
   }
 

@@ -85,12 +85,13 @@ class LifeItem {
 }
 
 const _kategoriLabel = {
+  'allah': 'Allah',
   'kerohanian': 'Kerohanian',
   'pendidikan': 'Pendidikan',
   'karakter': 'Karakter',
 };
 
-const _kategoriOrder = ['kerohanian', 'pendidikan', 'karakter'];
+const _kategoriOrder = ['allah', 'kerohanian', 'pendidikan', 'karakter'];
 
 class JournalSnapshot {
   final String date;
@@ -203,9 +204,6 @@ class JournalSnapshot {
     final ordered = <String, List<LifeItem>>{};
     for (final k in _kategoriOrder) {
       if (map.containsKey(k)) ordered[k] = map[k]!;
-    }
-    for (final k in map.keys) {
-      if (!ordered.containsKey(k)) ordered[k] = map[k]!;
     }
     return ordered;
   }

@@ -492,7 +492,7 @@ class _LoginFormCard extends ConsumerWidget {
               obscureText: obscure,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
-                hintText: '••••••••',
+                hintText: 'Masukkan password',
                 suffixIcon: IconButton(
                   icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
                   onPressed: onToggleObscure,
@@ -531,7 +531,7 @@ class _LoginFormCard extends ConsumerWidget {
               ),
               child: state.loading
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Masuk', style: TextStyle(fontWeight: FontWeight.w600)),
+                  : const Text('Login Sekarang', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ),
           const SizedBox(height: 24),

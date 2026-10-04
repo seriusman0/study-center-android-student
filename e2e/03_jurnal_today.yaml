@@ -38,7 +38,6 @@ appId: com.studycenter.sc_student
 # ---- Verify key sections are visible ----
 - assertVisible: "Perjanjian Lama"
 - assertVisible: "Perjanjian Baru"
-- assertVisible: "Hafal Ayat"
 
 - takeScreenshot: "03_jurnal_bible_section"
 
@@ -59,20 +58,13 @@ appId: com.studycenter.sc_student
 
 # ---- Test: Ayat Hafalan section ----
 - scrollUntilVisible:
-    element: "Hafal Ayat"
+    element: "Hafal hari ini"
     direction: DOWN
 
-- assertVisible: "Hafal Ayat"
+- assertVisible: "Hafal hari ini"
 - takeScreenshot: "03_jurnal_verse_section"
 
 # ---- Test: Check a life item ----
-- scrollUntilVisible:
-    element: "Jadwal Kehidupan"
-    direction: DOWN
-
-- assertVisible: "Jadwal Kehidupan"
-- takeScreenshot: "03_jurnal_life_section"
-
 # Tap the first visible life item (default seeded label — see
 # docs/android-api-reference.md § JurnalLifeItem defaults)
 - scrollUntilVisible:
@@ -84,6 +76,9 @@ appId: com.studycenter.sc_student
 - takeScreenshot: "03_jurnal_life_item_checked"
 
 # Uncheck the same item
+- scrollUntilVisible:
+    element: "Mengawali hari dengan berdoa"
+    direction: DOWN
 - tapOn: "Mengawali hari dengan berdoa"
 - waitForAnimationToEnd
 - takeScreenshot: "03_jurnal_life_item_unchecked"

@@ -498,7 +498,7 @@ class _LifeScheduleCard extends StatelessWidget {
                 letterSpacing: 0.5,
               ),
             ),
-            if (entry.key == 'kerohanian') ...[
+            if (entry.key == 'kerohanian' || entry.key == 'allah') ...[
               _BibleReadingInline(snap: snap, notifier: notifier),
               _HafalAyatSection(snap: snap, notifier: notifier),
             ],
@@ -516,6 +516,8 @@ class _LifeScheduleCard extends StatelessWidget {
 
   String _kategoriLabel(String k) {
     switch (k) {
+      case 'allah':
+        return 'ALLAH';
       case 'kerohanian':
         return 'KEROHANIAN';
       case 'pendidikan':
