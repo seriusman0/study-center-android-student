@@ -1,0 +1,1 @@
+﻿import 'dart:convert'; import 'package:dio/dio.dart'; void main() async { final dio = Dio(); try { final res = await dio.get('https://studycenter.nanoprojectdevindonesia.com/api/galeri'); print('RES:' + jsonEncode(res.data)); } catch (e) { print(e); } }

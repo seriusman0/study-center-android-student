@@ -153,6 +153,7 @@ class _GaleriGridItem extends StatelessWidget {
           children: [
             CachedNetworkImage(
               imageUrl: item.fotoUrl,
+              memCacheWidth: 400,
               fit: BoxFit.cover,
               placeholder: (_, __) => Container(
                 color: AppColors.divider,

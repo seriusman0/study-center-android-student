@@ -6,25 +6,16 @@ import '../../college/models/college_journal_model.dart';
 import '../providers/scholarship_teenager_journal_provider.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/widgets/app_widgets.dart';
+import '../../../shared/widgets/journal_ui_components.dart';
 
-/// Jurnal harian untuk role scholarship_teenager.
-///
-/// Mirip [CollegeJournalScreen] dengan perbedaan:
-/// - Endpoint: /api/scholarship-teenager-jurnal/today & /check
-/// - TIDAK ada study_log (time_range) — hanya check & boolean
-/// - Section: Pembacaan Alkitab (PL/PB), lalu life_items per-kategori
-///   (pembacaan, sidang, rohani), lalu Foto Belajar
-/// - formOpen lock via config.form_active
 class ScholarshipJournalScreen extends ConsumerStatefulWidget {
   const ScholarshipJournalScreen({super.key});
 
   @override
-  ConsumerState<ScholarshipJournalScreen> createState() =>
-      _ScholarshipJournalScreenState();
+  ConsumerState<ScholarshipJournalScreen> createState() => _ScholarshipJournalScreenState();
 }
 
-class _ScholarshipJournalScreenState
-    extends ConsumerState<ScholarshipJournalScreen> {
+class _ScholarshipJournalScreenState extends ConsumerState<ScholarshipJournalScreen> {
   @override
   void initState() {
     super.initState();
@@ -41,23 +32,17 @@ class _ScholarshipJournalScreenState
     final state = ref.watch(scholarshipTeenagerJournalProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Jurnal Harian'),
         actions: [
           if (state.loading)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                  child: SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2))),
+              child: Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))),
             )
           else
-            IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () =>
-                    ref.read(scholarshipTeenagerJournalProvider.notifier).load()),
+            IconButton(icon: const Icon(Icons.refresh), onPressed: () => ref.read(scholarshipTeenagerJournalProvider.notifier).load()),
           if (state.pendingOfflineOps > 0 && state.isOnline)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
@@ -71,9 +56,7 @@ class _ScholarshipJournalScreenState
 
   Widget _buildBody(BuildContext context, ScholarshipJournalState state) {
     if (state.snapshot == null) {
-      if (state.loading) {
-        return const Center(child: CircularProgressIndicator());
-      }
+      if (state.loading) return const Center(child: CircularProgressIndicator());
       if (state.error != null) {
         return Center(
           child: Padding(
@@ -81,22 +64,18 @@ class _ScholarshipJournalScreenState
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 12),
-              Text(state.error!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red)),
+              Text(state.error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Coba lagi'),
-                  onPressed: () =>
-                      ref.read(scholarshipTeenagerJournalProvider.notifier).load()),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Coba lagi'),
+                onPressed: () => ref.read(scholarshipTeenagerJournalProvider.notifier).load(),
+              ),
             ]),
           ),
         );
       }
-      return const Center(
-          child: Text('Gagal memuat. Tap refresh.',
-              style: TextStyle(color: AppColors.textMuted)));
+      return const Center(child: Text('Gagal memuat. Tap refresh.', style: TextStyle(color: AppColors.textMuted)));
     }
 
     final snap = state.snapshot!;
@@ -108,11 +87,7 @@ class _ScholarshipJournalScreenState
     );
   }
 
-  Widget _buildContent(
-      BuildContext context,
-      ScholarshipJournalState state,
-      CollegeJournalSnapshot snap,
-      ScholarshipTeenagerJournalNotifier notifier) {
+  Widget _buildContent(BuildContext context, ScholarshipJournalState state, CollegeJournalSnapshot snap, ScholarshipTeenagerJournalNotifier notifier) {
     if (state.loading) {
       return ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -126,15 +101,10 @@ class _ScholarshipJournalScreenState
       _SchProgressHeader(snap: snap, state: state, notifier: notifier),
       const SizedBox(height: 12),
       _SchFormWindowBanner(snap: snap, state: state),
-      ...snap.lifeItemsByKategori.entries.map((entry) => _SchLifeSection(
-            kategori: entry.key,
-            items: entry.value,
-            snap: snap,
-            notifier: notifier,
-            isToday: state.isToday,
-          )),
+      ..._buildSections(snap, notifier, state.isToday),
       const SizedBox(height: 12),
       _SchPhotoCard(snap: snap, notifier: notifier, state: state),
+      JournalSubmitSection(onSubmit: () {}),
     ];
 
     return ListView.builder(
@@ -144,91 +114,56 @@ class _ScholarshipJournalScreenState
       itemBuilder: (_, index) => items[index],
     );
   }
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Progress header (date nav + streak)
-// ─────────────────────────────────────────────────────────────────────────────
+  List<Widget> _buildSections(CollegeJournalSnapshot snap, ScholarshipTeenagerJournalNotifier notifier, bool isToday) {
+    final List<Widget> sections = [];
+    int sectionIndex = 1;
+
+    // Allah / Pembacaan
+    final allahItems = snap.lifeItemsByKategori['allah'] ?? [];
+    sections.add(_SchLifeSection(
+      kategori: 'allah',
+      number: sectionIndex.toString(),
+      items: allahItems,
+      snap: snap,
+      notifier: notifier,
+      isToday: isToday,
+    ));
+    sectionIndex++;
+
+    // Other categories
+    for (final entry in snap.lifeItemsByKategori.entries) {
+      if (entry.key == 'allah' || entry.key == 'pembacaan') continue;
+      sections.add(_SchLifeSection(
+        kategori: entry.key,
+        number: sectionIndex.toString(),
+        items: entry.value,
+        snap: snap,
+        notifier: notifier,
+        isToday: isToday,
+      ));
+      sectionIndex++;
+    }
+
+    return sections;
+  }
+}
 
 class _SchProgressHeader extends StatelessWidget {
   final CollegeJournalSnapshot snap;
   final ScholarshipJournalState state;
   final ScholarshipTeenagerJournalNotifier notifier;
 
-  const _SchProgressHeader(
-      {required this.snap, required this.state, required this.notifier});
+  const _SchProgressHeader({required this.snap, required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final progress =
-        snap.totalCount > 0 ? snap.checkedCount / snap.totalCount : 0.0;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-            colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4))
-        ],
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Expanded(
-              child: Text('Jurnal ${_formatDate(snap.date)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold, color: Colors.white))),
-          _NavBtn(icon: Icons.chevron_left, onTap: () => notifier.goToPrevDay()),
-          const SizedBox(width: 4),
-          _NavBtn(
-              icon: Icons.chevron_right,
-              onTap: state.isToday ? null : () => notifier.goToNextDay()),
-          if (!state.isToday) ...[
-            const SizedBox(width: 4),
-            GestureDetector(
-              onTap: () => notifier.goToToday(),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFF97316),
-                    borderRadius: BorderRadius.circular(8)),
-                child: const Text('Hari ini',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600)),
-              ),
-            ),
-          ],
-        ]),
-        const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: Colors.white.withOpacity(0.2),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(Color(0xFFFDE047))),
-        ),
-        const SizedBox(height: 8),
-        Text('${snap.checkedCount} dari ${snap.totalCount} item selesai',
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: Colors.white.withOpacity(0.8))),
-        const SizedBox(height: 8),
-        Text('Streak ${snap.streak} hari berturut-turut',
-            style: theme.textTheme.bodySmall?.copyWith(
-                color: const Color(0xFFFDE047),
-                fontWeight: FontWeight.w600)),
-      ]),
+    return JournalHeader(
+      userName: 'Test User Edited', // Ideally from user profile
+      dateString: _formatDate(snap.date),
+      isToday: state.isToday,
+      onPrev: () => notifier.goToPrevDay(),
+      onNext: state.isToday ? null : () => notifier.goToNextDay(),
     );
   }
 
@@ -241,38 +176,6 @@ class _SchProgressHeader extends StatelessWidget {
   }
 }
 
-class _NavBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-  const _NavBtn({required this.icon, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final disabled = onTap == null;
-    return GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: disabled
-                ? Colors.white.withOpacity(0.05)
-                : Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon,
-              color: disabled
-                  ? Colors.white.withOpacity(0.3)
-                  : Colors.white,
-              size: 20),
-        ));
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Form window banner (locked outside form hours)
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _SchFormWindowBanner extends StatelessWidget {
   final CollegeJournalSnapshot snap;
   final ScholarshipJournalState state;
@@ -284,18 +187,11 @@ class _SchFormWindowBanner extends StatelessWidget {
       return Container(
         margin: const EdgeInsets.only(top: 12),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.shade200)),
+        decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.orange.shade200)),
         child: Row(children: [
-          Icon(Icons.warning_amber_rounded,
-              color: Colors.orange.shade800, size: 20),
+          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade800, size: 20),
           const SizedBox(width: 8),
-          Expanded(
-              child: Text(
-                  'Form jurnal hanya bisa diisi pukul ${snap.config.formOpenTime.length >= 5 ? snap.config.formOpenTime.substring(0, 5) : snap.config.formOpenTime.isEmpty ? "-" : snap.config.formOpenTime}–${snap.config.formCloseTime.length >= 5 ? snap.config.formCloseTime.substring(0, 5) : snap.config.formCloseTime.isEmpty ? "-" : snap.config.formCloseTime}.',
-                  style: TextStyle(color: Colors.orange.shade800))),
+          Expanded(child: Text('Form jurnal hanya bisa diisi pukul ${snap.config.formOpenTime}–${snap.config.formCloseTime}.', style: TextStyle(color: Colors.orange.shade800))),
         ]),
       );
     }
@@ -305,6 +201,7 @@ class _SchFormWindowBanner extends StatelessWidget {
 
 class _SchLifeSection extends StatelessWidget {
   final String kategori;
+  final String number;
   final List<CollegeLifeItem> items;
   final CollegeJournalSnapshot snap;
   final ScholarshipTeenagerJournalNotifier notifier;
@@ -312,6 +209,7 @@ class _SchLifeSection extends StatelessWidget {
 
   const _SchLifeSection({
     required this.kategori,
+    required this.number,
     required this.items,
     required this.snap,
     required this.notifier,
@@ -321,52 +219,62 @@ class _SchLifeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disabled = !snap.config.formActive && isToday;
+    final isAllah = kategori == 'allah';
 
-    final isAllahOrPembacaan = kategori == 'allah' || kategori == 'pembacaan' || kategori == 'kerohanian';
-
-    final rows = <Widget>[
-      if (isAllahOrPembacaan) ...[
-        AppChecklistTile(
-          label: 'Perjanjian Lama',
-          checked: snap.bible.plChecked,
-          enabled: !disabled,
-          onChanged: (v) => notifier.checkBible('pl', v),
-        ),
-        AppChecklistTile(
-          label: 'Perjanjian Baru',
-          checked: snap.bible.pbChecked,
-          enabled: !disabled,
-          onChanged: (v) => notifier.checkBible('pb', v),
-        ),
-      ],
-      for (final item in items) _buildItem(item, disabled),
-    ];
-
-    final subtitle = (snap.bible.plText?.isNotEmpty == true || snap.bible.pbText?.isNotEmpty == true)
-        ? 'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText ?? '-'} / ${snap.bible.pbText ?? '-'}'
-        : 'Jadwal hari ke-${snap.bible.dayNo} belum diisi admin.';
-
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (isAllahOrPembacaan)
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
-            child: Text(subtitle,
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-          ),
-        AppSectionCard(title: _sectionTitle(kategori), rows: rows),
-      ]),
-    );
-  }
-
-  Widget _buildItem(CollegeLifeItem item, bool disabled) {
-    // scholarship_teenager has no time_range items — treat everything as check
-    return AppChecklistTile(
-      label: item.label,
-      checked: item.checked,
-      enabled: !disabled,
-      onChanged: (v) => notifier.checkLife(item.id, v),
+    return JournalSectionCard(
+      number: number,
+      title: _sectionTitle(kategori),
+      subtitle: isAllah ? null : 'Opsional — bisa pilih lebih dari satu',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isAllah) ...[
+            const Text('PEMBACAAN ALKITAB', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.0)),
+            const SizedBox(height: 8),
+            Text(
+              'Hari ke-${snap.bible.dayNo} — ${snap.bible.plText ?? "-"} / ${snap.bible.pbText ?? "-"}',
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: JournalItemBox(
+                    child: AppChecklistTile(
+                      label: 'Perjanjian Lama',
+                      sublabel: snap.bible.plText,
+                      checked: snap.bible.plChecked,
+                      enabled: !disabled,
+                      onChanged: (v) => notifier.checkBible('pl', v),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: JournalItemBox(
+                    child: AppChecklistTile(
+                      label: 'Perjanjian Baru',
+                      sublabel: snap.bible.pbText,
+                      checked: snap.bible.pbChecked,
+                      enabled: !disabled,
+                      onChanged: (v) => notifier.checkBible('pb', v),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          ...items.map((item) => JournalItemBox(
+            child: AppChecklistTile(
+              label: item.label,
+              checked: item.checked,
+              enabled: !disabled,
+              onChanged: (v) => notifier.checkLife(item.id, v),
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -375,39 +283,31 @@ class _SchLifeSection extends StatelessWidget {
         'kerohanian' => 'Kerohanian',
         'pendidikan' => 'Pendidikan',
         'karakter' => 'Karakter',
-        'pembacaan' => 'Item Pembacaan',
         'sidang' => 'Sidang-Sidang Gereja',
-        'rohani' => 'Kegiatan Rohani & Pelayanan',
-        'prajurit' => 'Karakter Prajurit',
+        'rohani' => 'Rohani & Pelayanan',
         _ => k.toUpperCase(),
       };
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Foto belajar card
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _SchPhotoCard extends StatelessWidget {
   final CollegeJournalSnapshot snap;
   final ScholarshipTeenagerJournalNotifier notifier;
   final ScholarshipJournalState state;
 
-  const _SchPhotoCard(
-      {required this.snap, required this.notifier, required this.state});
+  const _SchPhotoCard({required this.snap, required this.notifier, required this.state});
 
   @override
   Widget build(BuildContext context) {
-    final hasPhoto =
-        snap.fotoBelajarUrl != null && snap.fotoBelajarUrl!.isNotEmpty;
-    final isToday =
-        snap.date == DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final hasPhoto = snap.fotoBelajarUrl != null && snap.fotoBelajarUrl!.isNotEmpty;
+    final isToday = snap.date == DateFormat('yyyy-MM-dd').format(DateTime.now());
     final disabled = !snap.config.formActive && isToday;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: AppSectionCard(
-        title: 'Foto Belajar',
-        rows: [
+    return JournalSectionCard(
+      number: '4',
+      title: 'Foto Saat Belajar',
+      subtitle: '(opsional)',
+      child: Column(
+        children: [
           if (hasPhoto) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.card),
@@ -419,12 +319,8 @@ class _SchPhotoCard extends StatelessWidget {
                 errorBuilder: (_, __, ___) => Container(
                   width: double.infinity,
                   height: 180,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                  ),
-                  child: const Icon(Icons.image,
-                      color: AppColors.textMuted, size: 40),
+                  decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(AppRadius.card)),
+                  child: const Icon(Icons.image, color: AppColors.textMuted, size: 40),
                 ),
               ),
             ),
@@ -432,17 +328,13 @@ class _SchPhotoCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
-                icon: const Icon(Icons.delete_outline,
-                    color: AppColors.danger, size: 18),
-                label: const Text('Hapus Foto',
-                    style: TextStyle(color: AppColors.danger)),
+                icon: const Icon(Icons.delete_outline, color: AppColors.danger, size: 18),
+                label: const Text('Hapus Foto', style: TextStyle(color: AppColors.danger)),
                 onPressed: disabled ? null : () => notifier.deletePhoto(),
               ),
             ),
           ] else
-            AppUploadBox(
-              onTap: disabled ? null : () => _pickImage(context),
-            ),
+            AppUploadBox(onTap: disabled ? null : () => _pickImage(context)),
         ],
       ),
     );
@@ -453,16 +345,8 @@ class _SchPhotoCard extends StatelessWidget {
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text('Kamera'),
-            onTap: () => _capture(ImageSource.camera, ctx),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text('Galeri'),
-            onTap: () => _capture(ImageSource.gallery, ctx),
-          ),
+          ListTile(leading: const Icon(Icons.camera_alt), title: const Text('Kamera'), onTap: () => _capture(ImageSource.camera, ctx)),
+          ListTile(leading: const Icon(Icons.photo_library), title: const Text('Galeri'), onTap: () => _capture(ImageSource.gallery, ctx)),
         ]),
       ),
     );
@@ -471,27 +355,13 @@ class _SchPhotoCard extends StatelessWidget {
   void _capture(ImageSource source, BuildContext ctx) async {
     Navigator.pop(ctx);
     final picker = ImagePicker();
-    XFile? file;
-    if (source == ImageSource.camera) {
-      file = await picker.pickImage(
-          source: ImageSource.camera, imageQuality: 85);
-    } else {
-      file = await picker.pickImage(source: ImageSource.gallery);
-    }
+    XFile? file = await picker.pickImage(source: source, imageQuality: 85);
     if (file != null) {
       try {
         await notifier.uploadPhoto(file);
-        if (ctx.mounted) {
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            const SnackBar(content: Text('Foto berhasil diunggah')),
-          );
-        }
+        if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Foto berhasil diunggah')));
       } catch (e) {
-        if (ctx.mounted) {
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(content: Text('Gagal unggah: $e')),
-          );
-        }
+        if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Gagal unggah: $e')));
       }
     }
   }

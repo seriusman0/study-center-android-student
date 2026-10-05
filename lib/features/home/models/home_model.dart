@@ -15,14 +15,21 @@ class BlogPost {
     this.cabangNama,
   });
 
-  factory BlogPost.fromJson(Map<String, dynamic> j) => BlogPost(
-        id:          (j['id'] as num).toInt(),
-        title:       j['title'] as String? ?? '',
-        slug:        j['slug'] as String? ?? '',
-        image:       j['image'] as String?,
-        publishedAt: j['published_at'] as String?,
-        cabangNama:  (j['cabang'] as Map?)?['nama'] as String?,
-      );
+  factory BlogPost.fromJson(Map<String, dynamic> j) {
+    String? imgUrl = j['image'] as String?;
+    if (imgUrl != null && imgUrl.isNotEmpty && !imgUrl.startsWith('http')) {
+      if (!imgUrl.startsWith('/')) imgUrl = '/$imgUrl';
+      imgUrl = 'https://studycenter.nanoprojectdevindonesia.com$imgUrl';
+    }
+    return BlogPost(
+      id:          (j['id'] as num).toInt(),
+      title:       j['title'] as String? ?? '',
+      slug:        j['slug'] as String? ?? '',
+      image:       imgUrl,
+      publishedAt: j['published_at'] as String?,
+      cabangNama:  (j['cabang'] as Map?)?['nama'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -41,11 +48,18 @@ class GaleriItem {
 
   const GaleriItem({required this.id, required this.fotoUrl, required this.tanggal});
 
-  factory GaleriItem.fromJson(Map<String, dynamic> j) => GaleriItem(
-        id:      (j['id'] as num).toInt(),
-        fotoUrl: j['foto_url'] as String? ?? '',
-        tanggal: j['tanggal'] as String? ?? '',
-      );
+  factory GaleriItem.fromJson(Map<String, dynamic> j) {
+    String fUrl = j['foto_url'] as String? ?? '';
+    if (fUrl.isNotEmpty && !fUrl.startsWith('http')) {
+      if (!fUrl.startsWith('/')) fUrl = '/$fUrl';
+      fUrl = 'https://studycenter.nanoprojectdevindonesia.com$fUrl';
+    }
+    return GaleriItem(
+      id:      (j['id'] as num).toInt(),
+      fotoUrl: fUrl,
+      tanggal: j['tanggal'] as String? ?? '',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

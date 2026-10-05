@@ -1,0 +1,32 @@
+appId: com.studycenter.sc_student
+---
+- launchApp: {clearState: true}
+- assertVisible: "Masuk"
+- tapOn:
+    id: "emailField"
+- inputText: "testuser"
+- pressKey: Enter
+- tapOn:
+    id: "passwordField"
+- inputText: "12345"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Masuk"
+    direction: DOWN
+- tapOn:
+    id: "loginBtn"
+- extendedWaitUntil:
+    visible: "Beranda.*|Jurnal|Profil"
+    timeout: 15000
+- tapOn: "Jurnal Beasiswa"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn: "Mengawali hari dengan berdoa" # checklist
+- tapOn: "Perjanjian Lama" # checklist
+- scrollUntilVisible:
+    element: "Submit Jurnal Hari Ini"
+    direction: DOWN
+- tapOn: "Submit Jurnal Hari Ini"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: testuser_journal_submitted

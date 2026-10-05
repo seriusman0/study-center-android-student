@@ -1,0 +1,27 @@
+appId: com.studycenter.sc_student
+---
+- launchApp: {clearState: true}
+- assertVisible: "Masuk"
+- tapOn:
+    id: "emailField"
+- inputText: "teststudent"
+- pressKey: Enter
+- tapOn:
+    id: "passwordField"
+- inputText: "12345"
+- pressKey: Back
+- scrollUntilVisible:
+    element: "Masuk"
+    direction: DOWN
+- tapOn:
+    id: "loginBtn"
+- extendedWaitUntil:
+    visible: "Beranda.*|Jurnal|Profil"
+    timeout: 15000
+- tapOn: "Jurnal SC"
+- waitForAnimationToEnd:
+    timeout: 5000
+- scrollUntilVisible:
+    element: "Submit Jurnal Hari Ini"
+    direction: DOWN
+- takeScreenshot: teststudent_journal

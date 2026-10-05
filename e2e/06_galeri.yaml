@@ -22,11 +22,7 @@ appId: com.studycenter.sc_student
 
 - waitForAnimationToEnd:
     timeout: 3000
-- extendedWaitUntil:
-    visible: "Test Student"
-    timeout: 15000
-- waitForAnimationToEnd:
-    timeout: 2000
+- assertVisible: "Beranda"
 
 # ---- Ensure we are on Beranda tab ----
 - tapOn:

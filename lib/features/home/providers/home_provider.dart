@@ -54,16 +54,14 @@ class HomeNotifier extends Notifier<HomeState> {
           blogs: cachedBlogs.isNotEmpty ? cachedBlogs : state.blogs,
           galeri: cachedGaleri.isNotEmpty ? cachedGaleri : state.galeri,
           laporan: cachedLaporan ?? state.laporan,
-          loading: false,
+          loading: true, // set loading to true since we will sync in background
         );
-        // We can choose to return here to avoid backend call, or continue 
-        // to silently fetch from backend and update UI. 
-        // Returning here satisfies "tidak selalu load data dari backend".
-        return;
+      } else {
+        state = state.copyWith(loading: true, error: null);
       }
+    } else {
+      state = state.copyWith(loading: true, error: null);
     }
-
-    state = state.copyWith(loading: true, error: null);
 
     List<BlogPost> blogs;
     try {

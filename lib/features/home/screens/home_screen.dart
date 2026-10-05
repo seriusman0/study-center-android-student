@@ -990,6 +990,8 @@ class _GaleriCard extends StatelessWidget {
         imageUrl: item.fotoUrl,
         width: 140,
         height: 160,
+        memCacheWidth: 280,
+        memCacheHeight: 320,
         fit: BoxFit.cover,
         placeholder: (_, __) => Container(
           width: 140,
