@@ -35,20 +35,11 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() => const AuthState();
 
-  /// Last known password for auto re-login on token expiry.
-  String? _lastPassword;
-
-  /// Saves a password to be used for auto re-login if the token expires.
-  void rememberPassword(String password) {
-    _lastPassword = password;
-  }
-
   Future<void> login(String email, String password, {bool saveProfile = true}) async {
     state = state.copyWith(loading: true, error: null);
     try {
       final user = await ref.read(authRepositoryProvider).login(email, password);
       state = AuthState(user: user);
-      _lastPassword = password;
 
       // Persist token + profile so restoreSession() can recover the session
       // on next launch (critical for offline behaviour).
@@ -66,7 +57,6 @@ class AuthNotifier extends Notifier<AuthState> {
         ));
       }
     } catch (e) {
-      _lastPassword = null;
       state = AuthState(error: extractErrorMessage(e));
     }
   }
@@ -124,7 +114,6 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final user = await ref.read(authRepositoryProvider).login(email, password);
       state = AuthState(user: user);
-      _lastPassword = password;
 
       final token = await ref.read(storageServiceProvider).getToken();
       if (token != null) {

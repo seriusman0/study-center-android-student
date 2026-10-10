@@ -92,7 +92,8 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
       await ref.read(adminUsersRepositoryProvider).updateRole(userId, role);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = AdminUsersState(users: state.users, error: extractErrorMessage(e));
       return false;
     }
   }
@@ -102,7 +103,8 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
       await ref.read(adminUsersRepositoryProvider).toggleActive(userId);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = AdminUsersState(users: state.users, error: extractErrorMessage(e));
       return false;
     }
   }

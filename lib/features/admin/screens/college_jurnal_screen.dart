@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/college_jurnal_model.dart';
 import '../providers/college_jurnal_provider.dart';
 import '../../../shared/theme/design_tokens.dart';
 
@@ -109,8 +108,8 @@ class _DashboardTab extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                         color:
                             u.pctWeek >= 70 ? Colors.green : Colors.orange)),
-                Text('minggu ini',
-                    style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                const Text('minggu ini',
+                    style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
               ],
             ),
           );

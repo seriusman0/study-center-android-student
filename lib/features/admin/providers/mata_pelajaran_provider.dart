@@ -75,7 +75,8 @@ class MataPelajaranNotifier extends Notifier<MataPelajaranState> {
       await ref.read(mataPelajaranRepositoryProvider).create(nama: nama, urutan: urutan);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }
@@ -85,7 +86,8 @@ class MataPelajaranNotifier extends Notifier<MataPelajaranState> {
       await ref.read(mataPelajaranRepositoryProvider).update(id, nama: nama, urutan: urutan, isActive: isActive);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }
@@ -95,7 +97,8 @@ class MataPelajaranNotifier extends Notifier<MataPelajaranState> {
       await ref.read(mataPelajaranRepositoryProvider).toggleActive(id);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }
@@ -105,7 +108,8 @@ class MataPelajaranNotifier extends Notifier<MataPelajaranState> {
       await ref.read(mataPelajaranRepositoryProvider).delete(id);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }

@@ -1,5 +1,6 @@
 /// Models for admin-managed jurnal configuration:
 /// life items (habit checklist), bible reading schedules, and weekly verses.
+library;
 
 class JurnalLifeItem {
   final int id;

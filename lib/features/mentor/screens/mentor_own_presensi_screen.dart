@@ -61,8 +61,8 @@ class _MentorOwnPresensiScreenState extends ConsumerState<MentorOwnPresensiScree
                         child: ListTile(
                           title: Text(p.kelasNama ?? 'Kelas #${p.kelasId}',
                               style: const TextStyle(fontWeight: FontWeight.w600)),
-                          subtitle: Text(
-                            '\${_formatDate(p.tanggal)} • \${p.jamDatang}-\${p.jamPulang}\n\${p.jumlahMurid} murid • \${p.catatan ?? \"-\"}',
+                          subtitle: const Text(
+                            '\${_formatDate(p.tanggal)} • \${p.jamDatang}-\${p.jamPulang}\n\${p.jumlahMurid} murid • \${p.catatan ?? "-"}',
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -83,15 +83,6 @@ class _MentorOwnPresensiScreenState extends ConsumerState<MentorOwnPresensiScree
                   ),
       ),
     );
-  }
-
-  String _formatDate(String raw) {
-    try {
-      final dt = DateTime.parse(raw);
-      return DateFormat('dd MMM yyyy').format(dt);
-    } catch (_) {
-      return raw;
-    }
   }
 
   Future<void> _confirmDelete(int id) async {
@@ -237,7 +228,7 @@ class _CreateFormState extends ConsumerState<_CreateForm> {
           const SizedBox(height: 16),
           DropdownButtonFormField<KelasMaster>(
             decoration: const InputDecoration(labelText: 'Kelas', border: OutlineInputBorder()),
-            value: _selectedKelas,
+            initialValue: _selectedKelas,
             items: kelasState.items.map((k) {
               return DropdownMenuItem(value: k, child: Text(k.nama));
             }).toList(),

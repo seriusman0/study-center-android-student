@@ -16,7 +16,7 @@ class ProfileScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final avatarRadius = 48.0;
+    const avatarRadius = 48.0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
@@ -30,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: avatarRadius,
-                    backgroundColor: AppColors.primary.withOpacity(0.12),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
                     backgroundImage: user.avatar != null
                         ? NetworkImage(user.avatar!)
                         : null,
@@ -39,7 +39,7 @@ class ProfileScreen extends ConsumerWidget {
                             user.name.isEmpty
                                 ? '?'
                                 : user.name[0].toUpperCase(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               // Per spec: initial ~45% of diameter.
                               fontSize: avatarRadius * 2 * 0.45,
                               fontWeight: FontWeight.w700,

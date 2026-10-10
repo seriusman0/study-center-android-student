@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 Map<String, dynamic> generateOfflineTemplate(Map<String, dynamic> previousData, String targetDate) {
   final result = Map<String, dynamic>.from(previousData);
   

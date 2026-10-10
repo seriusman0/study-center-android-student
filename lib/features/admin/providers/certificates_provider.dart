@@ -136,7 +136,8 @@ class CertTemplatesNotifier extends Notifier<CertTemplatesState> {
           );
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = CertTemplatesState(templates: state.templates, error: extractErrorMessage(e));
       return false;
     }
   }
@@ -160,7 +161,8 @@ class CertTemplatesNotifier extends Notifier<CertTemplatesState> {
           );
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = CertTemplatesState(templates: state.templates, error: extractErrorMessage(e));
       return false;
     }
   }
@@ -170,7 +172,8 @@ class CertTemplatesNotifier extends Notifier<CertTemplatesState> {
       await ref.read(certificatesRepositoryProvider).deleteTemplate(id);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = CertTemplatesState(templates: state.templates, error: extractErrorMessage(e));
       return false;
     }
   }
@@ -217,7 +220,8 @@ class IssuedCertificatesNotifier extends Notifier<IssuedCertificatesState> {
           );
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = IssuedCertificatesState(issued: state.issued, error: extractErrorMessage(e));
       return false;
     }
   }
@@ -227,7 +231,8 @@ class IssuedCertificatesNotifier extends Notifier<IssuedCertificatesState> {
       await ref.read(certificatesRepositoryProvider).deleteIssued(id);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = IssuedCertificatesState(issued: state.issued, error: extractErrorMessage(e));
       return false;
     }
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
-import '../models/mentor_presensi_admin_model.dart';
 import '../providers/mentor_presensi_admin_provider.dart';
 import '../../../shared/theme/design_tokens.dart';
 
@@ -53,6 +52,8 @@ class _MentorPresensiAdminScreenState extends ConsumerState<MentorPresensiAdminS
     final from = _fromDate != null ? _fmtDate(_fromDate!) : null;
     final to = _toDate != null ? _fmtDate(_toDate!) : null;
     final notifier = ref.read(mentorPresensiAdminProvider.notifier);
+    // Capture before the await so we don't touch BuildContext across an async gap.
+    final messenger = ScaffoldMessenger.of(context);
     String? path;
     if (type == 'csv') {
       path = await notifier.exportExcel(from: from, to: to);
@@ -61,10 +62,10 @@ class _MentorPresensiAdminScreenState extends ConsumerState<MentorPresensiAdminS
     }
     if (path != null && mounted) {
       await OpenFilex.open(path);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export berhasil')));
+      messenger.showSnackBar(const SnackBar(content: Text('Export berhasil')));
     } else if (path == null && mounted) {
       final err = ref.read(mentorPresensiAdminProvider).error;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err ?? 'Export gagal')));
+      messenger.showSnackBar(SnackBar(content: Text(err ?? 'Export gagal')));
     }
   }
 
@@ -98,7 +99,7 @@ class _MentorPresensiAdminScreenState extends ConsumerState<MentorPresensiAdminS
                 const SizedBox(height: 8),
                 Row(children: [
                   Expanded(child: _MiniStat(label: 'Sesi', value: '${state.report!.totals.sesi}')),
-                  Expanded(child: _MiniStat(label: 'Jam', value: '${state.report!.totals.jam.toStringAsFixed(1)}')),
+                  Expanded(child: _MiniStat(label: 'Jam', value: state.report!.totals.jam.toStringAsFixed(1))),
                   Expanded(child: _MiniStat(label: 'Murid', value: '${state.report!.totals.murid}')),
                   Expanded(child: _MiniStat(label: 'Mentor Aktif', value: '${state.report!.totals.mentorAktif}')),
                 ]),
@@ -148,7 +149,7 @@ class _MiniStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
     Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF0F766E))),
-    Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+    Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
   ]);
 }
 
@@ -166,7 +167,7 @@ class _DateChip extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppColors.borderStrong),
+        side: const BorderSide(color: AppColors.borderStrong),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: ListTile(

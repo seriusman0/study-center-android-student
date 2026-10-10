@@ -204,7 +204,7 @@ class _JournalHistoryScreenState extends ConsumerState<JournalHistoryScreen> {
         if (state.items.isEmpty) {
           return Center(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('Belum ada riwayat jurnal.',
+              const Text('Belum ada riwayat jurnal.',
                   style: TextStyle(color: AppColors.textMuted)),
               const SizedBox(height: 12),
               ElevatedButton.icon(

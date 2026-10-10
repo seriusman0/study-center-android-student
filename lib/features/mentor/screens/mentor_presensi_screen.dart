@@ -123,7 +123,7 @@ class _MentorPresensiScreenState extends ConsumerState<MentorPresensiScreen> {
                   style: Theme.of(ctx).textTheme.titleLarge),
               const SizedBox(height: 4),
               Text('${_formatDate(p.tanggal)} • ${p.jamMulai}-${p.jamSelesai}',
-                  style: TextStyle(color: AppColors.textSecondary)),
+                  style: const TextStyle(color: AppColors.textSecondary)),
               if (p.materi.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text('Materi', style: Theme.of(ctx).textTheme.labelLarge),

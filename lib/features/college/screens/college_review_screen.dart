@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../models/college_review_model.dart';
 import '../providers/college_review_provider.dart';
-import 'college_review_detail_screen.dart';
 import '../../../shared/theme/design_tokens.dart';
 import '../../../shared/widgets/app_widgets.dart';
 

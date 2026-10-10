@@ -18,14 +18,12 @@ class _DashedBorderPainter extends CustomPainter {
   final double radius;
   final double strokeWidth;
   final Color color;
-  final double dashLength;
-  final double gapLength;
+  static const double dashLength = 8;
+  static const double gapLength = 6;
   _DashedBorderPainter({
     required this.radius,
     required this.strokeWidth,
     required this.color,
-    this.dashLength = 8,
-    this.gapLength = 6,
   });
 
   @override
@@ -136,7 +134,7 @@ class AppPrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryDark,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
+          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.button),
           ),
@@ -703,7 +701,7 @@ class CircleSizer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 24, height: 24,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.border,
         shape: BoxShape.circle,
       ),

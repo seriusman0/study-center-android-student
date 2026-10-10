@@ -155,8 +155,8 @@ class ConversationDto {
         lastMessageAt: j['last_message_at']?.toString(),
         lastMessage: j['last_message'] != null ? MessageDto.fromJson(Map<String, dynamic>.from(j['last_message'] as Map)) : null,
         participants: (j['participants'] as List?)
-                ?.where((e) => e is Map)
-                .map((e) => UserDto.fromJson(Map<String, dynamic>.from(e as Map)))
+                ?.whereType<Map>()
+                .map((e) => UserDto.fromJson(Map<String, dynamic>.from(e)))
                 .toList() ??
             [],
       );

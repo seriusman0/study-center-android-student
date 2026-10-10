@@ -65,3 +65,51 @@ ngobrol-src/
 references/
 scripts/
 playstore-deployment/
+
+# ── Build/dependency artifacts that must NEVER be committed ──────────────────
+node_modules/
+playwright-tests/node_modules/
+
+# Debug dumps, logs and screenshots captured while chasing bugs
+logcat*.txt
+pub_get_log.txt
+top.txt
+*_dump*.xml
+window_dump*.xml
+maestro-debug-output/
+maestro_out.txt
+screenshots/
+*.orig
+
+# Root-level scratch artifacts from ad-hoc debugging sessions.
+# Keep .gitignore itself and intentional config out of this rule.
+app_js.txt
+chat_js.txt
+chat_view.txt
+chat_routes.txt
+build_check.txt
+patch_check.txt
+check_*.py
+check_*.txt
+fetch_views.py
+capture.py
+*_controller.txt
+*_routes*.txt
+remote_routes*.txt
+routes_check.txt
+web_routes.txt
+echo_config.txt
+test_roles_output.txt
+*_event.txt
+monitor.json
+praj*.json
+prajurit*.json
+report.xml
+test_galeri.dart
+current_screen.png
+screen.png
+emulator_*.png
+
+# Local keystores — the release signing key must never be tracked.
+keystore-secrets/
+

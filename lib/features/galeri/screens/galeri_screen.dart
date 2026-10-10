@@ -110,7 +110,7 @@ class GaleriScreen extends ConsumerWidget {
           );
         }
         if (state.items.isEmpty) {
-          return Center(
+          return const Center(
             child: Text('Belum ada foto kegiatan.',
                 style: TextStyle(color: AppColors.textMuted)),
           );
@@ -162,7 +162,7 @@ class _GaleriGridItem extends StatelessWidget {
               ),
               errorWidget: (_, __, ___) => Container(
                 color: AppColors.divider,
-                child: Icon(Icons.image, size: 40, color: AppColors.textMuted),
+                child: const Icon(Icons.image, size: 40, color: AppColors.textMuted),
               ),
             ),
             // Gradient overlay for date label
@@ -176,7 +176,7 @@ class _GaleriGridItem extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(0.6),
+                      Colors.black.withValues(alpha: 0.6),
                       Colors.transparent,
                     ],
                   ),

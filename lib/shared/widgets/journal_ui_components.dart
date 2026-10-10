@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/design_tokens.dart';
 
 // --- Header ---
@@ -30,7 +29,7 @@ class JournalHeader extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -68,7 +67,7 @@ class JournalHeader extends StatelessWidget {
           Positioned(
             right: 0,
             top: 0,
-            child: Icon(Icons.school, size: 64, color: Colors.amber.withOpacity(0.2)),
+            child: Icon(Icons.school, size: 64, color: Colors.amber.withValues(alpha: 0.2)),
           ),
         ],
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -53,7 +52,6 @@ class _JournalErrorBoundaryState extends State<_JournalErrorBoundary> {
   Widget build(BuildContext context) {
     if (_error != null) {
       final e = _error!;
-      final stack = e.stack?.toString() ?? 'no stack';
       return Container(
         color: const Color(0xFFFEE2E2),
         padding: const EdgeInsets.all(16),

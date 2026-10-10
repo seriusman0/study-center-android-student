@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/college_review_model.dart';
-import '../models/college_review_list_model.dart';
 import '../repositories/college_repository.dart';
 
 class CollegeReviewState {

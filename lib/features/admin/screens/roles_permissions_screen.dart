@@ -123,7 +123,7 @@ class _RoleCard extends ConsumerWidget {
                               ?.copyWith(fontWeight: FontWeight.w700)),
                       if (isProtected) ...[
                         const SizedBox(width: 6),
-                        Icon(Icons.lock_outline, size: 14, color: AppColors.textSecondary),
+                        const Icon(Icons.lock_outline, size: 14, color: AppColors.textSecondary),
                       ],
                     ],
                   ),

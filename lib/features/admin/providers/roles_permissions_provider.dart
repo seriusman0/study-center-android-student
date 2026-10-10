@@ -108,7 +108,8 @@ class RolesPermissionsNotifier extends Notifier<RolesPermissionsState> {
       await ref.read(rolesPermissionsRepositoryProvider).createRole(name: name, description: description);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }
@@ -118,7 +119,8 @@ class RolesPermissionsNotifier extends Notifier<RolesPermissionsState> {
       await ref.read(rolesPermissionsRepositoryProvider).updateRole(id, name: name, description: description);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }
@@ -128,7 +130,8 @@ class RolesPermissionsNotifier extends Notifier<RolesPermissionsState> {
       await ref.read(rolesPermissionsRepositoryProvider).syncPermissions(roleId, permissionIds);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }
@@ -138,7 +141,8 @@ class RolesPermissionsNotifier extends Notifier<RolesPermissionsState> {
       await ref.read(rolesPermissionsRepositoryProvider).deleteRole(id);
       await load();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: extractErrorMessage(e));
       return false;
     }
   }

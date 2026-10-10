@@ -101,7 +101,8 @@ class BlogModerationNotifier extends Notifier<BlogModerationState> {
       await ref.read(blogModerationRepositoryProvider).deleteBlog(id);
       await loadBlogs();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(blogsError: extractErrorMessage(e));
       return false;
     }
   }
@@ -111,7 +112,8 @@ class BlogModerationNotifier extends Notifier<BlogModerationState> {
       await ref.read(blogModerationRepositoryProvider).deleteComment(id);
       await loadComments();
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(blogsError: extractErrorMessage(e));
       return false;
     }
   }

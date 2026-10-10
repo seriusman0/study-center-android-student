@@ -210,7 +210,7 @@ class CollegeJournalSnapshot {
     final studyLogsRaw = j['study_logs'];
     final Map<String, dynamic> studyLogsMap = switch (studyLogsRaw) {
       Map<String, dynamic> m => m,
-      List l => {},
+      List _ => {},
       _ => {},
     };
     final studyLogs = <int, StudyLog>{};

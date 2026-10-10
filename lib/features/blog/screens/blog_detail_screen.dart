@@ -127,7 +127,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                         errorWidget: (_, __, ___) => Container(
                           height: 220,
                           color: AppColors.divider,
-                          child: Icon(Icons.image,
+                          child: const Icon(Icons.image,
                               size: 48, color: AppColors.textMuted),
                         ),
                       ),
@@ -158,7 +158,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                                 CircleAvatar(
                                   radius: 14,
                                   backgroundColor: theme.colorScheme.primary
-                                      .withOpacity(0.15),
+                                      .withValues(alpha: 0.15),
                                   child: Text(
                                     (blog.authorName ?? 'A')[0].toUpperCase(),
                                     style: TextStyle(
@@ -211,7 +211,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                                   ?.copyWith(height: 1.7),
                             )
                           else
-                            Text('Tidak ada konten.',
+                            const Text('Tidak ada konten.',
                                 style:
                                     TextStyle(color: AppColors.textMuted)),
 
@@ -236,9 +236,9 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                           const SizedBox(height: 12),
 
                           if (blog.comments.isEmpty)
-                            Padding(
+                            const Padding(
                               padding:
-                                  const EdgeInsets.symmetric(vertical: 8),
+                                  EdgeInsets.symmetric(vertical: 8),
                               child: Text('Belum ada komentar.',
                                   style:
                                       TextStyle(color: AppColors.textMuted)),
@@ -275,10 +275,10 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 border:
-                    Border(top: BorderSide(color: AppColors.border)),
+                    const Border(top: BorderSide(color: AppColors.border)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, -2),
                   )
@@ -308,7 +308,7 @@ class _BlogDetailScreenState extends ConsumerState<BlogDetailScreen> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                           borderSide:
-                              BorderSide(color: AppColors.borderStrong),
+                              const BorderSide(color: AppColors.borderStrong),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -376,7 +376,7 @@ class _CommentTile extends StatelessWidget {
               : CircleAvatar(
                   radius: 16,
                   backgroundColor:
-                      theme.colorScheme.primary.withOpacity(0.15),
+                      theme.colorScheme.primary.withValues(alpha: 0.15),
                   child: Text(
                     comment.authorName[0].toUpperCase(),
                     style: TextStyle(
@@ -413,8 +413,8 @@ class _CommentTile extends StatelessWidget {
                       if (canDelete)
                         GestureDetector(
                           onTap: onDelete,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 4),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 4),
                             child: Icon(Icons.close,
                                 size: 14, color: AppColors.textMuted),
                           ),

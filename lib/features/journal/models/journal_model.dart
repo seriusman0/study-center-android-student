@@ -119,8 +119,8 @@ class JournalSnapshot {
         : (rawLifeItems is Map ? rawLifeItems.values : []);
 
     final parsedItems = lifeItemsList
-        .where((e) => e is Map)
-        .map((e) => LifeItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .whereType<Map>()
+        .map((e) => LifeItem.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
     Map<String, dynamic> bibleMap = {};

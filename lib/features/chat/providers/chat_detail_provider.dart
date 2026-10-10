@@ -127,7 +127,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     try {
       final res = await _repo.getMessages(convId, page: 1);
       final rawList = res['data'] as List? ?? [];
-      final list = rawList.where((e) => e is Map).map((e) => MessageDto.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      final list = rawList.whereType<Map>().map((e) => MessageDto.fromJson(Map<String, dynamic>.from(e))).toList();
       state = state.copyWith(
         loading: false,
         messages: list,
@@ -147,7 +147,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
       final nextPage = state.currentPage + 1;
       final res = await _repo.getMessages(convId, page: nextPage);
       final rawList = res['data'] as List? ?? [];
-      final list = rawList.where((e) => e is Map).map((e) => MessageDto.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      final list = rawList.whereType<Map>().map((e) => MessageDto.fromJson(Map<String, dynamic>.from(e))).toList();
       
       state = state.copyWith(
         loadingMore: false,

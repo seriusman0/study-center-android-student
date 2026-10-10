@@ -144,7 +144,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                                       msg.status == 'pending' ? Icons.access_time : Icons.done_all,
                                       size: 12,
                                       color: msg.status == 'pending' 
-                                          ? Colors.teal.shade800.withOpacity(0.5) 
+                                          ? Colors.teal.shade800.withValues(alpha: 0.5) 
                                           : Colors.teal.shade800,
                                     ),
                                   ],
@@ -187,7 +187,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.teal,
                     shape: BoxShape.circle,
                   ),

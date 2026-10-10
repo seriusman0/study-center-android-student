@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
@@ -142,7 +141,9 @@ class _TemplateForm extends ConsumerStatefulWidget {
 }
 
 class _TemplateFormState extends ConsumerState<_TemplateForm> {
-  late final _namaCtrl, _deskripsiCtrl, _htmlCtrl;
+  late final TextEditingController _namaCtrl;
+  late final TextEditingController _deskripsiCtrl;
+  late final TextEditingController _htmlCtrl;
   String _orientation = 'portrait';
   bool _isActive = true;
 
@@ -171,7 +172,7 @@ class _TemplateFormState extends ConsumerState<_TemplateForm> {
             TextField(controller: _htmlCtrl, decoration: const InputDecoration(labelText: 'HTML Konten', isDense: true), maxLines: 6),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              value: _orientation,
+              initialValue: _orientation,
               items: const [
                 DropdownMenuItem(value: 'portrait', child: Text('Portrait')),
                 DropdownMenuItem(value: 'landscape', child: Text('Landscape')),
@@ -220,27 +221,6 @@ class _IssuedTab extends ConsumerWidget {
     } catch (e) {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Gagal: $e')));
     }
-  }
-
-  void _confirmDelete(BuildContext ctx, WidgetRef ref, IssuedCertificate cert) {
-    showDialog(
-      context: ctx,
-      builder: (d) => AlertDialog(
-        title: const Text('Hapus Sertifikat?'),
-        content: Text('Sertifikat ${cert.nomorSertifikat} akan dihapus.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(issuedCertificatesProvider.notifier).delete(cert.id);
-              Navigator.pop(d);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red[50]),
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -313,7 +293,7 @@ class _IssueFormState extends ConsumerState<_IssueForm> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
-              value: _templateId,
+              initialValue: _templateId,
               items: templates.map((t) => DropdownMenuItem(value: t.id, child: Text(t.nama))).toList(),
               onChanged: (v) => setState(() => _templateId = v),
               decoration: const InputDecoration(labelText: 'Template', isDense: true),

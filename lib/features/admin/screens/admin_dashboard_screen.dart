@@ -302,7 +302,7 @@ class _AdminFeatureGrid extends StatelessWidget {
                   Icon(f[2] as IconData, color: Theme.of(context).colorScheme.primary, size: 22),
                   const SizedBox(height: 4),
                   Text(f[0] as String, textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
                 ],
               ),
             ),

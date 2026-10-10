@@ -34,12 +34,12 @@ class MockCollegeJournalRepository extends Mock implements CollegeJournalReposit
 class MockScholarshipRepo extends Mock implements ScholarshipTeenagerJournalRepository {}
 
 // ── Fake data ──────────────────────────────────────────────────
-JournalSnapshot _fakeJournalSnapshot() => JournalSnapshot(
+JournalSnapshot _fakeJournalSnapshot() => const JournalSnapshot(
       date: '2024-09-01',
-      bible: const BibleReading(
+      bible: BibleReading(
         plPorsi: 'Kej 1', pbPorsi: 'Mat 1', plChecked: false, pbChecked: false,
       ),
-      lifeItems: const [
+      lifeItems: [
         LifeItem(id: 1, kategori: 'kerohanian', label: 'Doa', checked: false),
       ],
     );
@@ -86,7 +86,7 @@ void main() {
     await connectivityCtrl.close();
   });
 
-  ProviderContainer _makeContainer() => ProviderContainer(
+  ProviderContainer makeContainer() => ProviderContainer(
         overrides: [
           journalRepositoryProvider.overrideWithValue(mockJournalRepo),
           collegeJournalRepositoryProvider.overrideWithValue(mockCollegeRepo),
@@ -119,7 +119,7 @@ void main() {
             verseRef: any(named: 'verseRef'),
           )).thenThrow(Exception('Offline'));
 
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
 
       // Load semua provider
@@ -167,7 +167,7 @@ void main() {
             date: any(named: 'date'),
           )).thenAnswer((_) async => _fakeJournalSnapshot());
 
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
 
       // Load journal provider dulu agar snapshot ada
@@ -206,7 +206,7 @@ void main() {
         throw Exception('Server error'); // checkBible gagal
       });
 
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
 
       await container.read(journalProvider.notifier).load();
@@ -259,7 +259,7 @@ void main() {
             date: any(named: 'date'),
           )).thenThrow(Exception('Permanent error'));
 
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
 
       await container.read(journalProvider.notifier).load();
@@ -300,7 +300,7 @@ void main() {
         return _fakeJournalSnapshot();
       });
 
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
 
       await container.read(journalProvider.notifier).load();

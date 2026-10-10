@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/widgets/app_widgets.dart';
 import '../../auth/models/user_model.dart';
 import '../../journal/providers/journal_provider.dart';
 import '../../scholarship_teenager/providers/scholarship_teenager_journal_provider.dart';
@@ -138,7 +137,7 @@ class _NonStudentHome extends ConsumerWidget {
             const SizedBox(height: 24),
             
             if (user.isMentor) ...[
-              _MentorStatsCircle(),
+              const _MentorStatsCircle(),
               const SizedBox(height: 24),
               _MentorDashboardGrid(user: user),
             ] else ...[
@@ -641,30 +640,6 @@ class _StudentHomeState extends ConsumerState<_StudentHome> {
   }
 }
 
-class _BibleRow extends StatelessWidget {
-  final String type;
-  final String porsi;
-  final bool checked;
-
-  const _BibleRow(this.type, this.porsi, this.checked);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          checked ? Icons.check_circle : Icons.radio_button_unchecked,
-          size: 16,
-          color: checked ? AppColors.success : AppColors.textMuted,
-        ),
-        const SizedBox(width: 8),
-        Text('$type — $porsi',
-            style: Theme.of(context).textTheme.bodySmall),
-      ],
-    );
-  }
-}
-
 class _BlogCard extends StatelessWidget {
   final BlogPost blog;
   final ThemeData theme;
@@ -694,7 +669,7 @@ class _BlogCard extends StatelessWidget {
                       width: 60,
                       height: 60,
                       color: AppColors.divider,
-                      child: Icon(Icons.article, color: AppColors.textMuted),
+                      child: const Icon(Icons.article, color: AppColors.textMuted),
                     ),
                   ),
                 )
@@ -757,132 +732,6 @@ class _BlogCard extends StatelessWidget {
 
 /// Compact journal card shown on both student and non-student home screens.
 /// Displays the "Jurnal Hari Ini" entry and navigates to /jurnal when tapped.
-class _ScholarshipJournalHomeCard extends ConsumerWidget {
-  const _ScholarshipJournalHomeCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(scholarshipTeenagerJournalProvider);
-    final snap = state.snapshot;
-    final theme = Theme.of(context);
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () => context.push('/jurnal?tab=Beasiswa'),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.book, color: theme.colorScheme.secondary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Jurnal Beasiswa',
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const Spacer(),
-                  if (state.loading)
-                    const SizedBox(
-                        height: 14,
-                        width: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (snap != null) ...[
-                LinearProgressIndicator(
-                  value: snap.totalCount > 0
-                      ? snap.checkedCount / snap.totalCount
-                      : 0,
-                  borderRadius: BorderRadius.circular(4),
-                  minHeight: 8,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${snap.checkedCount} dari ${snap.totalCount} item selesai',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: AppColors.textSecondary),
-                ),
-              ] else if (state.error != null)
-                Text('Gagal memuat jurnal beasiswa',
-                    style: TextStyle(color: Colors.red[400], fontSize: 13))
-              else
-                const Text('Memuat...', style: TextStyle(color: AppColors.textMuted)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CollegeJournalHomeCard extends ConsumerWidget {
-  const _CollegeJournalHomeCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(collegeJournalProvider);
-    final snap = state.snapshot;
-    final theme = Theme.of(context);
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () => context.push('/jurnal?tab=College'),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.school, color: theme.colorScheme.secondary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Jurnal College',
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const Spacer(),
-                  if (state.loading)
-                    const SizedBox(
-                        height: 14,
-                        width: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (snap != null) ...[
-                LinearProgressIndicator(
-                  value: snap.totalCount > 0
-                      ? snap.checkedCount / snap.totalCount
-                      : 0,
-                  borderRadius: BorderRadius.circular(4),
-                  minHeight: 8,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${snap.checkedCount} dari ${snap.totalCount} item selesai',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: AppColors.textSecondary),
-                ),
-              ] else if (state.error != null)
-                Text('Gagal memuat jurnal college',
-                    style: TextStyle(color: Colors.red[400], fontSize: 13))
-              else
-                const Text('Memuat...', style: TextStyle(color: AppColors.textMuted)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _JournalCard extends StatelessWidget {
   final UserModel user;
   final ThemeData theme;
@@ -933,7 +782,7 @@ class _JournalCard extends StatelessWidget {
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const Spacer(),
-                  Icon(Icons.chevron_right,
+                  const Icon(Icons.chevron_right,
                       color: AppColors.textMuted, size: 20),
                 ],
               ),
@@ -1002,7 +851,7 @@ class _GaleriCard extends StatelessWidget {
         errorWidget: (_, __, ___) => Container(
           width: 140,
           color: AppColors.divider,
-          child: Icon(Icons.image, color: AppColors.textMuted, size: 40),
+          child: const Icon(Icons.image, color: AppColors.textMuted, size: 40),
         ),
       ),
     );
@@ -1031,8 +880,8 @@ class _SquareJournalButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,
-          splashColor: Colors.white.withOpacity(0.2),
-          highlightColor: Colors.white.withOpacity(0.1),
+          splashColor: Colors.white.withValues(alpha: 0.2),
+          highlightColor: Colors.white.withValues(alpha: 0.1),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -1128,7 +977,7 @@ class _MentorDashboardGrid extends StatelessWidget {
     required Color color,
   }) {
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: () => context.push(route),
@@ -1141,7 +990,7 @@ class _MentorDashboardGrid extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 28),
@@ -1175,7 +1024,7 @@ class _MentorDashboardGrid extends StatelessWidget {
 
 
 class _MentorStatsCircle extends ConsumerWidget {
-  const _MentorStatsCircle({super.key});
+  const _MentorStatsCircle();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1197,13 +1046,13 @@ class _MentorStatsCircle extends ConsumerWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [primary.withOpacity(0.9), primary.withOpacity(0.7)],
+                colors: [primary.withValues(alpha: 0.9), primary.withValues(alpha: 0.7)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: primary.withOpacity(0.3),
+                  color: primary.withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 )
@@ -1236,7 +1085,7 @@ class _MentorStatsCircle extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(

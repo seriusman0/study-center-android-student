@@ -123,19 +123,19 @@ ThemeData buildAppTheme() {
       thickness: 1,
       space: 1,
     ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: AppColors.primary,
       unselectedItemColor: AppColors.textMuted,
       elevation: 0,                            // IMPROVED: 0 - let the nav bar sit flush with no shadow (cards are elevated now)
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: true,
-      selectedLabelStyle: const TextStyle(
+      selectedLabelStyle: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,         // IMPROVED: was default - adds hierarchy
         height: 1.2,
       ),
-      unselectedLabelStyle: const TextStyle(
+      unselectedLabelStyle: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w400,         // IMPROVED: lighter weight for inactive tabs
         height: 1.2,

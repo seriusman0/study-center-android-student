@@ -21,8 +21,8 @@ class ChatRepository {
       final data = res.data as Map<String, dynamic>;
       final list = data['data'] as List? ?? [];
       final parsed = list
-          .where((e) => e is Map)
-          .map((e) => ConversationDto.fromJson(Map<String, dynamic>.from(e as Map)))
+          .whereType<Map>()
+          .map((e) => ConversationDto.fromJson(Map<String, dynamic>.from(e)))
           .toList();
       
       // Save to local DB in background
@@ -44,8 +44,8 @@ class ChatRepository {
       final data = res.data as Map<String, dynamic>;
       final rawList = data['data'] as List? ?? [];
       final parsed = rawList
-          .where((e) => e is Map)
-          .map((e) => MessageDto.fromJson(Map<String, dynamic>.from(e as Map)))
+          .whereType<Map>()
+          .map((e) => MessageDto.fromJson(Map<String, dynamic>.from(e)))
           .toList();
       
       // Save to local DB in background
@@ -205,8 +205,8 @@ class ChatRepository {
     final data = res.data as Map<String, dynamic>;
     final list = data['data'] as List? ?? [];
     return list
-        .where((e) => e is Map)
-        .map((e) => UserDto.fromJson(Map<String, dynamic>.from(e as Map)))
+        .whereType<Map>()
+        .map((e) => UserDto.fromJson(Map<String, dynamic>.from(e)))
         .toList();
   }
 

@@ -23,9 +23,9 @@ class _PrajuritJurnalScreenState extends ConsumerState<PrajuritJurnalScreen>
     super.initState();
     _tab = TabController(length: 3, vsync: this);
     Future.microtask(() {
-      ref.read(PrajuritDashboardProvider.notifier).load();
-      ref.read(PrajuritBibleProvider.notifier).load();
-      ref.read(PrajuritItemsProvider.notifier).load();
+      ref.read(prajuritDashboardProvider.notifier).load();
+      ref.read(prajuritBibleProvider.notifier).load();
+      ref.read(prajuritItemsProvider.notifier).load();
     });
   }
 
@@ -72,7 +72,7 @@ class _PrajuritJurnalScreenState extends ConsumerState<PrajuritJurnalScreen>
 class _DashboardTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(PrajuritDashboardProvider);
+    final state = ref.watch(prajuritDashboardProvider);
     if (state.loading && state.users.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -83,7 +83,7 @@ class _DashboardTab extends ConsumerWidget {
       return const Center(child: Text('Tidak ada data mahasiswa'));
     }
     return RefreshIndicator(
-      onRefresh: () => ref.read(PrajuritDashboardProvider.notifier).load(),
+      onRefresh: () => ref.read(prajuritDashboardProvider.notifier).load(),
       child: ListView.separated(
         itemCount: state.users.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
@@ -109,8 +109,8 @@ class _DashboardTab extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                         color:
                             u.pctWeek >= 70 ? Colors.green : Colors.orange)),
-                Text('minggu ini',
-                    style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                const Text('minggu ini',
+                    style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
               ],
             ),
           );
@@ -125,7 +125,7 @@ class _DashboardTab extends ConsumerWidget {
 class _BibleTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(PrajuritBibleProvider);
+    final state = ref.watch(prajuritBibleProvider);
     if (state.loading && state.items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -136,7 +136,7 @@ class _BibleTab extends ConsumerWidget {
       return const Center(child: Text('Belum ada jadwal Bible'));
     }
     return RefreshIndicator(
-      onRefresh: () => ref.read(PrajuritBibleProvider.notifier).load(),
+      onRefresh: () => ref.read(prajuritBibleProvider.notifier).load(),
       child: ListView.separated(
         itemCount: state.items.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
@@ -220,14 +220,14 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
                     if (nameCtrl.text.trim().isEmpty) return;
                     Navigator.pop(ctx);
                     if (isEdit) {
-                      ref.read(PrajuritItemsProvider.notifier).updateItem(
+                      ref.read(prajuritItemsProvider.notifier).updateItem(
                             item.id,
                             nameCtrl.text.trim(),
                             descCtrl.text.trim(),
                             isActive,
                           );
                     } else {
-                      ref.read(PrajuritItemsProvider.notifier).addItem(
+                      ref.read(prajuritItemsProvider.notifier).addItem(
                             nameCtrl.text.trim(),
                             descCtrl.text.trim(),
                             isActive,
@@ -258,7 +258,7 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ref.read(PrajuritItemsProvider.notifier).deleteItem(id);
+              ref.read(prajuritItemsProvider.notifier).deleteItem(id);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Hapus'),
@@ -270,7 +270,7 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(PrajuritItemsProvider);
+    final state = ref.watch(prajuritItemsProvider);
     
     Widget body;
     if (state.loading && state.items.isEmpty) {
@@ -281,7 +281,7 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
       body = const Center(child: Text('Belum ada item kurikulum'));
     } else {
       body = RefreshIndicator(
-        onRefresh: () => ref.read(PrajuritItemsProvider.notifier).load(),
+        onRefresh: () => ref.read(prajuritItemsProvider.notifier).load(),
         child: ListView.separated(
           itemCount: state.items.length,
           separatorBuilder: (_, __) => const Divider(height: 1),

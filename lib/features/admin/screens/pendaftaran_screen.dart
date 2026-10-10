@@ -158,7 +158,7 @@ class _DetailView extends ConsumerWidget {
           if (item.avatar != null) CircleAvatar(backgroundImage: NetworkImage(item.avatar!), radius: 40),
           const SizedBox(height: 12),
           Text(item.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-          Text('@${item.username}', style: TextStyle(color: AppColors.textSecondary)),
+          Text('@${item.username}', style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 12),
           if (p != null) ...[
             _field('Tempat/Tanggal Lahir', '${p.birthPlace ?? '-'} / ${p.birthDate ?? '-'}'),
@@ -173,7 +173,7 @@ class _DetailView extends ConsumerWidget {
             _field('Mata Pelajaran', p.mataPelajaran.join(', ')),
             if (p.photo != null) ...[
               const SizedBox(height: 8),
-              Text('Foto', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              const Text('Foto', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
               Image.network(p.photo!, width: 120, height: 120, fit: BoxFit.cover),
             ],
             if (p.catatanAdmin != null && p.catatanAdmin!.isNotEmpty)
@@ -185,7 +185,7 @@ class _DetailView extends ConsumerWidget {
             Text('Catatan: ${p!.catatanAdmin}', style: TextStyle(color: Colors.orange[700]),),
           const SizedBox(height: 20),
           if (status != 'diterima') ...[
-            Text('Validasi', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+            const Text('Validasi', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
             const SizedBox(height: 8),
             Row(children: [
               Expanded(child: TextField(controller: catatanCtrl, decoration: const InputDecoration(labelText: 'Catatan admin', hintText: 'Opsional'), maxLines: 3)),
@@ -208,13 +208,16 @@ class _DetailView extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         Text(value, style: const TextStyle(fontSize: 14)),
       ]),
     );
   }
 
   void _validasi(BuildContext ctx, WidgetRef ref, String status) {
+    // Capture the messenger up-front: the dialog callback runs after an await,
+    // so BuildContext must not be used across that async gap.
+    final messenger = ScaffoldMessenger.of(ctx);
     showDialog(
       context: ctx,
       builder: (dialogCtx) => AlertDialog(
@@ -225,10 +228,11 @@ class _DetailView extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               final ok = await ref.read(pendaftaranDetailProvider(item.id).notifier).validasi(status: status, catatanAdmin: catatanCtrl.text.isEmpty ? null : catatanCtrl.text);
+              if (!dialogCtx.mounted) return;
               Navigator.pop(dialogCtx);
-              ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(ok ? 'Berhasil' : 'Gagal')));
+              messenger.showSnackBar(SnackBar(content: Text(ok ? 'Berhasil' : 'Gagal')));
             },
-            child: Text('Konfirmasi'),
+            child: const Text('Konfirmasi'),
           ),
         ],
       ),

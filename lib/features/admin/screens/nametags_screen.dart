@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/certificate_model.dart';
 import '../providers/nametags_provider.dart';
 import '../../../shared/theme/design_tokens.dart';
 
@@ -62,7 +61,7 @@ class _NameTagsScreenState extends ConsumerState<NameTagsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Wrap(spacing: 6, children: [
               ChoiceChip(label: const Text('Semua'), selected: state.selectedIds.isEmpty, onSelected: (_) => ref.read(nameTagsProvider.notifier).clearSelection(), visualDensity: VisualDensity.compact),
-              Text('${state.selectedIds.length} terpilih', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              Text('${state.selectedIds.length} terpilih', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
             ]),
           ),
           const SizedBox(height: 4),
@@ -117,8 +116,6 @@ class _GenerateResultSheetState extends ConsumerState<_GenerateResultSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(nameTagsProvider);
-
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(

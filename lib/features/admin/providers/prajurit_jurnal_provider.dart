@@ -44,7 +44,7 @@ class PrajuritJurnalRepository {
   }
 }
 
-final PrajuritJurnalRepoProvider = Provider(
+final prajuritJurnalRepoProvider = Provider(
   (ref) => PrajuritJurnalRepository(ref.read(dioProvider)),
 );
 
@@ -64,7 +64,7 @@ class PrajuritDashboardNotifier extends Notifier<PrajuritDashboardState> {
   Future<void> load() async {
     state = const PrajuritDashboardState(loading: true);
     try {
-      final users = await ref.read(PrajuritJurnalRepoProvider).fetchDashboard();
+      final users = await ref.read(prajuritJurnalRepoProvider).fetchDashboard();
       state = PrajuritDashboardState(users: users);
     } catch (e) {
       state = PrajuritDashboardState(error: extractErrorMessage(e));
@@ -72,7 +72,7 @@ class PrajuritDashboardNotifier extends Notifier<PrajuritDashboardState> {
   }
 }
 
-final PrajuritDashboardProvider =
+final prajuritDashboardProvider =
     NotifierProvider<PrajuritDashboardNotifier, PrajuritDashboardState>(
         PrajuritDashboardNotifier.new);
 
@@ -92,7 +92,7 @@ class PrajuritBibleNotifier extends Notifier<PrajuritBibleState> {
   Future<void> load() async {
     state = const PrajuritBibleState(loading: true);
     try {
-      final items = await ref.read(PrajuritJurnalRepoProvider).fetchBibleItems();
+      final items = await ref.read(prajuritJurnalRepoProvider).fetchBibleItems();
       state = PrajuritBibleState(items: items);
     } catch (e) {
       state = PrajuritBibleState(error: extractErrorMessage(e));
@@ -100,7 +100,7 @@ class PrajuritBibleNotifier extends Notifier<PrajuritBibleState> {
   }
 }
 
-final PrajuritBibleProvider =
+final prajuritBibleProvider =
     NotifierProvider<PrajuritBibleNotifier, PrajuritBibleState>(
         PrajuritBibleNotifier.new);
 
@@ -120,7 +120,7 @@ class PrajuritItemsNotifier extends Notifier<PrajuritItemsState> {
   Future<void> load() async {
     state = const PrajuritItemsState(loading: true);
     try {
-      final items = await ref.read(PrajuritJurnalRepoProvider).fetchPrajuritItems();
+      final items = await ref.read(prajuritJurnalRepoProvider).fetchPrajuritItems();
       state = PrajuritItemsState(items: items);
     } catch (e) {
       state = PrajuritItemsState(error: extractErrorMessage(e));
@@ -128,7 +128,7 @@ class PrajuritItemsNotifier extends Notifier<PrajuritItemsState> {
   }
 
   Future<void> addItem(String name, String? description, bool isActive) async {
-    await ref.read(PrajuritJurnalRepoProvider).createPrajuritItem({
+    await ref.read(prajuritJurnalRepoProvider).createPrajuritItem({
       'name': name,
       'description': description,
       'is_active': isActive,
@@ -137,7 +137,7 @@ class PrajuritItemsNotifier extends Notifier<PrajuritItemsState> {
   }
 
   Future<void> updateItem(int id, String name, String? description, bool isActive) async {
-    await ref.read(PrajuritJurnalRepoProvider).updatePrajuritItem(id, {
+    await ref.read(prajuritJurnalRepoProvider).updatePrajuritItem(id, {
       'name': name,
       'description': description,
       'is_active': isActive,
@@ -146,11 +146,11 @@ class PrajuritItemsNotifier extends Notifier<PrajuritItemsState> {
   }
 
   Future<void> deleteItem(int id) async {
-    await ref.read(PrajuritJurnalRepoProvider).deletePrajuritItem(id);
+    await ref.read(prajuritJurnalRepoProvider).deletePrajuritItem(id);
     await load();
   }
 }
 
-final PrajuritItemsProvider =
+final prajuritItemsProvider =
     NotifierProvider<PrajuritItemsNotifier, PrajuritItemsState>(
         PrajuritItemsNotifier.new);

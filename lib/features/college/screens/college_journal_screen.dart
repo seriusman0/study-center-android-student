@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -268,9 +266,6 @@ class _LifeSection extends StatelessWidget {
   }
 
   static Widget buildItemStatic(BuildContext context, CollegeLifeItem item, CollegeJournalSnapshot snap, CollegeJournalNotifier notifier, bool disabled) {
-    final studyLog = snap.studyLogs[item.id];
-    final hasStudy = studyLog != null && studyLog.jamMulai.isNotEmpty && studyLog.jamSelesai.isNotEmpty;
-
     switch (item.responseType) {
       case CollegeItemResponseType.check:
         return AppChecklistTile(

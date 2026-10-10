@@ -36,8 +36,6 @@ class _BlogModerationScreenState extends ConsumerState<BlogModerationScreen>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(blogModerationProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Moderasi Blog & Komentar'),
@@ -82,8 +80,9 @@ class _BlogsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(blogModerationProvider);
     if (state.loadingBlogs) return const Center(child: CircularProgressIndicator());
-    if (state.blogsError != null)
+    if (state.blogsError != null) {
       return Center(child: Text('Gagal: ${state.blogsError}', style: TextStyle(color: Colors.red[400])));
+    }
     if (state.blogs.isEmpty) return const Center(child: Text('Tidak ada blog', style: TextStyle(color: AppColors.textMuted)));
 
     return RefreshIndicator(
@@ -97,8 +96,8 @@ class _BlogsTab extends ConsumerWidget {
             leading: const Icon(Icons.article, color: Color(0xFF0F766E)),
             title: Text(blog.title, style: const TextStyle(fontWeight: FontWeight.w600)),
             subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(blog.authorName ?? 'Admin', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-              if (blog.cabangNama != null) Text(blog.cabangNama!, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              Text(blog.authorName ?? 'Admin', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              if (blog.cabangNama != null) Text(blog.cabangNama!, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
             ]),
             trailing: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red, size: 18),
@@ -138,8 +137,9 @@ class _CommentsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(blogModerationProvider);
     if (state.loadingComments) return const Center(child: CircularProgressIndicator());
-    if (state.commentsError != null)
+    if (state.commentsError != null) {
       return Center(child: Text('Gagal: ${state.commentsError}', style: TextStyle(color: Colors.red[400])));
+    }
     if (state.comments.isEmpty) return const Center(child: Text('Tidak ada komentar', style: TextStyle(color: AppColors.textMuted)));
 
     return RefreshIndicator(
@@ -159,11 +159,11 @@ class _CommentsTab extends ConsumerWidget {
                   Text('Oleh: ${comment.userName}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                 if (comment.blogTitle != null)
                   Text('Di: ${comment.blogTitle}',
-                      style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                      style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                 if (comment.createdAt != null)
-                  Text(comment.createdAt!, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  Text(comment.createdAt!, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
               ],
             ),
             trailing: IconButton(

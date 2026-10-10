@@ -36,7 +36,7 @@ final dioProvider = Provider((ref) {
 class _AuthInterceptor extends InterceptorsWrapper {
   final Dio _dio;
   final StorageService _storage;
-  final ProviderRef _ref;
+  final Ref _ref;
   bool _isRefreshing = false;
 
   _AuthInterceptor(this._dio, this._storage, this._ref);

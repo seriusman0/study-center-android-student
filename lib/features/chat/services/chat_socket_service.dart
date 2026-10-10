@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dart_pusher_channels/dart_pusher_channels.dart';
@@ -30,7 +29,7 @@ class ChatSocketService {
       final token = await _storage.getToken();
       if (token == null) throw Exception('No auth token');
 
-      final options = PusherChannelsOptions.fromHost(
+      const options = PusherChannelsOptions.fromHost(
         scheme: 'wss',
         host: ChatSocketConfig.host,
         port: ChatSocketConfig.port,

@@ -53,7 +53,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(laporanProvider);
     final user = ref.watch(authProvider).user;
-    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -95,7 +94,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         final roles = user?.roles ?? [];
         final hasMultipleRoles = roles.length > 1;
         
-        final roleLabels = const {
+        const roleLabels = {
           'student': 'Siswa',
           'scholarship_teenager': 'Remaja Beasiswa',
           'college': 'Mahasiswa',
@@ -198,7 +197,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.date_range, size: 16, color: AppColors.textSecondary),
+                                  const Icon(Icons.date_range, size: 16, color: AppColors.textSecondary),
                                   const SizedBox(width: 8),
                                   Text(
                                     matrix != null ? '${matrix.from}  -  ${matrix.to}' : 'Pilih Tanggal',

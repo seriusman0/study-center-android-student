@@ -335,7 +335,7 @@ class _ProfileTile extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.close, size: 18, color: AppColors.textMuted),
+                  icon: const Icon(Icons.close, size: 18, color: AppColors.textMuted),
                   onPressed: onRemove,
                   tooltip: 'Hapus dari daftar',
                   padding: EdgeInsets.zero,
@@ -576,7 +576,7 @@ class _DaftarLink extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
+        const Text(
           'Belum punya akun? ',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),

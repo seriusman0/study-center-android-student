@@ -56,27 +56,6 @@ class _MataPelajaranScreenState extends ConsumerState<MataPelajaranScreen> {
     );
   }
 
-  void _confirmDelete(BuildContext ctx, MataPelajaranModel item) {
-    showDialog(
-      context: ctx,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Hapus Mata Pelajaran?'),
-        content: Text('"${item.nama}" akan dihapus.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(mataPelajaranProvider.notifier).delete(item.id);
-              Navigator.pop(dialogCtx);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red[50]),
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mataPelajaranProvider);
@@ -102,7 +81,7 @@ class _MataPelajaranScreenState extends ConsumerState<MataPelajaranScreen> {
                           trailing: Switch(
                             value: mp.isActive,
                             onChanged: (v) => ref.read(mataPelajaranProvider.notifier).update(mp.id, nama: mp.nama, urutan: mp.urutan, isActive: v),
-                            activeColor: const Color(0xFF0F766E),
+                            activeThumbColor: const Color(0xFF0F766E),
                           ),
                         );
                       }),
