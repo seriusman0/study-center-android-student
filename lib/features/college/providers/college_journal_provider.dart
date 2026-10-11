@@ -8,6 +8,7 @@ import '../../../core/services/api_service.dart';
 import '../models/college_journal_model.dart';
 import '../models/college_profile_model.dart';
 import '../repositories/college_repository.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../../core/providers/journal_sync_signal.dart';
 
 class CollegeJournalState {
@@ -86,7 +87,12 @@ class CollegeJournalNotifier extends Notifier<CollegeJournalState> {
     );
 
     _initConnectivity();
-    _loadProfile();
+    // /college/profile is role:college-gated on the backend — calling it for a
+    // user without the role returns 403 and spams the log on every launch.
+    // Only fetch it for users who actually hold the college role.
+    if (ref.read(authProvider).user?.isCollege == true) {
+      _loadProfile();
+    }
     ref.onDispose(() {
       _syncSub?.close();
       _connSub?.close();
